@@ -96,10 +96,23 @@ class CameraMotionEstimator:
             
             # 检查旋转矩阵的有效性
             if np.abs(np.linalg.det(R) - 1.0) < 0.1:
-                inliers = np.sum(N[:, 2] > 0)  # 法向量z分量应为正
-                if inliers > max_inliers:
-                    max_inliers = inliers
-                    best_solution = {'R': R, 'T': T, 'N': N}
+                # 处理法向量的不同可能格式
+                if N.ndim == 1:
+                    # 如果N是1维数组 (3,)
+                    z_component = N[2]
+                elif N.shape == (3, 1):
+                    # 如果N是列向量 (3, 1)
+                    z_component = N[2, 0]
+                else:
+                    # 如果N是行向量 (1, 3)
+                    z_component = N[0, 2]
+                
+                # 法向量z分量应为正（假设相机朝向场景）
+                if z_component > 0:
+                    inliers = 1  # 这个解是合理的
+                    if inliers > max_inliers:
+                        max_inliers = inliers
+                        best_solution = {'R': R, 'T': T, 'N': N}
                     
         return best_solution
     
