@@ -212,21 +212,53 @@ class StaticObjectDetector:
         """基于图像特征细化静态区域"""
         # 计算图像梯度
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) if len(image.shape) == 3 else image
+        print(f"Image shape: {image.shape}")
         grad_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
         grad_y = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
-        gradient_magnitude = np.sqrt(grad_x**2 + grad_y**2)
-        
+        gradient_magnitude = np.sqrt(grad_x ** 2 + grad_y ** 2)
+
         # 在高梯度区域（边缘）更严格地判断静态区域
         edge_mask = gradient_magnitude > np.percentile(gradient_magnitude, 75)
+        print(f"Flow shape: {flow.shape}")  # 应该是 (H, W, 2)
         
         # 在边缘区域使用更严格的阈值
-        flow_magnitude = np.sqrt(flow[:, :, 0]**2 + flow[:, :, 1]**2)
+        flow_magnitude = np.sqrt(flow[:, :, 0] ** 2 + flow[:, :, 1] ** 2)
         strict_static_mask = flow_magnitude < (self.flow_threshold * 0.5)
         
-        # 组合结果
-        refined_mask = static_mask.copy()
-        refined_mask[edge_mask] = strict_static_mask[edge_mask]
+        # 确保所有数组都有相同的维度
+        print(f"Edge mask shape: {edge_mask.shape}")
+        print(f"Static mask shape: {static_mask.shape}")
+        print(f"Flow magnitude shape: {flow_magnitude.shape}")
+        print(f"Strict static mask shape: {strict_static_mask.shape}")
         
+        # 组合结果 - 确保维度匹配
+        refined_mask = static_mask.copy()
+        
+        # 检查维度是否匹配，如果不匹配则调整
+        if edge_mask.shape != refined_mask.shape:
+            # 如果edge_mask和refined_mask维度不同，需要调整其中一个
+            if edge_mask.shape[0] != refined_mask.shape[0] or edge_mask.shape[1] != refined_mask.shape[1]:
+                # 将所有数组调整到flow的维度 (因为flow通常是正确的维度)
+                target_height, target_width = flow.shape[:2]
+                
+                # 调整edge_mask
+                if edge_mask.shape != (target_height, target_width):
+                    edge_mask = cv2.resize(edge_mask.astype(np.uint8), 
+                                         (target_width, target_height), 
+                                         interpolation=cv2.INTER_NEAREST).astype(bool)
+                
+                # 调整refined_mask
+                if refined_mask.shape != (target_height, target_width):
+                    refined_mask = cv2.resize(refined_mask.astype(np.uint8), 
+                                            (target_width, target_height), 
+                                            interpolation=cv2.INTER_NEAREST).astype(bool)
+        
+        print(f"Final edge mask shape: {edge_mask.shape}")
+        print(f"Final refined mask shape: {refined_mask.shape}")
+        
+        # 现在可以安全地进行布尔索引
+        refined_mask[edge_mask] = strict_static_mask[edge_mask]
+
         return refined_mask
 
 
