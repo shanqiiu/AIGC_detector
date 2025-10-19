@@ -1,0 +1,16 @@
+视频: The camera orbits around. Acropolis, the camera circles around.-0
+期望标签: static
+实际动态度: 0.501
+是否BadCase: 是
+
+劣质视频：未知视频 期望静态（0.00）但实际高动态（0.50）。可能原因：物体抖动、飘移、相机补偿失败。
+
+建议：
+1. 检查视频稳定性，是否存在抖动
+2. 验证相机补偿是否正常工作
+3. 查看可视化结果，定位异常运动区域
+4. 考虑重新生成视频
+
+根因诊断:
+  主要问题: spatial_consistency 异常偏高
+  贡献因素:

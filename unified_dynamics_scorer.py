@@ -27,7 +27,9 @@ class UnifiedDynamicsScorer:
     def __init__(self,
                  mode: str = 'auto',
                  weights: Optional[Dict[str, float]] = None,
-                 thresholds: Optional[Dict[str, float]] = None):
+                 thresholds: Optional[Dict[str, float]] = None,
+                 use_normalized_flow: bool = False,
+                 baseline_diagonal: float = 1469.0):
         """
         初始化评分器
         
@@ -37,9 +39,12 @@ class UnifiedDynamicsScorer:
                 - 'static_scene': 静态场景模式（有相机运动）
                 - 'dynamic_scene': 动态场景模式（人物运动）
             weights: 各指标权重，如 {'flow': 0.4, 'spatial': 0.3, ...}
-            thresholds: 归一化阈值，用于sigmoid函数
+            thresholds: 归一化阈值，用于sigmoid函数（可手动覆盖）
+            use_normalized_flow: 是否使用分辨率归一化
+            baseline_diagonal: 基准分辨率对角线（默认1280×720≈1469）
         """
         self.mode = mode
+        self.use_normalized_flow = use_normalized_flow
         
         # 默认权重配置
         self.default_weights = {
@@ -52,13 +57,25 @@ class UnifiedDynamicsScorer:
         
         self.weights = weights if weights is not None else self.default_weights
         
-        # 默认归一化阈值（用于sigmoid函数）
-        self.default_thresholds = {
-            'flow_low': 1.0,      # 低动态阈值（像素/帧）
-            'flow_mid': 5.0,      # 中等动态阈值
-            'flow_high': 15.0,    # 高动态阈值
-            'static_ratio': 0.5,  # 静态区域判断阈值
-        }
+        # 根据归一化状态设置默认阈值
+        if use_normalized_flow:
+            # 归一化阈值（相对值，基于baseline_diagonal）
+            self.default_thresholds = {
+                'flow_low': 1.0 / baseline_diagonal,    # ≈ 0.00068
+                'flow_mid': 5.0 / baseline_diagonal,    # ≈ 0.0034
+                'flow_high': 15.0 / baseline_diagonal,  # ≈ 0.0102
+                'static_ratio': 0.5,                    # 不变（已是比例）
+                'temporal_std': 1.0 / baseline_diagonal, # ≈ 0.00068
+            }
+        else:
+            # 绝对阈值（像素值，向后兼容）
+            self.default_thresholds = {
+                'flow_low': 1.0,      # 低动态阈值（像素/帧）
+                'flow_mid': 5.0,      # 中等动态阈值
+                'flow_high': 15.0,    # 高动态阈值
+                'static_ratio': 0.5,  # 静态区域判断阈值
+                'temporal_std': 1.0,  # 时序标准差阈值
+            }
         
         self.thresholds = thresholds if thresholds is not None else self.default_thresholds
     
@@ -226,8 +243,9 @@ class UnifiedDynamicsScorer:
         std_dynamics = temporal_stats['std_dynamics_score']
         
         # 归一化：标准差越大，变化越丰富
-        # 0.1 -> 0.1, 0.5 -> 0.5, 2.0 -> 0.9
-        score = self._sigmoid_normalize(std_dynamics, threshold=1.0, steepness=1.0)
+        # 根据归一化状态使用不同阈值
+        temporal_threshold = self.thresholds.get('temporal_std', 1.0)
+        score = self._sigmoid_normalize(std_dynamics, threshold=temporal_threshold, steepness=1.0)
         
         return float(np.clip(score, 0.0, 1.0))
     

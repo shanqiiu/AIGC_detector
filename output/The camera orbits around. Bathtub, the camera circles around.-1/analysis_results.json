@@ -1,0 +1,2846 @@
+{
+  "temporal_stats": {
+    "mean_dynamics_score": 0.0009018596669079534,
+    "std_dynamics_score": 0.00011212469729980734,
+    "max_dynamics_score": 0.0011678073522267411,
+    "min_dynamics_score": 0.0005961773479898279,
+    "mean_static_ratio": 0.869142583211263,
+    "std_static_ratio": 0.05421061832693049,
+    "mean_consistency_score": 0.21600803280080924,
+    "temporal_stability": 0.9998878878732386
+  },
+  "frame_count": 129,
+  "flow_count": 128,
+  "camera_compensation_enabled": true,
+  "unified_dynamics_score": 0.4686238647457283,
+  "scene_type": "static",
+  "dynamics_category": "medium_dynamic",
+  "dynamics_category_id": 2,
+  "camera_compensation_stats": {
+    "success_rate": 1.0,
+    "successful_frames": 128,
+    "total_frames": 128,
+    "mean_inliers": 184.0390625,
+    "std_inliers": 7.911031008730388,
+    "mean_match_ratio": 0.9201953125,
+    "std_match_ratio": 0.03955515504365193
+  },
+  "frame_results": [
+    {
+      "frame_index": 0,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007763002567088508,
+        "std_magnitude": 0.0004176079441739731,
+        "max_magnitude": 0.002013737982660322,
+        "dynamics_score": 0.0009851042287958374,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9576671006944445,
+        "dynamic_ratio": 0.042332899305555505,
+        "mean_dynamic_magnitude": 0.0013733734965611422,
+        "consistency_score": 0.46318420065390375
+      },
+      "camera_compensation": {
+        "inliers": 179,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 1,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008386686402384123,
+        "std_magnitude": 0.0004578401381019203,
+        "max_magnitude": 0.002010674685061818,
+        "dynamics_score": 0.0010675887092893724,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9484288194444445,
+        "dynamic_ratio": 0.05157118055555554,
+        "mean_dynamic_magnitude": 0.0016378049707717513,
+        "consistency_score": 0.438480532943643
+      },
+      "camera_compensation": {
+        "inliers": 168,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 2,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007356601621820812,
+        "std_magnitude": 0.0003404557181291392,
+        "max_magnitude": 0.0019131493000396908,
+        "dynamics_score": 0.0009058880212466508,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9594032118055555,
+        "dynamic_ratio": 0.040596788194444455,
+        "mean_dynamic_magnitude": 0.0012360657158514492,
+        "consistency_score": 0.5364648504863423
+      },
+      "camera_compensation": {
+        "inliers": 177,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 3,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006175475103379712,
+        "std_magnitude": 0.00042930897542222513,
+        "max_magnitude": 0.0020086902997950413,
+        "dynamics_score": 0.0008322019980490838,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9769845920138889,
+        "dynamic_ratio": 0.023015407986111125,
+        "mean_dynamic_magnitude": 0.0015144638215791107,
+        "consistency_score": 0.2961720587102422
+      },
+      "camera_compensation": {
+        "inliers": 188,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 4,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007718356541550574,
+        "std_magnitude": 0.0004093078690364396,
+        "max_magnitude": 0.0020344745335851974,
+        "dynamics_score": 0.0009764895886732772,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9560036892361111,
+        "dynamic_ratio": 0.04399631076388888,
+        "mean_dynamic_magnitude": 0.0018075286435986096,
+        "consistency_score": 0.4062674029035126
+      },
+      "camera_compensation": {
+        "inliers": 178,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 5,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007515487931025673,
+        "std_magnitude": 0.0004049086082533826,
+        "max_magnitude": 0.00202698885989197,
+        "dynamics_score": 0.0009540030972292586,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9669759114583333,
+        "dynamic_ratio": 0.03302408854166672,
+        "mean_dynamic_magnitude": 0.0013547929414862618,
+        "consistency_score": 0.4585183591219054
+      },
+      "camera_compensation": {
+        "inliers": 192,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 6,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006394556214190898,
+        "std_magnitude": 0.00039514929530365134,
+        "max_magnitude": 0.0020317223956639718,
+        "dynamics_score": 0.0008370302690709155,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9523980034722223,
+        "dynamic_ratio": 0.047601996527777746,
+        "mean_dynamic_magnitude": 0.0017931685280460211,
+        "consistency_score": 0.32928914049934266
+      },
+      "camera_compensation": {
+        "inliers": 180,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 7,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005999288646410532,
+        "std_magnitude": 0.0003515464355206446,
+        "max_magnitude": 0.0021062538425481586,
+        "dynamics_score": 0.0007757020824013755,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9555772569444444,
+        "dynamic_ratio": 0.0444227430555556,
+        "mean_dynamic_magnitude": 0.0021623741014190306,
+        "consistency_score": 0.25440704119846835
+      },
+      "camera_compensation": {
+        "inliers": 189,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 8,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007763322506270355,
+        "std_magnitude": 0.00047054691440130794,
+        "max_magnitude": 0.0020626033131717148,
+        "dynamics_score": 0.0010116057078276895,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9512934027777777,
+        "dynamic_ratio": 0.04870659722222226,
+        "mean_dynamic_magnitude": 0.0017839882230826717,
+        "consistency_score": 0.3492393846239109
+      },
+      "camera_compensation": {
+        "inliers": 181,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 9,
+      "static_dynamics": {
+        "mean_magnitude": 0.000675536652256661,
+        "std_magnitude": 0.0004190098815316464,
+        "max_magnitude": 0.0020015510317261827,
+        "dynamics_score": 0.0008850415930224842,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9737120225694444,
+        "dynamic_ratio": 0.026287977430555554,
+        "mean_dynamic_magnitude": 0.0014409424117011042,
+        "consistency_score": 0.374349000069227
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 10,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006529983029561604,
+        "std_magnitude": 0.00043931541808362844,
+        "max_magnitude": 0.0020488550841580053,
+        "dynamics_score": 0.0008726560119979746,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.945712890625,
+        "dynamic_ratio": 0.05428710937500003,
+        "mean_dynamic_magnitude": 0.0013472790086010043,
+        "consistency_score": 0.33617119490547753
+      },
+      "camera_compensation": {
+        "inliers": 161,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 11,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006594114694060991,
+        "std_magnitude": 0.0004425868034935583,
+        "max_magnitude": 0.0020268722067390724,
+        "dynamics_score": 0.0008807048711528783,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.942939453125,
+        "dynamic_ratio": 0.05706054687499995,
+        "mean_dynamic_magnitude": 0.001986606725217786,
+        "consistency_score": 0.25185650580732
+      },
+      "camera_compensation": {
+        "inliers": 190,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 12,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007800913259483179,
+        "std_magnitude": 0.0004013622623581525,
+        "max_magnitude": 0.001998546841007837,
+        "dynamics_score": 0.000980772457127394,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9568098958333333,
+        "dynamic_ratio": 0.04319010416666669,
+        "mean_dynamic_magnitude": 0.001434129236064902,
+        "consistency_score": 0.4753405374878312
+      },
+      "camera_compensation": {
+        "inliers": 178,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 13,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007445560544269889,
+        "std_magnitude": 0.00043880060589220104,
+        "max_magnitude": 0.002014754468088748,
+        "dynamics_score": 0.0009639563573730894,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8948708767361111,
+        "dynamic_ratio": 0.1051291232638889,
+        "mean_dynamic_magnitude": 0.0022575979363606597,
+        "consistency_score": 0.16982361218879172
+      },
+      "camera_compensation": {
+        "inliers": 186,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 14,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008413856353430654,
+        "std_magnitude": 0.0004169643156904069,
+        "max_magnitude": 0.0021134624671662037,
+        "dynamics_score": 0.0010498677931882689,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8911349826388889,
+        "dynamic_ratio": 0.1088650173611111,
+        "mean_dynamic_magnitude": 0.002238516737292944,
+        "consistency_score": 0.37242865216634546
+      },
+      "camera_compensation": {
+        "inliers": 179,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 15,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008480585246460726,
+        "std_magnitude": 0.000639497655161337,
+        "max_magnitude": 0.0020189641803309536,
+        "dynamics_score": 0.0011678073522267411,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8591069878472222,
+        "dynamic_ratio": 0.14089301215277783,
+        "mean_dynamic_magnitude": 0.0018323431394354367,
+        "consistency_score": 0.27064756176481886
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 16,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008126853471700496,
+        "std_magnitude": 0.00047528799301534244,
+        "max_magnitude": 0.002018824487732763,
+        "dynamics_score": 0.0010503293436777209,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9349088541666667,
+        "dynamic_ratio": 0.06509114583333331,
+        "mean_dynamic_magnitude": 0.001404012745014799,
+        "consistency_score": 0.42511740001366616
+      },
+      "camera_compensation": {
+        "inliers": 191,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 17,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008610137505373444,
+        "std_magnitude": 0.0004405493797073483,
+        "max_magnitude": 0.0023668360176814533,
+        "dynamics_score": 0.0010812884403910185,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8774522569444444,
+        "dynamic_ratio": 0.1225477430555556,
+        "mean_dynamic_magnitude": 0.0017806915474618689,
+        "consistency_score": 0.4359729645782008
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 18,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007467483609042783,
+        "std_magnitude": 0.00046452811811499936,
+        "max_magnitude": 0.002067259941446585,
+        "dynamics_score": 0.000979012419961778,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9380045572916667,
+        "dynamic_ratio": 0.06199544270833335,
+        "mean_dynamic_magnitude": 0.001748266854707263,
+        "consistency_score": 0.3577900157964192
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 19,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007093545772013718,
+        "std_magnitude": 0.0004212076669559113,
+        "max_magnitude": 0.00202941059348663,
+        "dynamics_score": 0.0009199584106793275,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8966438802083333,
+        "dynamic_ratio": 0.1033561197916667,
+        "mean_dynamic_magnitude": 0.002195580696459564,
+        "consistency_score": 0.2668839023848931
+      },
+      "camera_compensation": {
+        "inliers": 190,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 20,
+      "static_dynamics": {
+        "mean_magnitude": 0.00082568653870405,
+        "std_magnitude": 0.0004701393718409816,
+        "max_magnitude": 0.001998041128238476,
+        "dynamics_score": 0.0010607562246245407,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9277864583333333,
+        "dynamic_ratio": 0.07221354166666671,
+        "mean_dynamic_magnitude": 0.001305385735516697,
+        "consistency_score": 0.4466408579151978
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 21,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007747413959689918,
+        "std_magnitude": 0.00044457754036174714,
+        "max_magnitude": 0.002771974620408047,
+        "dynamics_score": 0.0009970301661498654,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9404047309027778,
+        "dynamic_ratio": 0.05959526909722224,
+        "mean_dynamic_magnitude": 0.0012619589545248989,
+        "consistency_score": 0.44088623597896526
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 22,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007796826475353656,
+        "std_magnitude": 0.00042216279525667726,
+        "max_magnitude": 0.002034761097933874,
+        "dynamics_score": 0.0009907640451637043,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8947113715277778,
+        "dynamic_ratio": 0.1052886284722222,
+        "mean_dynamic_magnitude": 0.0019323027348853185,
+        "consistency_score": 0.38839189382666206
+      },
+      "camera_compensation": {
+        "inliers": 190,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 23,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007545060623221946,
+        "std_magnitude": 0.0004428809647752067,
+        "max_magnitude": 0.002027158359577115,
+        "dynamics_score": 0.0009759465447097979,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8974891493055556,
+        "dynamic_ratio": 0.10251085069444443,
+        "mean_dynamic_magnitude": 0.0022091468990590294,
+        "consistency_score": 0.29687179966069766
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 24,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007688681267998474,
+        "std_magnitude": 0.00047139070267817517,
+        "max_magnitude": 0.002027496002875624,
+        "dynamics_score": 0.0010045634781389351,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9236545138888889,
+        "dynamic_ratio": 0.07634548611111114,
+        "mean_dynamic_magnitude": 0.0017874192935463501,
+        "consistency_score": 0.3653361032654887
+      },
+      "camera_compensation": {
+        "inliers": 192,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 25,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007730041202480509,
+        "std_magnitude": 0.0004547693298261549,
+        "max_magnitude": 0.0020406068178762033,
+        "dynamics_score": 0.0010003887851611282,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9018196614583334,
+        "dynamic_ratio": 0.09818033854166663,
+        "mean_dynamic_magnitude": 0.0019600887555303245,
+        "consistency_score": 0.3547094007227489
+      },
+      "camera_compensation": {
+        "inliers": 195,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 26,
+      "static_dynamics": {
+        "mean_magnitude": 0.000807277433745416,
+        "std_magnitude": 0.0004622601553447886,
+        "max_magnitude": 0.002012126797035985,
+        "dynamics_score": 0.0010384075114178103,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9384537760416667,
+        "dynamic_ratio": 0.06154622395833331,
+        "mean_dynamic_magnitude": 0.0013648997230337671,
+        "consistency_score": 0.43867950941797806
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 27,
+      "static_dynamics": {
+        "mean_magnitude": 0.000763097921586817,
+        "std_magnitude": 0.00043545102059266186,
+        "max_magnitude": 0.0020480776065888036,
+        "dynamics_score": 0.000980823431883148,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8697113715277778,
+        "dynamic_ratio": 0.13028862847222222,
+        "mean_dynamic_magnitude": 0.002115138464364412,
+        "consistency_score": 0.3252636838439653
+      },
+      "camera_compensation": {
+        "inliers": 195,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 28,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007841523285182609,
+        "std_magnitude": 0.0004620360020066246,
+        "max_magnitude": 0.0020132974632731913,
+        "dynamics_score": 0.0010151703295215731,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8704025607638889,
+        "dynamic_ratio": 0.1295974392361111,
+        "mean_dynamic_magnitude": 0.0020181043929484955,
+        "consistency_score": 0.34532275532433077
+      },
+      "camera_compensation": {
+        "inliers": 175,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 29,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006194154388546617,
+        "std_magnitude": 0.0003343039929825997,
+        "max_magnitude": 0.001744783384497438,
+        "dynamics_score": 0.0007865674353459616,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9557888454861111,
+        "dynamic_ratio": 0.044211154513888906,
+        "mean_dynamic_magnitude": 0.0013624702461948167,
+        "consistency_score": 0.4451641152527014
+      },
+      "camera_compensation": {
+        "inliers": 171,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 30,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008235804423313945,
+        "std_magnitude": 0.0004579058705143886,
+        "max_magnitude": 0.0020410513274752243,
+        "dynamics_score": 0.0010525333775885887,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8914626736111111,
+        "dynamic_ratio": 0.10853732638888891,
+        "mean_dynamic_magnitude": 0.0018477433079604724,
+        "consistency_score": 0.400272343867373
+      },
+      "camera_compensation": {
+        "inliers": 193,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 31,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007518449895899196,
+        "std_magnitude": 0.00037805208149374267,
+        "max_magnitude": 0.0020289101708566033,
+        "dynamics_score": 0.0009408710303367908,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9021484375,
+        "dynamic_ratio": 0.09785156250000004,
+        "mean_dynamic_magnitude": 0.002173329428329417,
+        "consistency_score": 0.339207269916479
+      },
+      "camera_compensation": {
+        "inliers": 190,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 32,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007903767315825036,
+        "std_magnitude": 0.0005115746587862427,
+        "max_magnitude": 0.002022594198741936,
+        "dynamics_score": 0.001046164060975625,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9022992621527778,
+        "dynamic_ratio": 0.09770073784722222,
+        "mean_dynamic_magnitude": 0.0018758167241019962,
+        "consistency_score": 0.33872538525955176
+      },
+      "camera_compensation": {
+        "inliers": 184,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 33,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008630711598064629,
+        "std_magnitude": 0.0005548707676045797,
+        "max_magnitude": 0.0020150669501422273,
+        "dynamics_score": 0.0011405065436087527,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9056076388888888,
+        "dynamic_ratio": 0.09439236111111116,
+        "mean_dynamic_magnitude": 0.0016847976351695457,
+        "consistency_score": 0.3599297279134397
+      },
+      "camera_compensation": {
+        "inliers": 190,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 34,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006997824164011441,
+        "std_magnitude": 0.00042864697836706193,
+        "max_magnitude": 0.002022946297785141,
+        "dynamics_score": 0.0009141059055846751,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8343023003472222,
+        "dynamic_ratio": 0.1656976996527778,
+        "mean_dynamic_magnitude": 0.002343147379256835,
+        "consistency_score": 0.21935717333895577
+      },
+      "camera_compensation": {
+        "inliers": 190,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 35,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008082660476759801,
+        "std_magnitude": 0.00042742109426376334,
+        "max_magnitude": 0.002016331963111405,
+        "dynamics_score": 0.0010219765948078618,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8572309027777778,
+        "dynamic_ratio": 0.1427690972222222,
+        "mean_dynamic_magnitude": 0.0022147186917985525,
+        "consistency_score": 0.3473741445736046
+      },
+      "camera_compensation": {
+        "inliers": 196,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 36,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008248232868367874,
+        "std_magnitude": 0.00048359288813392033,
+        "max_magnitude": 0.002020381559806147,
+        "dynamics_score": 0.0010666197309037477,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8116742621527778,
+        "dynamic_ratio": 0.18832573784722217,
+        "mean_dynamic_magnitude": 0.0021976788570926883,
+        "consistency_score": 0.3281271727808933
+      },
+      "camera_compensation": {
+        "inliers": 186,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 37,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008747530804300226,
+        "std_magnitude": 0.0005041980679310975,
+        "max_magnitude": 0.0020259607975964683,
+        "dynamics_score": 0.0011268521143955714,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9159255642361112,
+        "dynamic_ratio": 0.08407443576388884,
+        "mean_dynamic_magnitude": 0.0016614551984982875,
+        "consistency_score": 0.42091633999926237
+      },
+      "camera_compensation": {
+        "inliers": 196,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 38,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007161490807395447,
+        "std_magnitude": 0.0004883336057970736,
+        "max_magnitude": 0.0020242150061477336,
+        "dynamics_score": 0.0009603158836380815,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9091037326388889,
+        "dynamic_ratio": 0.09089626736111112,
+        "mean_dynamic_magnitude": 0.001982890593374524,
+        "consistency_score": 0.2799443073493434
+      },
+      "camera_compensation": {
+        "inliers": 191,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 39,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007408244237344795,
+        "std_magnitude": 0.0003996429367027579,
+        "max_magnitude": 0.0020265292588905696,
+        "dynamics_score": 0.0009406458920858585,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8520030381944445,
+        "dynamic_ratio": 0.14799696180555555,
+        "mean_dynamic_magnitude": 0.0022704556189303174,
+        "consistency_score": 0.294672586770268
+      },
+      "camera_compensation": {
+        "inliers": 185,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 40,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006378211082089913,
+        "std_magnitude": 0.0004709789993672492,
+        "max_magnitude": 0.0020128110231398826,
+        "dynamics_score": 0.0008733106078926159,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.85068359375,
+        "dynamic_ratio": 0.14931640624999998,
+        "mean_dynamic_magnitude": 0.0022259403468448263,
+        "consistency_score": 0.16681426902764507
+      },
+      "camera_compensation": {
+        "inliers": 180,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 41,
+      "static_dynamics": {
+        "mean_magnitude": 0.0008237512009231869,
+        "std_magnitude": 0.0005004323833715664,
+        "max_magnitude": 0.0020321652226558224,
+        "dynamics_score": 0.00107396739260897,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9319097222222222,
+        "dynamic_ratio": 0.06809027777777776,
+        "mean_dynamic_magnitude": 0.0016999204448169807,
+        "consistency_score": 0.38276145708853215
+      },
+      "camera_compensation": {
+        "inliers": 189,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 42,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007223161129293017,
+        "std_magnitude": 0.0004665902077210149,
+        "max_magnitude": 0.002032087463887453,
+        "dynamics_score": 0.0009556112167898092,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8153754340277778,
+        "dynamic_ratio": 0.1846245659722222,
+        "mean_dynamic_magnitude": 0.0021718957570651455,
+        "consistency_score": 0.27080077839920147
+      },
+      "camera_compensation": {
+        "inliers": 189,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 43,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007165992695725927,
+        "std_magnitude": 0.0003769262093308909,
+        "max_magnitude": 0.0020309120037342843,
+        "dynamics_score": 0.0009050623742380382,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8176410590277777,
+        "dynamic_ratio": 0.18235894097222227,
+        "mean_dynamic_magnitude": 0.0025656675229292873,
+        "consistency_score": 0.21232966209672266
+      },
+      "camera_compensation": {
+        "inliers": 191,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 44,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007817044119057346,
+        "std_magnitude": 0.0005223406754489728,
+        "max_magnitude": 0.002017385624988518,
+        "dynamics_score": 0.001042874749630221,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8762358940972222,
+        "dynamic_ratio": 0.12376410590277775,
+        "mean_dynamic_magnitude": 0.0018589740560892897,
+        "consistency_score": 0.3216758860376705
+      },
+      "camera_compensation": {
+        "inliers": 184,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 45,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007553909415873656,
+        "std_magnitude": 0.0004951550452567863,
+        "max_magnitude": 0.002043882428030975,
+        "dynamics_score": 0.0010029684642157586,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8857476128472223,
+        "dynamic_ratio": 0.11425238715277775,
+        "mean_dynamic_magnitude": 0.0019495240406397784,
+        "consistency_score": 0.30306806248546625
+      },
+      "camera_compensation": {
+        "inliers": 188,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 46,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007363881158786252,
+        "std_magnitude": 0.00047814208705248613,
+        "max_magnitude": 0.0020226837959846375,
+        "dynamics_score": 0.0009754591594048682,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8515646701388889,
+        "dynamic_ratio": 0.14843532986111108,
+        "mean_dynamic_magnitude": 0.002066469272920533,
+        "consistency_score": 0.289938939299889
+      },
+      "camera_compensation": {
+        "inliers": 181,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 47,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005996151865212783,
+        "std_magnitude": 0.0004366171377979527,
+        "max_magnitude": 0.0020392370275490374,
+        "dynamics_score": 0.0008179237554202547,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8394650607638889,
+        "dynamic_ratio": 0.16053493923611106,
+        "mean_dynamic_magnitude": 0.0021762443460077393,
+        "consistency_score": 0.15516794993821126
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 48,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007127686335243346,
+        "std_magnitude": 0.0004921082534371726,
+        "max_magnitude": 0.0021263296036289907,
+        "dynamics_score": 0.0009588227602429209,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.87310546875,
+        "dynamic_ratio": 0.12689453125000005,
+        "mean_dynamic_magnitude": 0.002012375069527652,
+        "consistency_score": 0.26676969554810226
+      },
+      "camera_compensation": {
+        "inliers": 174,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 49,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007986231272595211,
+        "std_magnitude": 0.00047390292909752846,
+        "max_magnitude": 0.002026341301313245,
+        "dynamics_score": 0.0010355745918082854,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8457855902777778,
+        "dynamic_ratio": 0.15421440972222222,
+        "mean_dynamic_magnitude": 0.002064242690837042,
+        "consistency_score": 0.34335093361178115
+      },
+      "camera_compensation": {
+        "inliers": 191,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 50,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007251767698376288,
+        "std_magnitude": 0.0004795585699039785,
+        "max_magnitude": 0.00201497601304001,
+        "dynamics_score": 0.000964956054789618,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8697319878472223,
+        "dynamic_ratio": 0.13026801215277772,
+        "mean_dynamic_magnitude": 0.0021487054099015687,
+        "consistency_score": 0.2565971526019867
+      },
+      "camera_compensation": {
+        "inliers": 192,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 51,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006539280780777319,
+        "std_magnitude": 0.00039601628041246046,
+        "max_magnitude": 0.002042177732685876,
+        "dynamics_score": 0.0008519362182839622,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8358539496527778,
+        "dynamic_ratio": 0.16414605034722218,
+        "mean_dynamic_magnitude": 0.0023459366586517268,
+        "consistency_score": 0.20182285546489875
+      },
+      "camera_compensation": {
+        "inliers": 192,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 52,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007718165508271896,
+        "std_magnitude": 0.00046109617783405497,
+        "max_magnitude": 0.00201547700133082,
+        "dynamics_score": 0.001002364639744217,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7529361979166667,
+        "dynamic_ratio": 0.24706380208333334,
+        "mean_dynamic_magnitude": 0.0022958756876088463,
+        "consistency_score": 0.30474419807491404
+      },
+      "camera_compensation": {
+        "inliers": 164,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 53,
+      "static_dynamics": {
+        "mean_magnitude": 0.000797542170311097,
+        "std_magnitude": 0.0005134272621938537,
+        "max_magnitude": 0.002024426654356081,
+        "dynamics_score": 0.0010542558014080237,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.919091796875,
+        "dynamic_ratio": 0.08090820312500002,
+        "mean_dynamic_magnitude": 0.0019458601817164774,
+        "consistency_score": 0.33032510894981915
+      },
+      "camera_compensation": {
+        "inliers": 182,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 54,
+      "static_dynamics": {
+        "mean_magnitude": 0.000682631745622244,
+        "std_magnitude": 0.0005012758657266022,
+        "max_magnitude": 0.0020511443838078097,
+        "dynamics_score": 0.0009332696784855451,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.86296875,
+        "dynamic_ratio": 0.13703125000000005,
+        "mean_dynamic_magnitude": 0.002195235382892526,
+        "consistency_score": 0.20098034211583538
+      },
+      "camera_compensation": {
+        "inliers": 194,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 55,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005899880569615536,
+        "std_magnitude": 0.00042989177914668067,
+        "max_magnitude": 0.0020366275000716747,
+        "dynamics_score": 0.000804933946534894,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8309787326388889,
+        "dynamic_ratio": 0.16902126736111112,
+        "mean_dynamic_magnitude": 0.0022336201938989086,
+        "consistency_score": 0.1466204102283135
+      },
+      "camera_compensation": {
+        "inliers": 193,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 56,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007388317519500865,
+        "std_magnitude": 0.0004959215689831999,
+        "max_magnitude": 0.0021920732906027434,
+        "dynamics_score": 0.0009867925364416864,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8360894097222222,
+        "dynamic_ratio": 0.16391059027777777,
+        "mean_dynamic_magnitude": 0.002217415434802023,
+        "consistency_score": 0.25328453287354813
+      },
+      "camera_compensation": {
+        "inliers": 184,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 57,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007184115292989938,
+        "std_magnitude": 0.0004884689595841005,
+        "max_magnitude": 0.0020217556323800156,
+        "dynamics_score": 0.000962646009091044,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9053374565972222,
+        "dynamic_ratio": 0.0946625434027778,
+        "mean_dynamic_magnitude": 0.0020146042642977782,
+        "consistency_score": 0.27417475005248326
+      },
+      "camera_compensation": {
+        "inliers": 191,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 58,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006676888622225193,
+        "std_magnitude": 0.00046860611012981666,
+        "max_magnitude": 0.002200268889690208,
+        "dynamics_score": 0.0009019919172874276,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.887392578125,
+        "dynamic_ratio": 0.11260742187499995,
+        "mean_dynamic_magnitude": 0.002098396211139256,
+        "consistency_score": 0.22508802903796177
+      },
+      "camera_compensation": {
+        "inliers": 183,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 59,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006513104992609348,
+        "std_magnitude": 0.0004742621505039638,
+        "max_magnitude": 0.002038777829772816,
+        "dynamics_score": 0.0008884415745129166,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9106640625,
+        "dynamic_ratio": 0.08933593750000002,
+        "mean_dynamic_magnitude": 0.0020080297417868188,
+        "consistency_score": 0.2191652470283727
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 60,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006070698907773157,
+        "std_magnitude": 0.00040796581633269,
+        "max_magnitude": 0.0020244496456216688,
+        "dynamics_score": 0.0008110527989436607,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.796748046875,
+        "dynamic_ratio": 0.203251953125,
+        "mean_dynamic_magnitude": 0.002423058109366578,
+        "consistency_score": 0.14253008687366842
+      },
+      "camera_compensation": {
+        "inliers": 192,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 61,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007458313728073978,
+        "std_magnitude": 0.0005186978021812902,
+        "max_magnitude": 0.0020926291984352035,
+        "dynamics_score": 0.0010051802738980428,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9354644097222222,
+        "dynamic_ratio": 0.06453559027777778,
+        "mean_dynamic_magnitude": 0.001844828358657278,
+        "consistency_score": 0.2876943250714751
+      },
+      "camera_compensation": {
+        "inliers": 190,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 62,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006045239188139862,
+        "std_magnitude": 0.00043910425789295824,
+        "max_magnitude": 0.0020121263804188413,
+        "dynamics_score": 0.0008240760477604653,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.87181640625,
+        "dynamic_ratio": 0.12818359375,
+        "mean_dynamic_magnitude": 0.0021371517909759006,
+        "consistency_score": 0.1708054047028802
+      },
+      "camera_compensation": {
+        "inliers": 192,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 63,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006235558004210667,
+        "std_magnitude": 0.0004864102698432351,
+        "max_magnitude": 0.002161854677364463,
+        "dynamics_score": 0.0008667609353426842,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.866572265625,
+        "dynamic_ratio": 0.133427734375,
+        "mean_dynamic_magnitude": 0.002155632478262065,
+        "consistency_score": 0.15523010005732962
+      },
+      "camera_compensation": {
+        "inliers": 184,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 64,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006928964386669522,
+        "std_magnitude": 0.0005122442495666883,
+        "max_magnitude": 0.0024113524654831055,
+        "dynamics_score": 0.0009490185634502963,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8649663628472222,
+        "dynamic_ratio": 0.13503363715277783,
+        "mean_dynamic_magnitude": 0.0020971322361827438,
+        "consistency_score": 0.22167074674102283
+      },
+      "camera_compensation": {
+        "inliers": 183,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 65,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006914991941991792,
+        "std_magnitude": 0.0004874746044915096,
+        "max_magnitude": 0.002034319553862247,
+        "dynamics_score": 0.0009352364964449341,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9638856336805556,
+        "dynamic_ratio": 0.036114366319444424,
+        "mean_dynamic_magnitude": 0.0018169721606180703,
+        "consistency_score": 0.2822038402588166
+      },
+      "camera_compensation": {
+        "inliers": 185,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 66,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005483637648487512,
+        "std_magnitude": 0.0004062419995129372,
+        "max_magnitude": 0.0021332410920588004,
+        "dynamics_score": 0.0007514847646052198,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8044422743055556,
+        "dynamic_ratio": 0.1955577256944444,
+        "mean_dynamic_magnitude": 0.002336798459786494,
+        "consistency_score": 0.09405632741360503
+      },
+      "camera_compensation": {
+        "inliers": 197,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 67,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005417451894814588,
+        "std_magnitude": 0.0004951220710354793,
+        "max_magnitude": 0.0024228205332127353,
+        "dynamics_score": 0.0007893062249991985,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8642035590277778,
+        "dynamic_ratio": 0.1357964409722222,
+        "mean_dynamic_magnitude": 0.002138673994277093,
+        "consistency_score": 0.04686665343635432
+      },
+      "camera_compensation": {
+        "inliers": 194,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 68,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006126954448732828,
+        "std_magnitude": 0.00046241749227871813,
+        "max_magnitude": 0.002032344939411551,
+        "dynamics_score": 0.0008439041910126418,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7907823350694444,
+        "dynamic_ratio": 0.2092176649305556,
+        "mean_dynamic_magnitude": 0.002504864412667422,
+        "consistency_score": 0.1086900867246835
+      },
+      "camera_compensation": {
+        "inliers": 193,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 69,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006801000156904563,
+        "std_magnitude": 0.0004608176684001796,
+        "max_magnitude": 0.002032278974580203,
+        "dynamics_score": 0.0009105088498905462,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8502734375,
+        "dynamic_ratio": 0.14972656250000005,
+        "mean_dynamic_magnitude": 0.0021512949499355363,
+        "consistency_score": 0.23173274421921397
+      },
+      "camera_compensation": {
+        "inliers": 184,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 70,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006486380315211909,
+        "std_magnitude": 0.00043241227305126706,
+        "max_magnitude": 0.002010008352416149,
+        "dynamics_score": 0.0008648441680468244,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8407421875,
+        "dynamic_ratio": 0.15925781250000004,
+        "mean_dynamic_magnitude": 0.002256550602046567,
+        "consistency_score": 0.20035162799418194
+      },
+      "camera_compensation": {
+        "inliers": 178,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 71,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005371231916894994,
+        "std_magnitude": 0.0003997842882699818,
+        "max_magnitude": 0.002013017748042484,
+        "dynamics_score": 0.0007370153358244903,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8404014756944445,
+        "dynamic_ratio": 0.15959852430555554,
+        "mean_dynamic_magnitude": 0.002421319956270851,
+        "consistency_score": 0.05407441854050832
+      },
+      "camera_compensation": {
+        "inliers": 191,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 72,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006690680488763345,
+        "std_magnitude": 0.0005266729746267135,
+        "max_magnitude": 0.0020185346672612946,
+        "dynamics_score": 0.0009324045361896912,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.79064453125,
+        "dynamic_ratio": 0.20935546875,
+        "mean_dynamic_magnitude": 0.0023025121578326654,
+        "consistency_score": 0.17593243081210697
+      },
+      "camera_compensation": {
+        "inliers": 169,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 73,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006479384822806092,
+        "std_magnitude": 0.0005070555317933364,
+        "max_magnitude": 0.0020322935672700193,
+        "dynamics_score": 0.0009014662481772774,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9161078559027778,
+        "dynamic_ratio": 0.08389214409722223,
+        "mean_dynamic_magnitude": 0.0019141063464620752,
+        "consistency_score": 0.1975583646185598
+      },
+      "camera_compensation": {
+        "inliers": 192,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 74,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005596086787427644,
+        "std_magnitude": 0.00041435677376802,
+        "max_magnitude": 0.002024457530420505,
+        "dynamics_score": 0.0007667870656267744,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8217697482638889,
+        "dynamic_ratio": 0.17823025173611107,
+        "mean_dynamic_magnitude": 0.0024325567626774657,
+        "consistency_score": 0.0753032371667901
+      },
+      "camera_compensation": {
+        "inliers": 186,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 75,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005080783648607072,
+        "std_magnitude": 0.0004577633168071505,
+        "max_magnitude": 0.0020180990995880923,
+        "dynamics_score": 0.0007369600232642825,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8134581163194444,
+        "dynamic_ratio": 0.18654188368055558,
+        "mean_dynamic_magnitude": 0.0022405039256546576,
+        "consistency_score": 0.0350372483163609
+      },
+      "camera_compensation": {
+        "inliers": 185,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 76,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006730220525440642,
+        "std_magnitude": 0.0005116413588706591,
+        "max_magnitude": 0.0020239994876140263,
+        "dynamics_score": 0.0009288427319793937,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8222938368055556,
+        "dynamic_ratio": 0.17770616319444443,
+        "mean_dynamic_magnitude": 0.002126310496810007,
+        "consistency_score": 0.20562471913294744
+      },
+      "camera_compensation": {
+        "inliers": 180,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 77,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006748108303638662,
+        "std_magnitude": 0.0005479710544034358,
+        "max_magnitude": 0.0020421827296937503,
+        "dynamics_score": 0.0009487963575655841,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8712076822916667,
+        "dynamic_ratio": 0.12879231770833333,
+        "mean_dynamic_magnitude": 0.0020609714538180317,
+        "consistency_score": 0.1789369170098679
+      },
+      "camera_compensation": {
+        "inliers": 185,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 78,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005998205220538832,
+        "std_magnitude": 0.0005032957321785634,
+        "max_magnitude": 0.002069547054988702,
+        "dynamics_score": 0.0008514683881431649,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8393500434027777,
+        "dynamic_ratio": 0.16064995659722225,
+        "mean_dynamic_magnitude": 0.0020771211528638808,
+        "consistency_score": 0.1364675064158949
+      },
+      "camera_compensation": {
+        "inliers": 181,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 79,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006881850011518523,
+        "std_magnitude": 0.0005608471878543822,
+        "max_magnitude": 0.002026850702704129,
+        "dynamics_score": 0.0009686085950790434,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9000075954861111,
+        "dynamic_ratio": 0.09999240451388891,
+        "mean_dynamic_magnitude": 0.0019073705847448812,
+        "consistency_score": 0.19176503533859346
+      },
+      "camera_compensation": {
+        "inliers": 187,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 80,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005846942431560941,
+        "std_magnitude": 0.0004749546063538193,
+        "max_magnitude": 0.0020438202910006914,
+        "dynamics_score": 0.0008221715463330037,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7929231770833334,
+        "dynamic_ratio": 0.20707682291666663,
+        "mean_dynamic_magnitude": 0.002301362295382005,
+        "consistency_score": 0.11874236732047516
+      },
+      "camera_compensation": {
+        "inliers": 185,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 81,
+      "static_dynamics": {
+        "mean_magnitude": 0.000759707027084599,
+        "std_magnitude": 0.0005304433687333692,
+        "max_magnitude": 0.0020610873580249336,
+        "dynamics_score": 0.0010249287114512836,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8792838541666667,
+        "dynamic_ratio": 0.12071614583333334,
+        "mean_dynamic_magnitude": 0.0019535390698645033,
+        "consistency_score": 0.2913075046762267
+      },
+      "camera_compensation": {
+        "inliers": 184,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 82,
+      "static_dynamics": {
+        "mean_magnitude": 0.0004813941238184513,
+        "std_magnitude": 0.00044571641526514386,
+        "max_magnitude": 0.002018292121711386,
+        "dynamics_score": 0.0007042523314510232,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8154383680555556,
+        "dynamic_ratio": 0.18456163194444442,
+        "mean_dynamic_magnitude": 0.0022682854973244647,
+        "consistency_score": 0.0026380637937215567
+      },
+      "camera_compensation": {
+        "inliers": 190,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 83,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006013109355432983,
+        "std_magnitude": 0.00048292511921816587,
+        "max_magnitude": 0.002014566896095955,
+        "dynamics_score": 0.0008427734951523812,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8583159722222222,
+        "dynamic_ratio": 0.14168402777777778,
+        "mean_dynamic_magnitude": 0.0021447225913235226,
+        "consistency_score": 0.13904743899426164
+      },
+      "camera_compensation": {
+        "inliers": 183,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 84,
+      "static_dynamics": {
+        "mean_magnitude": 0.000664074689738927,
+        "std_magnitude": 0.0005357875748877335,
+        "max_magnitude": 0.0020418205905743812,
+        "dynamics_score": 0.0009319684771827937,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8293901909722222,
+        "dynamic_ratio": 0.17060980902777778,
+        "mean_dynamic_magnitude": 0.0020901176283181,
+        "consistency_score": 0.18945045942368455
+      },
+      "camera_compensation": {
+        "inliers": 188,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 85,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007357746049646521,
+        "std_magnitude": 0.0005543425617755998,
+        "max_magnitude": 0.002014714989079513,
+        "dynamics_score": 0.001012945885852452,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9385069444444445,
+        "dynamic_ratio": 0.06149305555555551,
+        "mean_dynamic_magnitude": 0.001757509657445054,
+        "consistency_score": 0.2512586281506841
+      },
+      "camera_compensation": {
+        "inliers": 194,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 86,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005051671108222618,
+        "std_magnitude": 0.0004270212087452721,
+        "max_magnitude": 0.002081986576471047,
+        "dynamics_score": 0.0007186777151948978,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7978895399305556,
+        "dynamic_ratio": 0.20211046006944444,
+        "mean_dynamic_magnitude": 0.0023706599759239317,
+        "consistency_score": 0.03070238873138753
+      },
+      "camera_compensation": {
+        "inliers": 183,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 87,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005744982911976716,
+        "std_magnitude": 0.0004659572631199842,
+        "max_magnitude": 0.002124964901680784,
+        "dynamics_score": 0.0008074769227576637,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8447319878472223,
+        "dynamic_ratio": 0.15526801215277775,
+        "mean_dynamic_magnitude": 0.0021575984930352283,
+        "consistency_score": 0.1150374857351919
+      },
+      "camera_compensation": {
+        "inliers": 189,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 88,
+      "static_dynamics": {
+        "mean_magnitude": 0.00048824991403579156,
+        "std_magnitude": 0.0004246237485831901,
+        "max_magnitude": 0.002014099169898312,
+        "dynamics_score": 0.0007005617883273866,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7868077256944445,
+        "dynamic_ratio": 0.21319227430555554,
+        "mean_dynamic_magnitude": 0.0023380435742693124,
+        "consistency_score": 0.02726302251426671
+      },
+      "camera_compensation": {
+        "inliers": 191,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 89,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006235141686997801,
+        "std_magnitude": 0.0005125519432978542,
+        "max_magnitude": 0.002030534507605131,
+        "dynamics_score": 0.0008797901403487071,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.867880859375,
+        "dynamic_ratio": 0.13211914062499996,
+        "mean_dynamic_magnitude": 0.002000869717695712,
+        "consistency_score": 0.1603799421369697
+      },
+      "camera_compensation": {
+        "inliers": 182,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 90,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005031404375955667,
+        "std_magnitude": 0.00046828059613815735,
+        "max_magnitude": 0.0020186090160720636,
+        "dynamics_score": 0.0007372807356646454,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8293120659722222,
+        "dynamic_ratio": 0.17068793402777782,
+        "mean_dynamic_magnitude": 0.002088369854702724,
+        "consistency_score": 0.042287062934350916
+      },
+      "camera_compensation": {
+        "inliers": 179,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 91,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005233053792440238,
+        "std_magnitude": 0.00046983439186519755,
+        "max_magnitude": 0.0020107874974659525,
+        "dynamics_score": 0.0007582225751766226,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8186306423611112,
+        "dynamic_ratio": 0.18136935763888884,
+        "mean_dynamic_magnitude": 0.002272365616268691,
+        "consistency_score": 0.03610802670234481
+      },
+      "camera_compensation": {
+        "inliers": 191,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 92,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005364661971984988,
+        "std_magnitude": 0.0004683599231639119,
+        "max_magnitude": 0.002134193147272704,
+        "dynamics_score": 0.0007706461587804548,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7746723090277777,
+        "dynamic_ratio": 0.22532769097222227,
+        "mean_dynamic_magnitude": 0.0023882562796157096,
+        "consistency_score": 0.06907499011255036
+      },
+      "camera_compensation": {
+        "inliers": 183,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 93,
+      "static_dynamics": {
+        "mean_magnitude": 0.000709295926059289,
+        "std_magnitude": 0.0005380682451252934,
+        "max_magnitude": 0.0020242000052592825,
+        "dynamics_score": 0.0009783300486219358,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8800303819444445,
+        "dynamic_ratio": 0.1199696180555555,
+        "mean_dynamic_magnitude": 0.0021103590737776984,
+        "consistency_score": 0.21097135978764725
+      },
+      "camera_compensation": {
+        "inliers": 177,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 94,
+      "static_dynamics": {
+        "mean_magnitude": 0.0004884882029893503,
+        "std_magnitude": 0.00045851483368748486,
+        "max_magnitude": 0.0020185427839302687,
+        "dynamics_score": 0.0007177456198330927,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8117914496527778,
+        "dynamic_ratio": 0.18820855034722217,
+        "mean_dynamic_magnitude": 0.0021984860038824173,
+        "consistency_score": 0.017986030549057563
+      },
+      "camera_compensation": {
+        "inliers": 184,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 95,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005391082961764868,
+        "std_magnitude": 0.00042118890239769836,
+        "max_magnitude": 0.002039537784176093,
+        "dynamics_score": 0.000749702747375336,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.81859375,
+        "dynamic_ratio": 0.18140625,
+        "mean_dynamic_magnitude": 0.002331915543717542,
+        "consistency_score": 0.07685290595865546
+      },
+      "camera_compensation": {
+        "inliers": 192,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 96,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005705828208513053,
+        "std_magnitude": 0.0005335290804990955,
+        "max_magnitude": 0.002027274903889056,
+        "dynamics_score": 0.000837347361100853,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8144194878472222,
+        "dynamic_ratio": 0.18558051215277782,
+        "mean_dynamic_magnitude": 0.0021388577128875286,
+        "consistency_score": 0.08689205663795285
+      },
+      "camera_compensation": {
+        "inliers": 180,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 97,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006603997622765357,
+        "std_magnitude": 0.00048064998494194586,
+        "max_magnitude": 0.0020356856905269444,
+        "dynamics_score": 0.0009007247547475086,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.824541015625,
+        "dynamic_ratio": 0.17545898437499996,
+        "mean_dynamic_magnitude": 0.0020933596841981026,
+        "consistency_score": 0.22406005454875422
+      },
+      "camera_compensation": {
+        "inliers": 182,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 98,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005936388964417792,
+        "std_magnitude": 0.0005547107431828686,
+        "max_magnitude": 0.002016847231789905,
+        "dynamics_score": 0.0008709942680332134,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8523394097222222,
+        "dynamic_ratio": 0.14766059027777778,
+        "mean_dynamic_magnitude": 0.002065499668256845,
+        "consistency_score": 0.08791097334126918
+      },
+      "camera_compensation": {
+        "inliers": 191,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 99,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005021554439702834,
+        "std_magnitude": 0.00042183890213725575,
+        "max_magnitude": 0.0020393484037857725,
+        "dynamics_score": 0.0007130748950389112,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8932345920138889,
+        "dynamic_ratio": 0.10676540798611112,
+        "mean_dynamic_magnitude": 0.0021655005615502754,
+        "consistency_score": 0.03762914610123247
+      },
+      "camera_compensation": {
+        "inliers": 183,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 100,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005678765843253068,
+        "std_magnitude": 0.000423190814313499,
+        "max_magnitude": 0.002015668435718106,
+        "dynamics_score": 0.0007794719914820563,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7735460069444444,
+        "dynamic_ratio": 0.22645399305555558,
+        "mean_dynamic_magnitude": 0.0021787856040653684,
+        "consistency_score": 0.16209144617470594
+      },
+      "camera_compensation": {
+        "inliers": 174,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 101,
+      "static_dynamics": {
+        "mean_magnitude": 0.000634608369108941,
+        "std_magnitude": 0.0005409601125834122,
+        "max_magnitude": 0.002042033830705975,
+        "dynamics_score": 0.0009050884254006471,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9179383680555555,
+        "dynamic_ratio": 0.08206163194444449,
+        "mean_dynamic_magnitude": 0.001988683640468674,
+        "consistency_score": 0.13262123633415757
+      },
+      "camera_compensation": {
+        "inliers": 190,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 102,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005870436117427701,
+        "std_magnitude": 0.0004657356939423292,
+        "max_magnitude": 0.0020334370486898294,
+        "dynamics_score": 0.0008199114587139348,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8182660590277778,
+        "dynamic_ratio": 0.18173394097222217,
+        "mean_dynamic_magnitude": 0.0019897125295783307,
+        "consistency_score": 0.1700727877887549
+      },
+      "camera_compensation": {
+        "inliers": 154,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 103,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005183339184644523,
+        "std_magnitude": 0.0003867275015130225,
+        "max_magnitude": 0.0020718284961207135,
+        "dynamics_score": 0.0007116976692209635,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8235015190972222,
+        "dynamic_ratio": 0.17649848090277775,
+        "mean_dynamic_magnitude": 0.0023791512996091196,
+        "consistency_score": 0.0315980520214485
+      },
+      "camera_compensation": {
+        "inliers": 181,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 104,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006893382482013714,
+        "std_magnitude": 0.0005569355630225767,
+        "max_magnitude": 0.0020228519424581094,
+        "dynamics_score": 0.0009678060297126597,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8354340277777778,
+        "dynamic_ratio": 0.16456597222222225,
+        "mean_dynamic_magnitude": 0.002566061137999645,
+        "consistency_score": 0.06394918640662217
+      },
+      "camera_compensation": {
+        "inliers": 175,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 105,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007060834196508166,
+        "std_magnitude": 0.0005079543060096088,
+        "max_magnitude": 0.002044551652843233,
+        "dynamics_score": 0.000960060572655621,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8787738715277778,
+        "dynamic_ratio": 0.12122612847222225,
+        "mean_dynamic_magnitude": 0.002099272442088488,
+        "consistency_score": 0.23564169195784046
+      },
+      "camera_compensation": {
+        "inliers": 181,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 106,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005894510346662982,
+        "std_magnitude": 0.0003693973319455408,
+        "max_magnitude": 0.005096188961755724,
+        "dynamics_score": 0.0007741497006390686,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7907107204861111,
+        "dynamic_ratio": 0.20928927951388887,
+        "mean_dynamic_magnitude": 0.0022788637835800263,
+        "consistency_score": 0.17965431471794557
+      },
+      "camera_compensation": {
+        "inliers": 170,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 107,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006815941218756114,
+        "std_magnitude": 0.00047972600128763594,
+        "max_magnitude": 0.00200713612644189,
+        "dynamics_score": 0.0009214571225194294,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8101150173611111,
+        "dynamic_ratio": 0.18988498263888887,
+        "mean_dynamic_magnitude": 0.0022859607040233623,
+        "consistency_score": 0.2029915247996945
+      },
+      "camera_compensation": {
+        "inliers": 159,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 108,
+      "static_dynamics": {
+        "mean_magnitude": 0.000509835718913683,
+        "std_magnitude": 0.0004480763882164133,
+        "max_magnitude": 0.0020108736051391656,
+        "dynamics_score": 0.0007338739130218896,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8056510416666667,
+        "dynamic_ratio": 0.19434895833333332,
+        "mean_dynamic_magnitude": 0.002281119782081624,
+        "consistency_score": 0.044043922753004505
+      },
+      "camera_compensation": {
+        "inliers": 191,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 109,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006529230912354863,
+        "std_magnitude": 0.0004795473434462722,
+        "max_magnitude": 0.0020208695413295417,
+        "dynamics_score": 0.0008926967629586224,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8519997829861111,
+        "dynamic_ratio": 0.14800021701388888,
+        "mean_dynamic_magnitude": 0.002303050555215601,
+        "consistency_score": 0.13109049665694172
+      },
+      "camera_compensation": {
+        "inliers": 182,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 110,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005774479602644444,
+        "std_magnitude": 0.0004816672751150478,
+        "max_magnitude": 0.0020123371032007777,
+        "dynamics_score": 0.0008182815978219683,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8560492621527778,
+        "dynamic_ratio": 0.14395073784722223,
+        "mean_dynamic_magnitude": 0.0020178197459140203,
+        "consistency_score": 0.13232401062976817
+      },
+      "camera_compensation": {
+        "inliers": 177,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 111,
+      "static_dynamics": {
+        "mean_magnitude": 0.00045468651233618963,
+        "std_magnitude": 0.0004515052234578238,
+        "max_magnitude": 0.0020152745542052998,
+        "dynamics_score": 0.0006804391240651015,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7886176215277778,
+        "dynamic_ratio": 0.2113823784722222,
+        "mean_dynamic_magnitude": 0.0023653658523781584,
+        "consistency_score": 0.0
+      },
+      "camera_compensation": {
+        "inliers": 184,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 112,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006112459332889132,
+        "std_magnitude": 0.0004973209244592009,
+        "max_magnitude": 0.002039128673307521,
+        "dynamics_score": 0.0008599063955185137,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7585731336805556,
+        "dynamic_ratio": 0.24142686631944443,
+        "mean_dynamic_magnitude": 0.00249824220136499,
+        "consistency_score": 0.11986880108186193
+      },
+      "camera_compensation": {
+        "inliers": 170,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 113,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006226525485103317,
+        "std_magnitude": 0.000512580223819673,
+        "max_magnitude": 0.0020394293854288717,
+        "dynamics_score": 0.0008789426604201682,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8490798611111111,
+        "dynamic_ratio": 0.1509201388888889,
+        "mean_dynamic_magnitude": 0.0020844358012850335,
+        "consistency_score": 0.15226490424796502
+      },
+      "camera_compensation": {
+        "inliers": 184,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 114,
+      "static_dynamics": {
+        "mean_magnitude": 0.000404940304315773,
+        "std_magnitude": 0.0003824740873481097,
+        "max_magnitude": 0.002022162320398469,
+        "dynamics_score": 0.0005961773479898279,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7911653645833333,
+        "dynamic_ratio": 0.2088346354166667,
+        "mean_dynamic_magnitude": 0.0022847109651516397,
+        "consistency_score": 0.0
+      },
+      "camera_compensation": {
+        "inliers": 182,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 115,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005392441801378273,
+        "std_magnitude": 0.0004998580743863627,
+        "max_magnitude": 0.002073032300591921,
+        "dynamics_score": 0.0007891732173310087,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8628461371527778,
+        "dynamic_ratio": 0.1371538628472222,
+        "mean_dynamic_magnitude": 0.002295962477460472,
+        "consistency_score": 0.0
+      },
+      "camera_compensation": {
+        "inliers": 174,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 116,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005139866743895041,
+        "std_magnitude": 0.0005206859880745393,
+        "max_magnitude": 0.0020105712330039157,
+        "dynamics_score": 0.0007743296684267738,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8609223090277778,
+        "dynamic_ratio": 0.13907769097222222,
+        "mean_dynamic_magnitude": 0.0020611081002621127,
+        "consistency_score": 0.001686675676823346
+      },
+      "camera_compensation": {
+        "inliers": 186,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 117,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006140285911873477,
+        "std_magnitude": 0.000547909156169391,
+        "max_magnitude": 0.0020480985811949268,
+        "dynamics_score": 0.0008879831692720432,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.86328125,
+        "dynamic_ratio": 0.13671875,
+        "mean_dynamic_magnitude": 0.002118848686183408,
+        "consistency_score": 0.103650005320991
+      },
+      "camera_compensation": {
+        "inliers": 165,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 118,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006561125214823995,
+        "std_magnitude": 0.0005579369150232857,
+        "max_magnitude": 0.002027686092615886,
+        "dynamics_score": 0.0009350809789940423,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8563129340277778,
+        "dynamic_ratio": 0.14368706597222225,
+        "mean_dynamic_magnitude": 0.00203701133868788,
+        "consistency_score": 0.16521997067136118
+      },
+      "camera_compensation": {
+        "inliers": 183,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 119,
+      "static_dynamics": {
+        "mean_magnitude": 0.0007120950489273969,
+        "std_magnitude": 0.0006347620318938598,
+        "max_magnitude": 0.0020522606038824447,
+        "dynamics_score": 0.001029476064874327,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9338812934027778,
+        "dynamic_ratio": 0.06611870659722219,
+        "mean_dynamic_magnitude": 0.0024822212375686793,
+        "consistency_score": 0.0
+      },
+      "camera_compensation": {
+        "inliers": 178,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 120,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006585356693431846,
+        "std_magnitude": 0.0005674285850728071,
+        "max_magnitude": 0.002055835831424555,
+        "dynamics_score": 0.0009422499618795882,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9500401475694444,
+        "dynamic_ratio": 0.04995985243055556,
+        "mean_dynamic_magnitude": 0.0016996270719149228,
+        "consistency_score": 0.15278211140572606
+      },
+      "camera_compensation": {
+        "inliers": 182,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 121,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005539182056598345,
+        "std_magnitude": 0.000526646591268043,
+        "max_magnitude": 0.002019428703095859,
+        "dynamics_score": 0.0008172415012938559,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8473893229166667,
+        "dynamic_ratio": 0.1526106770833333,
+        "mean_dynamic_magnitude": 0.002199123956856504,
+        "consistency_score": 0.034933950353028376
+      },
+      "camera_compensation": {
+        "inliers": 175,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 122,
+      "static_dynamics": {
+        "mean_magnitude": 0.00046956501394087804,
+        "std_magnitude": 0.00042563208919621856,
+        "max_magnitude": 0.002015706013674911,
+        "dynamics_score": 0.0006823810585389874,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7939887152777778,
+        "dynamic_ratio": 0.2060112847222222,
+        "mean_dynamic_magnitude": 0.002216674509298898,
+        "consistency_score": 0.02402677044998991
+      },
+      "camera_compensation": {
+        "inliers": 188,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 123,
+      "static_dynamics": {
+        "mean_magnitude": 0.0006551870072189262,
+        "std_magnitude": 0.0006040183918880475,
+        "max_magnitude": 0.002058024549284459,
+        "dynamics_score": 0.00095719620316295,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.9482834201388889,
+        "dynamic_ratio": 0.05171657986111111,
+        "mean_dynamic_magnitude": 0.0018440114050523367,
+        "consistency_score": 0.09587551056670807
+      },
+      "camera_compensation": {
+        "inliers": 183,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 124,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005678368628783748,
+        "std_magnitude": 0.0005177006141980462,
+        "max_magnitude": 0.0021132167650831798,
+        "dynamics_score": 0.0008266871699773979,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8424869791666667,
+        "dynamic_ratio": 0.1575130208333333,
+        "mean_dynamic_magnitude": 0.002117619514550419,
+        "consistency_score": 0.07941721815339087
+      },
+      "camera_compensation": {
+        "inliers": 171,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 125,
+      "static_dynamics": {
+        "mean_magnitude": 0.000625551413724558,
+        "std_magnitude": 0.0005068867815432703,
+        "max_magnitude": 0.0043496898418662255,
+        "dynamics_score": 0.0008789948044961931,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8519867621527778,
+        "dynamic_ratio": 0.1480132378472222,
+        "mean_dynamic_magnitude": 0.0020423330168395596,
+        "consistency_score": 0.16623332474539332
+      },
+      "camera_compensation": {
+        "inliers": 175,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 126,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005110336994895103,
+        "std_magnitude": 0.00044923809249588814,
+        "max_magnitude": 0.0020216905202482395,
+        "dynamics_score": 0.0007356527457374544,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.7895203993055555,
+        "dynamic_ratio": 0.2104796006944445,
+        "mean_dynamic_magnitude": 0.0021879493917600374,
+        "consistency_score": 0.0754976188651183
+      },
+      "camera_compensation": {
+        "inliers": 183,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    },
+    {
+      "frame_index": 127,
+      "static_dynamics": {
+        "mean_magnitude": 0.0005616671117331844,
+        "std_magnitude": 0.0005708857468723058,
+        "max_magnitude": 0.0020097698427617196,
+        "dynamics_score": 0.0008471099851693374,
+        "normalization_factor": 1468.6047800548656,
+        "is_normalized": true
+      },
+      "global_dynamics": {
+        "static_ratio": 0.8694498697916667,
+        "dynamic_ratio": 0.13055013020833328,
+        "mean_dynamic_magnitude": 0.0021196704236943155,
+        "consistency_score": 0.013683552485271089
+      },
+      "camera_compensation": {
+        "inliers": 183,
+        "total_matches": 200,
+        "homography_found": true
+      }
+    }
+  ]
+}

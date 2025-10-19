@@ -1,0 +1,47 @@
+{
+  "total_videos": 2,
+  "successful": 2,
+  "failed": 0,
+  "badcase_count": 2,
+  "normal_count": 0,
+  "badcase_rate": 1.0,
+  "type_distribution": {
+    "static_to_dynamic": 1,
+    "mismatch": 1
+  },
+  "severity_distribution": {
+    "mild": 0,
+    "moderate": 2,
+    "severe": 0
+  },
+  "badcase_list": [
+    {
+      "video_name": "The camera orbits around. Acropolis, the camera circles around.-0",
+      "video_path": "videos\\The camera orbits around. Acropolis, the camera circles around.-0.mp4",
+      "status": "success",
+      "frame_count": 129,
+      "expected_label": "static",
+      "actual_score": 0.5005124065833049,
+      "is_badcase": true,
+      "badcase_type": "static_to_dynamic",
+      "severity": "moderate",
+      "mismatch_score": 0.5005124065833049,
+      "confidence": 0.9333512045040011,
+      "output_dir": "output/The camera orbits around. Acropolis, the camera circles around.-0"
+    },
+    {
+      "video_name": "The camera orbits around. Bathtub, the camera circles around.-1",
+      "video_path": "videos\\The camera orbits around. Bathtub, the camera circles around.-1.mp4",
+      "status": "success",
+      "frame_count": 129,
+      "expected_label": "static",
+      "actual_score": 0.4686238647457283,
+      "is_badcase": true,
+      "badcase_type": "mismatch",
+      "severity": "moderate",
+      "mismatch_score": 0.4686238647457283,
+      "confidence": 0.9311730849011594,
+      "output_dir": "output/The camera orbits around. Bathtub, the camera circles around.-1"
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+视频: The camera orbits around. Bathtub, the camera circles around.-1
+期望标签: static
+实际动态度: 0.469
+是否BadCase: 是
+
+视频质量异常：未知视频 动态度不匹配（期望0.00，实际0.47）。
+
+建议人工review，确认是否需要重新生成
+
+根因诊断:
+  主要问题: 
+  贡献因素:

@@ -9,7 +9,7 @@ import numpy as np
 import os
 import json
 import glob
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Optional, Tuple, Union
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import argparse
@@ -18,6 +18,7 @@ from simple_raft import SimpleRAFTPredictor as RAFTPredictor
 from static_object_analyzer import StaticObjectDynamicsCalculator
 from dynamic_motion_compensation.camera_compensation import CameraCompensator
 from unified_dynamics_scorer import UnifiedDynamicsScorer, DynamicsClassifier
+from badcase_detector import BadCaseDetector, BadCaseAnalyzer, QualityFilter
 
 
 class VideoProcessor:
@@ -30,7 +31,9 @@ class VideoProcessor:
                  frame_skip: int = 1,
                  enable_visualization: bool = True,
                  enable_camera_compensation: bool = True,
-                 camera_compensation_params: Optional[Dict] = None):
+                 camera_compensation_params: Optional[Dict] = None,
+                 use_normalized_flow: bool = False,
+                 flow_threshold_ratio: float = 0.002):
         """
         初始化视频处理器
         
@@ -42,22 +45,37 @@ class VideoProcessor:
             enable_visualization: 是否生成可视化结果
             enable_camera_compensation: 是否启用相机补偿（默认True）
             camera_compensation_params: 相机补偿参数字典
+            use_normalized_flow: 是否使用分辨率归一化（默认False保持兼容）
+            flow_threshold_ratio: 归一化阈值比例（默认0.002）
         """
         self.raft_predictor = RAFTPredictor(raft_model_path, device, method='raft')
-        self.dynamics_calculator = StaticObjectDynamicsCalculator()
         self.max_frames = max_frames
         self.frame_skip = frame_skip
         self.enable_visualization = enable_visualization
         self.enable_camera_compensation = enable_camera_compensation
+        self.use_normalized_flow = use_normalized_flow
         
         # 初始化相机补偿器
         if camera_compensation_params is None:
             camera_compensation_params = {}
         self.camera_compensator = CameraCompensator(**camera_compensation_params) if enable_camera_compensation else None
         
-        # 初始化统一动态度评分器
-        self.unified_scorer = UnifiedDynamicsScorer(mode='static_scene')
+        # 初始化动态度计算器（支持归一化）
+        self.dynamics_calculator = StaticObjectDynamicsCalculator(
+            use_normalized_flow=use_normalized_flow,
+            flow_threshold_ratio=flow_threshold_ratio
+        )
+        
+        # 初始化统一动态度评分器（传递归一化状态）
+        self.unified_scorer = UnifiedDynamicsScorer(
+            mode='auto',
+            use_normalized_flow=use_normalized_flow
+        )
         self.dynamics_classifier = DynamicsClassifier()
+        
+        # 初始化BadCase检测器
+        self.badcase_detector = BadCaseDetector()
+        self.badcase_analyzer = BadCaseAnalyzer()
         
     def load_video(self, video_path: str) -> List[np.ndarray]:
         """加载视频帧"""
@@ -533,23 +551,23 @@ class VideoProcessor:
         if mean_dynamics < 1.0:
             report += "✓ 静态物体动态度低，相机运动补偿效果良好\n"
         elif mean_dynamics < 2.0:
-            report += "⚠ 静态物体动态度中等，存在轻微残余运动\n"
+            report += "△ 静态物体动态度中等，存在轻微残余运动\n"
         else:
             report += "✗ 静态物体动态度高，可能存在补偿误差或真实物体运动\n"
         
         if mean_static_ratio > 0.7:
             report += "✓ 场景主要由静态物体组成，适合进行静态物体动态度分析\n"
         elif mean_static_ratio > 0.5:
-            report += "⚠ 场景中静态和动态区域比例适中\n"
+            report += "△ 场景中静态和动态区域比例适中\n"
         else:
-            report += "✗ 场景中动态区域较多，静态物体动态度分析可能不够准确\n"
+            report += "⚠ 场景中动态区域较多，静态物体动态度分析可能不够准确\n"
         
         if temporal_stability > 0.8:
             report += "✓ 时序稳定性高，动态度计算结果可靠\n"
         elif temporal_stability > 0.6:
-            report += "⚠ 时序稳定性中等\n"
+            report += "△ 时序稳定性中等\n"
         else:
-            report += "✗ 时序稳定性低，结果可能存在较大波动\n"
+            report += "⚠ 时序稳定性低，结果可能存在较大波动\n"
         
         # 添加建议
         report += "\n建议:\n"
@@ -567,13 +585,33 @@ class VideoProcessor:
         return report
 
 
-def process_single_video(processor, video_path, output_dir, camera_fov):
-    """处理单个视频"""
+def load_expected_labels(label_file: str) -> Dict[str, Union[str, float]]:
+    """加载期望标签文件（用于BadCase检测）"""
+    labels = {}
+    if label_file.endswith('.json'):
+        with open(label_file, 'r', encoding='utf-8') as f:
+            labels = json.load(f)
+    return labels
+
+
+def process_single_video(processor, video_path, output_dir, camera_fov, expected_label=None):
+    """
+    处理单个视频
+    
+    Args:
+        processor: VideoProcessor实例
+        video_path: 视频路径
+        output_dir: 输出目录
+        camera_fov: 相机视场角
+        expected_label: 期望标签（可选，用于BadCase检测）
+    """
     video_name = os.path.splitext(os.path.basename(video_path))[0]
     video_output_dir = os.path.join(output_dir, video_name)
     
     print(f"\n{'='*70}")
     print(f"处理视频: {video_name}")
+    if expected_label is not None:
+        print(f"期望标签: {expected_label}")
     print(f"{'='*70}")
     
     try:
@@ -586,28 +624,90 @@ def process_single_video(processor, video_path, output_dir, camera_fov):
         # 处理视频
         result = processor.process_video(frames, camera_matrix, video_output_dir)
         
-        # 返回简要结果
+        # 提取基础信息
         temporal_stats = result['temporal_stats']
-        return {
+        unified = result.get('unified_dynamics', {})
+        actual_score = unified.get('unified_dynamics_score', 0.5)
+        confidence = unified.get('confidence', 0.0)
+        
+        # 构建基础返回结果
+        video_result = {
             'video_name': video_name,
+            'video_path': video_path,
             'status': 'success',
             'frame_count': len(frames),
             'mean_dynamics_score': temporal_stats['mean_dynamics_score'],
             'mean_static_ratio': temporal_stats['mean_static_ratio'],
             'temporal_stability': temporal_stats['temporal_stability'],
-            'output_dir': video_output_dir
+            'actual_score': actual_score,
+            'confidence': confidence,
+            'output_dir': video_output_dir,
+            'full_result': result
         }
+        
+        # 如果提供了期望标签，进行BadCase检测
+        if expected_label is not None:
+            badcase_result = processor.badcase_analyzer.analyze_with_details(
+                result, expected_label
+            )
+            
+            result['badcase_detection'] = badcase_result
+            video_result['expected_label'] = expected_label
+            video_result['is_badcase'] = badcase_result['is_badcase']
+            video_result['badcase_type'] = badcase_result.get('badcase_type', 'normal')
+            video_result['severity'] = badcase_result.get('severity', 'normal')
+            video_result['mismatch_score'] = badcase_result.get('mismatch_score', 0.0)
+            
+            # 保存BadCase检测结果
+            badcase_report_path = os.path.join(video_output_dir, 'badcase_report.txt')
+            with open(badcase_report_path, 'w', encoding='utf-8') as f:
+                f.write(f"视频: {video_name}\n")
+                f.write(f"期望标签: {expected_label}\n")
+                f.write(f"实际动态度: {actual_score:.3f}\n")
+                f.write(f"是否BadCase: {'是' if badcase_result['is_badcase'] else '否'}\n")
+                if badcase_result['is_badcase']:
+                    f.write(f"\n{badcase_result['description']}\n")
+                    f.write(f"\n{badcase_result['suggestion']}\n")
+                    if 'diagnosis' in badcase_result:
+                        f.write(f"\n根因诊断:\n")
+                        f.write(f"  主要问题: {badcase_result['diagnosis']['primary_issue']}\n")
+                        f.write(f"  贡献因素:\n")
+                        for factor in badcase_result['diagnosis']['contributing_factors']:
+                            f.write(f"    - {factor}\n")
+            
+            # 打印BadCase结果
+            if badcase_result['is_badcase']:
+                print(f"⚠  BadCase检测: 是")
+                print(f"   类型: {badcase_result['badcase_type']}")
+                print(f"   严重程度: {badcase_result['severity']}")
+                print(f"   不匹配度: {badcase_result['mismatch_score']:.3f}")
+            else:
+                print(f"✓  质量正常")
+        
+        return video_result
+        
     except Exception as e:
         print(f"错误: 处理视频失败 - {e}")
         return {
             'video_name': video_name,
+            'video_path': video_path,
             'status': 'failed',
-            'error': str(e)
+            'error': str(e),
+            'is_badcase': None if expected_label is not None else None
         }
 
 
-def batch_process_videos(processor, input_dir, output_dir, camera_fov):
-    """批量处理目录下的所有视频"""
+def batch_process_videos(processor, input_dir, output_dir, camera_fov, badcase_labels=None):
+    """
+    批量处理目录下的所有视频
+    
+    Args:
+        processor: VideoProcessor实例
+        input_dir: 视频目录
+        output_dir: 输出目录
+        camera_fov: 相机视场角
+        badcase_labels: 可选，期望标签字典，启用BadCase检测
+    """
     # 查找所有视频文件
     video_extensions = ['*.mp4', '*.avi', '*.mov', '*.mkv', '*.flv', '*.wmv']
     video_files = []
@@ -624,18 +724,36 @@ def batch_process_videos(processor, input_dir, output_dir, camera_fov):
     
     video_files.sort()
     print(f"\n找到 {len(video_files)} 个视频文件")
+    if badcase_labels:
+        print(f"已有 {len(badcase_labels)} 个视频标签")
     
     # 处理每个视频
     results = []
     for i, video_path in enumerate(video_files, 1):
+        video_name = os.path.splitext(os.path.basename(video_path))[0]
+        
+        # 获取期望标签（如果启用BadCase模式）
+        expected_label = None
+        if badcase_labels is not None:
+            expected_label = badcase_labels.get(video_name)
+            if expected_label is None:
+                print(f"\n⚠  视频 {video_name} 无期望标签，跳过BadCase检测")
+                expected_label = 'dynamic'  # 默认期望
+        
         print(f"\n进度: {i}/{len(video_files)}")
-        result = process_single_video(processor, video_path, output_dir, camera_fov)
+        result = process_single_video(processor, video_path, output_dir, camera_fov, expected_label)
         results.append(result)
     
     # 保存批量处理总结
-    save_batch_summary(results, output_dir)
-    
-    return results
+    if badcase_labels is not None:
+        # BadCase报告
+        batch_summary = processor.badcase_analyzer.generate_batch_summary(results)
+        processor.badcase_analyzer.save_batch_report(batch_summary, results, output_dir)
+        return batch_summary
+    else:
+        # 普通报告
+        save_batch_summary(results, output_dir)
+        return results
 
 
 def save_batch_summary(results, output_dir):
@@ -700,7 +818,15 @@ def main():
                        help='相机视场角 (度)')
     parser.add_argument('--batch', action='store_true',
                        help='批量处理模式：处理输入目录下的所有视频')
-    parser.add_argument('--no-visualize', dest='visualize', action='store_false',
+    
+    # BadCase检测参数（可选）
+    parser.add_argument('--badcase-labels', '-l', default=None,
+                       help='期望标签文件（JSON），启用BadCase检测')
+    parser.add_argument('--mismatch-threshold', type=float, default=0.3,
+                       help='BadCase不匹配阈值（默认0.3）')
+    
+    # 可视化参数
+    parser.add_argument('--no-visualize', dest='visualize', action='store_true',
                        help='禁用可视化生成（加快处理速度）')
     parser.add_argument('--no-camera-compensation', dest='camera_compensation', action='store_false',
                        help='禁用相机补偿（默认启用）')
@@ -708,9 +834,21 @@ def main():
                        help='相机补偿RANSAC阈值（像素）')
     parser.add_argument('--camera-max-features', type=int, default=2000,
                        help='相机补偿最大特征点数')
-    parser.set_defaults(visualize=True, camera_compensation=True)
+    parser.add_argument('--normalize-by-resolution', dest='use_normalized_flow',
+                       action='store_true',
+                       help='按分辨率归一化光流（推荐开启以保证不同分辨率视频的公平性）')
+    parser.add_argument('--flow-threshold-ratio', type=float, default=0.002,
+                       help='归一化后的静态阈值（相对于图像对角线，默认0.002）')
+    parser.set_defaults(visualize=False, camera_compensation=True, use_normalized_flow=False)
     
     args = parser.parse_args()
+    
+    # 加载BadCase标签（如果提供）
+    badcase_labels = None
+    if args.badcase_labels:
+        print(f"加载期望标签: {args.badcase_labels}")
+        badcase_labels = load_expected_labels(args.badcase_labels)
+        print(f"已加载 {len(badcase_labels)} 个标签")
     
     # 准备相机补偿参数
     camera_compensation_params = {
@@ -726,24 +864,47 @@ def main():
         frame_skip=args.frame_skip,
         enable_visualization=args.visualize,
         enable_camera_compensation=args.camera_compensation,
-        camera_compensation_params=camera_compensation_params
+        camera_compensation_params=camera_compensation_params,
+        use_normalized_flow=args.use_normalized_flow,
+        flow_threshold_ratio=args.flow_threshold_ratio
     )
+    
+    # 设置BadCase检测器（如果启用）
+    if badcase_labels:
+        processor.badcase_detector = BadCaseDetector(
+            mismatch_threshold=args.mismatch_threshold
+        )
+        processor.badcase_analyzer.detector = processor.badcase_detector
     
     # 批量处理模式
     if args.batch:
         if not os.path.isdir(args.input):
             raise ValueError(f"批量模式需要提供目录路径: {args.input}")
         
-        results = batch_process_videos(processor, args.input, args.output, args.fov)
+        results = batch_process_videos(processor, args.input, args.output, args.fov, badcase_labels)
         
         # 打印总结
-        success_count = sum(1 for r in results if r['status'] == 'success')
         print(f"\n{'='*70}")
         print(f"批量处理完成!")
-        print(f"总计: {len(results)} 个视频")
-        print(f"成功: {success_count} 个")
-        print(f"失败: {len(results) - success_count} 个")
-        print(f"结果保存到: {args.output}")
+        print(f"{'='*70}")
+        
+        if badcase_labels:
+            # BadCase模式总结
+            print(f"总视频数: {results['total_videos']}")
+            print(f"成功处理: {results['successful']}")
+            print(f"BadCase数量: {results['badcase_count']}")
+            print(f"BadCase比例: {results['badcase_rate']:.1%}")
+            print(f"\n严重程度分布:")
+            for severity, count in results['severity_distribution'].items():
+                print(f"  {severity}: {count}")
+        else:
+            # 普通模式总结
+            success_count = sum(1 for r in results if r['status'] == 'success')
+            print(f"总计: {len(results)} 个视频")
+            print(f"成功: {success_count} 个")
+            print(f"失败: {len(results) - success_count} 个")
+        
+        print(f"\n结果保存到: {args.output}")
         print(f"{'='*70}")
         
     # 单个视频/图像目录处理模式
