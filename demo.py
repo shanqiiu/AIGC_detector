@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 静态物体动态度分析系统演示
 """
@@ -25,8 +26,8 @@ def create_demo_video():
     # 创建静态背景场景（建筑物）
     background = np.zeros((height, width, 3), dtype=np.uint8)
     
-    # 绘制建筑物
-    # 主建筑
+    # 绘制建筑�?
+    # 主建�?
     cv2.rectangle(background, (150, 200), (350, 450), (120, 120, 120), -1)
     cv2.rectangle(background, (170, 220), (330, 430), (80, 80, 80), -1)
     
@@ -37,7 +38,7 @@ def create_demo_video():
             y = 250 + i * 35
             cv2.rectangle(background, (x, y), (x+15, y+25), (50, 100, 200), -1)
     
-    # 另一栋建筑
+    # 另一栋建�?
     cv2.rectangle(background, (400, 150), (580, 420), (100, 100, 100), -1)
     cv2.rectangle(background, (420, 170), (560, 400), (60, 60, 60), -1)
     
@@ -54,7 +55,7 @@ def create_demo_video():
     # 天空
     cv2.rectangle(background, (0, 0), (width, 150), (135, 206, 235), -1)
     
-    # 添加一些纹理
+    # 添加一些纹�?
     for _ in range(500):
         x = np.random.randint(0, width)
         y = np.random.randint(0, height)
@@ -76,23 +77,23 @@ def create_demo_video():
         # 应用平移
         shifted_frame = cv2.warpAffine(background, M, (width, height))
         
-        # 添加轻微的噪声
+        # 添加轻微的噪�?
         noise = np.random.normal(0, 3, shifted_frame.shape).astype(np.int16)
         shifted_frame = np.clip(shifted_frame.astype(np.int16) + noise, 0, 255).astype(np.uint8)
         
         frames.append(shifted_frame)
         
-        # 保存帧
+        # 保存�?
         cv2.imwrite(os.path.join(demo_dir, f'frame_{i:04d}.png'), 
                    cv2.cvtColor(shifted_frame, cv2.COLOR_RGB2BGR))
     
-    print(f"已创建 {len(frames)} 帧演示数据")
+    print(f"已创�? {len(frames)} 帧演示数�?")
     return frames, demo_dir
 
 
 def analyze_demo_video():
     """分析演示视频"""
-    print("\n开始分析演示视频...")
+    print("\n开始分析演示视�?...")
     
     # 创建演示数据
     frames, demo_dir = create_demo_video()
@@ -109,39 +110,39 @@ def analyze_demo_video():
     for i in range(len(frames) - 1):
         # 计算光流
         flow = predictor.predict_flow(frames[i], frames[i + 1])
-        flow = flow.transpose(1, 2, 0)  # 转换为 (H, W, 2)
+        flow = flow.transpose(1, 2, 0)  # 转换�? (H, W, 2)
         flows.append(flow)
         
         # 计算动态度
         result = calculator.calculate_frame_dynamics(flow, frames[i], frames[i + 1])
         results.append(result)
         
-        print(f"  帧 {i}: 动态度分数 = {result['static_dynamics']['dynamics_score']:.3f}, "
-              f"静态区域比例 = {result['global_dynamics']['static_ratio']:.3f}")
+        print(f"  �? {i}: 动态度分数 = {result['static_dynamics']['dynamics_score']:.3f}, "
+              f"静态区域比�? = {result['global_dynamics']['static_ratio']:.3f}")
     
     # 计算时序统计
     temporal_stats = calculator.calculate_temporal_statistics(results)
     
     print(f"\n时序统计结果:")
     print(f"  平均动态度分数: {temporal_stats['mean_dynamics_score']:.3f}")
-    print(f"  动态度分数标准差: {temporal_stats['std_dynamics_score']:.3f}")
-    print(f"  平均静态区域比例: {temporal_stats['mean_static_ratio']:.3f}")
-    print(f"  时序稳定性: {temporal_stats['temporal_stability']:.3f}")
+    print(f"  动态度分数标准�?: {temporal_stats['std_dynamics_score']:.3f}")
+    print(f"  平均静态区域比�?: {temporal_stats['mean_static_ratio']:.3f}")
+    print(f"  时序稳定�?: {temporal_stats['temporal_stability']:.3f}")
     
-    # 生成可视化
+    # 生成可视�?
     create_demo_visualizations(frames, flows, results, temporal_stats)
     
     return results, temporal_stats
 
 
 def create_demo_visualizations(frames, flows, results, temporal_stats):
-    """创建演示可视化"""
-    print("\n生成可视化结果...")
+    """创建演示可视�?"""
+    print("\n生成可视化结�?...")
     
     vis_dir = 'demo_output'
     os.makedirs(vis_dir, exist_ok=True)
     
-    # 1. 显示关键帧分析
+    # 1. 显示关键帧分�?
     key_frame_idx = len(frames) // 2
     if key_frame_idx < len(results):
         fig = create_frame_analysis_plot(
@@ -164,11 +165,11 @@ def create_demo_visualizations(frames, flows, results, temporal_stats):
     with open(os.path.join(vis_dir, 'demo_report.txt'), 'w', encoding='utf-8') as f:
         f.write(report)
     
-    print(f"可视化结果已保存到: {vis_dir}")
+    print(f"可视化结果已保存�?: {vis_dir}")
 
 
 def create_frame_analysis_plot(image, flow, result):
-    """创建单帧分析图"""
+    """创建单帧分析�?"""
     fig, axes = plt.subplots(2, 2, figsize=(12, 10))
     
     # 原始图像
@@ -191,10 +192,10 @@ def create_frame_analysis_plot(image, flow, result):
     axes[1, 0].axis('off')
     plt.colorbar(im2, ax=axes[1, 0])
     
-    # 静态区域掩码
+    # 静态区域掩�?
     static_mask = result['static_mask']
     overlay = image.copy()
-    overlay[static_mask] = [0, 255, 0]  # 绿色标记静态区域
+    overlay[static_mask] = [0, 255, 0]  # 绿色标记静态区�?
     axes[1, 1].imshow(overlay)
     axes[1, 1].set_title(f'Static Regions (Ratio: {result["global_dynamics"]["static_ratio"]:.3f})')
     axes[1, 1].axis('off')
@@ -204,7 +205,7 @@ def create_frame_analysis_plot(image, flow, result):
 
 
 def create_temporal_plot(results, temporal_stats):
-    """创建时序分析图"""
+    """创建时序分析�?"""
     dynamics_scores = [r['static_dynamics']['dynamics_score'] for r in results]
     static_ratios = [r['global_dynamics']['static_ratio'] for r in results]
     
@@ -219,7 +220,7 @@ def create_temporal_plot(results, temporal_stats):
     ax1.legend()
     ax1.grid(True, alpha=0.3)
     
-    # 静态区域比例
+    # 静态区域比�?
     ax2.plot(static_ratios, 'g-', linewidth=2, marker='s', markersize=4)
     ax2.axhline(y=temporal_stats['mean_static_ratio'], color='r', linestyle='--',
                label=f'Mean: {temporal_stats["mean_static_ratio"]:.3f}')
@@ -236,7 +237,7 @@ def create_temporal_plot(results, temporal_stats):
 def generate_demo_report(results, temporal_stats):
     """生成演示报告"""
     report = f"""
-相机转动拍摄静态建筑 - 动态度分析演示报告
+相机转动拍摄静态建�? - 动态度分析演示报告
 =====================================
 
 演示场景描述:
@@ -248,17 +249,17 @@ def generate_demo_report(results, temporal_stats):
 --------
 时序动态度统计:
 - 平均动态度分数: {temporal_stats['mean_dynamics_score']:.3f}
-- 动态度分数标准差: {temporal_stats['std_dynamics_score']:.3f}
+- 动态度分数标准�?: {temporal_stats['std_dynamics_score']:.3f}
 - 最大动态度分数: {temporal_stats['max_dynamics_score']:.3f}
 - 最小动态度分数: {temporal_stats['min_dynamics_score']:.3f}
 
-静态区域分析:
-- 平均静态区域比例: {temporal_stats['mean_static_ratio']:.3f}
+静态区域分�?:
+- 平均静态区域比�?: {temporal_stats['mean_static_ratio']:.3f}
 - 静态区域比例标准差: {temporal_stats['std_static_ratio']:.3f}
 
 系统性能评估:
-- 时序稳定性: {temporal_stats['temporal_stability']:.3f}
-- 平均一致性分数: {temporal_stats['mean_consistency_score']:.3f}
+- 时序稳定�?: {temporal_stats['temporal_stability']:.3f}
+- 平均一致性分�?: {temporal_stats['mean_consistency_score']:.3f}
 
 结论:
 ----
@@ -270,21 +271,21 @@ def generate_demo_report(results, temporal_stats):
     temporal_stability = temporal_stats['temporal_stability']
     
     if mean_dynamics < 1.0:
-        report += "✓ 系统成功检测到静态物体，相机运动补偿效果良好\n"
+        report += "�? 系统成功检测到静态物体，相机运动补偿效果良好\n"
     elif mean_dynamics < 2.0:
-        report += "⚠ 检测到轻微的残余运动，可能需要进一步优化\n"
+        report += "�? 检测到轻微的残余运动，可能需要进一步优化\n"
     else:
-        report += "✗ 动态度较高，建议检查相机运动估计准确性\n"
+        report += "�? 动态度较高，建议检查相机运动估计准确性\n"
     
     if mean_static_ratio > 0.7:
-        report += "✓ 场景主要由静态物体组成，分析结果可靠\n"
+        report += "�? 场景主要由静态物体组成，分析结果可靠\n"
     else:
-        report += "⚠ 静态区域检测可能需要调整参数\n"
+        report += "�? 静态区域检测可能需要调整参数\n"
     
     if temporal_stability > 0.8:
-        report += "✓ 时序稳定性高，动态度计算结果一致\n"
+        report += "�? 时序稳定性高，动态度计算结果一致\n"
     else:
-        report += "⚠ 时序稳定性有待提高\n"
+        report += "�? 时序稳定性有待提高\n"
     
     report += f"\n本演示展示了系统如何有效区分相机运动和物体运动，\n"
     report += f"仅计算静态物体的真实动态度。\n"
@@ -293,7 +294,7 @@ def generate_demo_report(results, temporal_stats):
 
 
 def main():
-    """主演示函数"""
+    """主演示函�?"""
     print("=" * 60)
     print("静态物体动态度分析系统 - 演示")
     print("=" * 60)
@@ -303,20 +304,20 @@ def main():
         results, temporal_stats = analyze_demo_video()
         
         print("\n" + "=" * 60)
-        print("演示完成！")
+        print("演示完成�?")
         print("=" * 60)
         
         print(f"\n关键发现:")
         print(f"- 成功区分了相机运动和物体运动")
         print(f"- 平均静态物体动态度: {temporal_stats['mean_dynamics_score']:.3f}")
-        print(f"- 系统稳定性: {temporal_stats['temporal_stability']:.3f}")
+        print(f"- 系统稳定�?: {temporal_stats['temporal_stability']:.3f}")
         
         print(f"\n查看详细结果:")
-        print(f"- 可视化图表: demo_output/")
+        print(f"- 可视化图�?: demo_output/")
         print(f"- 分析报告: demo_output/demo_report.txt")
         
     except Exception as e:
-        print(f"演示过程中发生错误: {e}")
+        print(f"演示过程中发生错�?: {e}")
         import traceback
         traceback.print_exc()
 

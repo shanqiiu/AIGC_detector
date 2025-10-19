@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Per-object SE(3) estimation on dynamic regions using PnP (global shutter only).
 - Requires per-object masks (if unavailable, treat whole image as one object)

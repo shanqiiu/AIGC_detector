@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 测试静态物体动态度计算功能
 """
@@ -26,8 +27,8 @@ def create_synthetic_test_data():
     # 创建静态背景（建筑物）
     background = np.zeros((height, width, 3), dtype=np.uint8)
     
-    # 添加建筑物结构
-    # 主建筑
+    # 添加建筑物结�?
+    # 主建�?
     cv2.rectangle(background, (100, 200), (300, 400), (150, 150, 150), -1)
     cv2.rectangle(background, (120, 220), (280, 380), (100, 100, 100), -1)
     
@@ -38,11 +39,11 @@ def create_synthetic_test_data():
             y = 240 + i * 40
             cv2.rectangle(background, (x, y), (x+20, y+25), (50, 100, 200), -1)
     
-    # 另一栋建筑
+    # 另一栋建�?
     cv2.rectangle(background, (350, 150), (550, 420), (120, 120, 120), -1)
     cv2.rectangle(background, (370, 170), (530, 400), (80, 80, 80), -1)
     
-    # 添加纹理和细节
+    # 添加纹理和细�?
     for _ in range(200):
         x = np.random.randint(0, width)
         y = np.random.randint(0, height)
@@ -55,7 +56,7 @@ def create_synthetic_test_data():
     
     for i in range(num_frames):
         # 计算旋转角度（模拟相机转动）
-        angle = i * 2.0  # 每帧转动2度
+        angle = i * 2.0  # 每帧转动2�?
         
         # 创建旋转矩阵
         rotation_matrix = cv2.getRotationMatrix2D((center_x, center_y), angle, 1.0)
@@ -69,11 +70,11 @@ def create_synthetic_test_data():
         
         frames.append(rotated_frame)
         
-        # 保存帧
+        # 保存�?
         cv2.imwrite(os.path.join(test_dir, f'frame_{i:04d}.png'), 
                    cv2.cvtColor(rotated_frame, cv2.COLOR_RGB2BGR))
     
-    print(f"已创建 {len(frames)} 帧测试数据，保存在 {test_dir}")
+    print(f"已创�? {len(frames)} 帧测试数据，保存�? {test_dir}")
     return frames, test_dir
 
 
@@ -91,27 +92,27 @@ def test_basic_functionality():
         
         # 计算前两帧的光流
         flow = predictor.predict_flow(frames[0], frames[1])
-        flow = flow.transpose(1, 2, 0)  # 转换为 (H, W, 2)
+        flow = flow.transpose(1, 2, 0)  # 转换�? (H, W, 2)
         
         # 计算动态度
         result = calculator.calculate_frame_dynamics(flow, frames[0], frames[1])
         
-        # 检查结果
+        # 检查结�?
         assert 'static_dynamics' in result
         assert 'global_dynamics' in result
         
-        print("✓ 基本功能测试通过")
+        print("�? 基本功能测试通过")
         
         # 打印结果摘要
         static_dynamics = result['static_dynamics']
         global_dynamics = result['global_dynamics']
         print(f"  动态度分数: {static_dynamics['dynamics_score']:.3f}")
-        print(f"  静态区域比例: {global_dynamics['static_ratio']:.3f}")
+        print(f"  静态区域比�?: {global_dynamics['static_ratio']:.3f}")
         
         return True
         
     except Exception as e:
-        print(f"✗ 基本功能测试失败: {e}")
+        print(f"�? 基本功能测试失败: {e}")
         return False
 
 
@@ -122,7 +123,7 @@ def test_camera_motion_compensation():
     try:
         from static_object_analyzer import CameraMotionEstimator
         
-        # 创建简单测试图像
+        # 创建简单测试图�?
         img1 = np.random.randint(0, 255, (200, 200, 3), dtype=np.uint8)
         
         # 创建旋转后的图像
@@ -135,21 +136,21 @@ def test_camera_motion_compensation():
         motion = estimator.estimate_camera_motion(img1, img2)
         
         if motion is not None:
-            print("✓ 相机运动估计成功")
-            print(f"  检测到 {len(motion['matches'])} 个特征匹配")
+            print("�? 相机运动估计成功")
+            print(f"  检测到 {len(motion['matches'])} 个特征匹�?")
             return True
         else:
-            print("⚠ 相机运动估计返回空结果（可能是特征点不足）")
-            return True  # 这在某些情况下是正常的
+            print("�? 相机运动估计返回空结果（可能是特征点不足�?")
+            return True  # 这在某些情况下是正常�?
             
     except Exception as e:
-        print(f"✗ 相机运动补偿测试失败: {e}")
+        print(f"�? 相机运动补偿测试失败: {e}")
         return False
 
 
 def test_static_detection():
-    """测试静态区域检测"""
-    print("\n=== 测试静态区域检测 ===")
+    """测试静态区域检�?"""
+    print("\n=== 测试静态区域检�? ===")
     
     try:
         from static_object_analyzer import StaticObjectDetector
@@ -158,26 +159,26 @@ def test_static_detection():
         h, w = 100, 100
         flow = np.zeros((h, w, 2))
         
-        # 添加一些运动区域
+        # 添加一些运动区�?
         flow[20:40, 20:40, 0] = 5.0  # 水平运动
         flow[60:80, 60:80, 1] = 3.0  # 垂直运动
         
-        # 测试静态区域检测
+        # 测试静态区域检�?
         detector = StaticObjectDetector(flow_threshold=2.0)
         static_mask, compensated_flow = detector.detect_static_regions(flow)
         
-        # 检查结果
+        # 检查结�?
         assert static_mask.shape == (h, w)
         assert compensated_flow.shape == (h, w, 2)
         
         static_ratio = np.sum(static_mask) / (h * w)
-        print(f"✓ 静态区域检测成功")
-        print(f"  静态区域比例: {static_ratio:.3f}")
+        print(f"�? 静态区域检测成�?")
+        print(f"  静态区域比�?: {static_ratio:.3f}")
         
         return True
         
     except Exception as e:
-        print(f"✗ 静态区域检测测试失败: {e}")
+        print(f"�? 静态区域检测测试失�?: {e}")
         return False
 
 
@@ -197,19 +198,19 @@ def test_dynamics_calculation():
         # 计算动态度
         result = calculator.calculate_frame_dynamics(flow, image1, image2)
         
-        # 检查结果结构
+        # 检查结果结�?
         required_keys = ['static_mask', 'compensated_flow', 'static_dynamics', 'global_dynamics']
         for key in required_keys:
-            assert key in result, f"缺少关键字: {key}"
+            assert key in result, f"缺少关键�?: {key}"
         
-        print("✓ 动态度计算成功")
+        print("�? 动态度计算成功")
         print(f"  动态度分数: {result['static_dynamics']['dynamics_score']:.3f}")
-        print(f"  静态区域比例: {result['global_dynamics']['static_ratio']:.3f}")
+        print(f"  静态区域比�?: {result['global_dynamics']['static_ratio']:.3f}")
         
         return True
         
     except Exception as e:
-        print(f"✗ 动态度计算测试失败: {e}")
+        print(f"�? 动态度计算测试失败: {e}")
         return False
 
 
@@ -239,23 +240,23 @@ def test_report_generation():
         # 生成报告
         report = calculator.generate_report(result)
         
-        # 检查报告内容
+        # 检查报告内�?
         assert len(report) > 100, "报告内容太短"
         assert "静态物体动态度分析报告" in report
         assert "1.500" in report  # 检查数值格式化
         
-        print("✓ 报告生成成功")
+        print("�? 报告生成成功")
         print(f"  报告长度: {len(report)} 字符")
         
         return True
         
     except Exception as e:
-        print(f"✗ 报告生成测试失败: {e}")
+        print(f"�? 报告生成测试失败: {e}")
         return False
 
 
 def run_all_tests():
-    """运行所有测试"""
+    """运行所有测�?"""
     print("开始运行静态物体动态度计算功能测试...")
     
     tests = [
@@ -283,15 +284,15 @@ def run_all_tests():
     print(f"通过: {passed}/{total}")
     
     if passed == total:
-        print("🎉 所有测试通过！")
+        print("🎉 所有测试通过�?")
     else:
-        print(f"⚠ {total - passed} 个测试失败")
+        print(f"�? {total - passed} 个测试失�?")
     
     return passed == total
 
 
 if __name__ == '__main__':
-    # 设置随机种子以获得可重复的结果
+    # 设置随机种子以获得可重复的结�?
     np.random.seed(42)
     
     success = run_all_tests()
@@ -300,7 +301,7 @@ if __name__ == '__main__':
         print("\n系统已准备就绪，可以处理真实的相机转动视频！")
         print("\n使用方法:")
         print("python video_processor.py -i your_video.mp4 -o output_dir")
-        print("或")
+        print("�?")
         print("python video_processor.py -i image_directory/ -o output_dir")
     else:
-        print("\n请检查并修复失败的测试后再使用系统。")
+        print("\n请检查并修复失败的测试后再使用系统�?")

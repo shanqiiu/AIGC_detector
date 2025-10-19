@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Global-shutter camera motion compensation and residual flow computation.
 - Estimate planar/global homography from feature matches

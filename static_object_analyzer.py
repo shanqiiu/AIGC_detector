@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 静态物体动态度分析器
 用于区分相机运动和真实物体运动，计算静态物体的动态度
@@ -61,7 +62,7 @@ class CameraMotionEstimator:
         """估计单应性矩阵"""
         if len(matches) < min_matches:
             return None, None
-            
+        
         # 提取匹配点坐标
         pts1 = np.float32([kp1[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
         pts2 = np.float32([kp2[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
@@ -80,7 +81,7 @@ class CameraMotionEstimator:
         """分解单应性矩阵得到相机运动参数"""
         if homography is None:
             return None
-            
+        
         # 分解单应性矩阵
         num, Rs, Ts, Ns = cv2.decomposeHomographyMat(homography, camera_matrix)
         
@@ -96,7 +97,12 @@ class CameraMotionEstimator:
             
             # 检查旋转矩阵的有效性
             if np.abs(np.linalg.det(R) - 1.0) < 0.1:
-                inliers = np.sum(N[:, 2] > 0)  # 法向量z分量应为正
+                # 修复：N可能是(3,1)或(3,)，需要正确处理
+                if len(N.shape) == 2:
+                    inliers = np.sum(N[:, 0] > 0) if N.shape[1] == 1 else np.sum(N[:, 2] > 0)
+                else:
+                    inliers = np.sum(N[2] > 0) if len(N) == 3 else 0
+                
                 if inliers > max_inliers:
                     max_inliers = inliers
                     best_solution = {'R': R, 'T': T, 'N': N}
@@ -212,24 +218,16 @@ class StaticObjectDetector:
         """基于图像特征细化静态区域"""
         # 计算图像梯度
         gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY) if len(image.shape) == 3 else image
-        print(f"Image shape: {image.shape}")
         grad_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
         grad_y = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
         gradient_magnitude = np.sqrt(grad_x ** 2 + grad_y ** 2)
 
         # 在高梯度区域（边缘）更严格地判断静态区域
         edge_mask = gradient_magnitude > np.percentile(gradient_magnitude, 75)
-        print(f"Flow shape: {flow.shape}")  # 应该是 (H, W, 2)
         
         # 在边缘区域使用更严格的阈值
         flow_magnitude = np.sqrt(flow[:, :, 0] ** 2 + flow[:, :, 1] ** 2)
         strict_static_mask = flow_magnitude < (self.flow_threshold * 0.5)
-        
-        # 确保所有数组都有相同的维度
-        print(f"Edge mask shape: {edge_mask.shape}")
-        print(f"Static mask shape: {static_mask.shape}")
-        print(f"Flow magnitude shape: {flow_magnitude.shape}")
-        print(f"Strict static mask shape: {strict_static_mask.shape}")
         
         # 组合结果 - 确保维度匹配
         refined_mask = static_mask.copy()
@@ -252,9 +250,6 @@ class StaticObjectDetector:
                     refined_mask = cv2.resize(refined_mask.astype(np.uint8), 
                                             (target_width, target_height), 
                                             interpolation=cv2.INTER_NEAREST).astype(bool)
-        
-        print(f"Final edge mask shape: {edge_mask.shape}")
-        print(f"Final refined mask shape: {refined_mask.shape}")
         
         # 现在可以安全地进行布尔索引
         refined_mask[edge_mask] = strict_static_mask[edge_mask]
@@ -329,10 +324,11 @@ class StaticObjectDynamicsCalculator:
             }
         
         # 提取静态区域的光流
-        static_flow = flow[static_mask]
+        static_flow_x = flow[:, :, 0][static_mask]
+        static_flow_y = flow[:, :, 1][static_mask]
         
         # 计算光流幅度
-        flow_magnitude = np.sqrt(static_flow[:, 0]**2 + static_flow[:, 1]**2)
+        flow_magnitude = np.sqrt(static_flow_x**2 + static_flow_y**2)
         
         # 计算统计量
         mean_magnitude = np.mean(flow_magnitude)
@@ -351,6 +347,7 @@ class StaticObjectDynamicsCalculator:
     
     def calculate_global_dynamics(self, flow, static_mask):
         """计算全局动态度指标"""
+        
         h, w = flow.shape[:2]
         total_pixels = h * w
         static_pixels = np.sum(static_mask)
@@ -361,8 +358,10 @@ class StaticObjectDynamicsCalculator:
         
         # 动态区域的平均光流幅度
         if dynamic_pixels > 0:
-            dynamic_flow = flow[~static_mask]
-            dynamic_magnitude = np.sqrt(dynamic_flow[:, 0]**2 + dynamic_flow[:, 1]**2)
+            # 提取动态区域的光流
+            dynamic_flow_x = flow[:, :, 0][~static_mask]
+            dynamic_flow_y = flow[:, :, 1][~static_mask]
+            dynamic_magnitude = np.sqrt(dynamic_flow_x**2 + dynamic_flow_y**2)
             mean_dynamic_magnitude = np.mean(dynamic_magnitude)
         else:
             mean_dynamic_magnitude = 0.0
@@ -463,14 +462,17 @@ class StaticObjectDynamicsCalculator:
         axes[1, 1].axis('off')
         
         # 动态度分布
-        static_flow = compensated_flow[result['static_mask']]
-        if len(static_flow) > 0:
-            static_magnitude = np.sqrt(static_flow[:, 0]**2 + static_flow[:, 1]**2)
+        static_mask = result['static_mask']
+        if np.any(static_mask):
+            static_flow_x = compensated_flow[:, :, 0][static_mask]
+            static_flow_y = compensated_flow[:, :, 1][static_mask]
+            static_magnitude = np.sqrt(static_flow_x**2 + static_flow_y**2)
             axes[1, 2].hist(static_magnitude, bins=50, alpha=0.7, label='Static Regions')
         
-        dynamic_flow = compensated_flow[~result['static_mask']]
-        if len(dynamic_flow) > 0:
-            dynamic_magnitude = np.sqrt(dynamic_flow[:, 0]**2 + dynamic_flow[:, 1]**2)
+        if np.any(~static_mask):
+            dynamic_flow_x = compensated_flow[:, :, 0][~static_mask]
+            dynamic_flow_y = compensated_flow[:, :, 1][~static_mask]
+            dynamic_magnitude = np.sqrt(dynamic_flow_x**2 + dynamic_flow_y**2)
             axes[1, 2].hist(dynamic_magnitude, bins=50, alpha=0.7, label='Dynamic Regions')
         
         axes[1, 2].set_title('Flow Magnitude Distribution')

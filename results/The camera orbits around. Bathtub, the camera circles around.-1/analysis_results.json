@@ -1,0 +1,646 @@
+{
+  "temporal_stats": {
+    "mean_dynamics_score": 0.8993230729663315,
+    "std_dynamics_score": 0.19967057029691143,
+    "max_dynamics_score": 1.4170333112380358,
+    "min_dynamics_score": 0.69008516313526,
+    "mean_static_ratio": 0.09001501012731482,
+    "std_static_ratio": 0.048298376402841466,
+    "mean_consistency_score": 0.003495944597006026,
+    "temporal_stability": 0.8335621667809238
+  },
+  "frame_count": 43,
+  "flow_count": 42,
+  "frame_results": [
+    {
+      "frame_index": 0,
+      "static_dynamics": {
+        "mean_magnitude": 0.5262411606881322,
+        "std_magnitude": 0.4247957804913424,
+        "max_magnitude": 5.497320709618937,
+        "dynamics_score": 0.7386390509338034
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07404188368055556,
+        "dynamic_ratio": 0.9259581163194445,
+        "mean_dynamic_magnitude": 5.195054759667229,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 1,
+      "static_dynamics": {
+        "mean_magnitude": 0.49822484411239826,
+        "std_magnitude": 0.4258138497291993,
+        "max_magnitude": 5.164971043101437,
+        "dynamics_score": 0.7111317689769979
+      },
+      "global_dynamics": {
+        "static_ratio": 0.08241861979166666,
+        "dynamic_ratio": 0.9175813802083334,
+        "mean_dynamic_magnitude": 4.5537691946102585,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 2,
+      "static_dynamics": {
+        "mean_magnitude": 0.9804650528795831,
+        "std_magnitude": 0.6850706371474993,
+        "max_magnitude": 5.944299076016326,
+        "dynamics_score": 1.3230003714533327
+      },
+      "global_dynamics": {
+        "static_ratio": 0.13253580729166667,
+        "dynamic_ratio": 0.8674641927083333,
+        "mean_dynamic_magnitude": 4.795568485149089,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 3,
+      "static_dynamics": {
+        "mean_magnitude": 0.5000501929929618,
+        "std_magnitude": 0.42242470502507035,
+        "max_magnitude": 5.631303124507086,
+        "dynamics_score": 0.7112625455054971
+      },
+      "global_dynamics": {
+        "static_ratio": 0.08322374131944445,
+        "dynamic_ratio": 0.9167762586805556,
+        "mean_dynamic_magnitude": 4.597082403580255,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 4,
+      "static_dynamics": {
+        "mean_magnitude": 0.9243123228801721,
+        "std_magnitude": 0.657342642475436,
+        "max_magnitude": 5.3260193599193215,
+        "dynamics_score": 1.25298364411789
+      },
+      "global_dynamics": {
+        "static_ratio": 0.11993815104166666,
+        "dynamic_ratio": 0.8800618489583334,
+        "mean_dynamic_magnitude": 5.160113537473485,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 5,
+      "static_dynamics": {
+        "mean_magnitude": 0.5399584233680605,
+        "std_magnitude": 0.4132165572722137,
+        "max_magnitude": 5.61164416140324,
+        "dynamics_score": 0.7465667020041674
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07797092013888889,
+        "dynamic_ratio": 0.9220290798611112,
+        "mean_dynamic_magnitude": 4.93668244929653,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 6,
+      "static_dynamics": {
+        "mean_magnitude": 0.4753514448459001,
+        "std_magnitude": 0.42946743657872,
+        "max_magnitude": 5.20653563827921,
+        "dynamics_score": 0.69008516313526
+      },
+      "global_dynamics": {
+        "static_ratio": 0.061571180555555556,
+        "dynamic_ratio": 0.9384288194444445,
+        "mean_dynamic_magnitude": 5.978734654464072,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 7,
+      "static_dynamics": {
+        "mean_magnitude": 0.5717265608873381,
+        "std_magnitude": 0.4253465200937086,
+        "max_magnitude": 5.91793218705512,
+        "dynamics_score": 0.7843998209341924
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07481879340277778,
+        "dynamic_ratio": 0.9251812065972222,
+        "mean_dynamic_magnitude": 5.371402902800083,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 8,
+      "static_dynamics": {
+        "mean_magnitude": 0.7876263756782158,
+        "std_magnitude": 0.607507377524957,
+        "max_magnitude": 5.528328886138974,
+        "dynamics_score": 1.0913800644406944
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07437282986111111,
+        "dynamic_ratio": 0.9256271701388888,
+        "mean_dynamic_magnitude": 4.94846773344253,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 9,
+      "static_dynamics": {
+        "mean_magnitude": 0.892858341235875,
+        "std_magnitude": 0.6490811847228627,
+        "max_magnitude": 8.850003645604843,
+        "dynamics_score": 1.2173989335973063
+      },
+      "global_dynamics": {
+        "static_ratio": 0.11233940972222223,
+        "dynamic_ratio": 0.8876605902777778,
+        "mean_dynamic_magnitude": 5.203642546285526,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 10,
+      "static_dynamics": {
+        "mean_magnitude": 1.136721879877973,
+        "std_magnitude": 0.5606228627201255,
+        "max_magnitude": 8.776157040727648,
+        "dynamics_score": 1.4170333112380358
+      },
+      "global_dynamics": {
+        "static_ratio": 0.22196180555555556,
+        "dynamic_ratio": 0.7780381944444444,
+        "mean_dynamic_magnitude": 5.485405769870139,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 11,
+      "static_dynamics": {
+        "mean_magnitude": 0.5680916834414868,
+        "std_magnitude": 0.44182860166654253,
+        "max_magnitude": 5.698383302156813,
+        "dynamics_score": 0.789005984274758
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06536458333333334,
+        "dynamic_ratio": 0.9346354166666666,
+        "mean_dynamic_magnitude": 5.5191245604469055,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 12,
+      "static_dynamics": {
+        "mean_magnitude": 0.9791249281402941,
+        "std_magnitude": 0.5650167198922277,
+        "max_magnitude": 5.733424725818091,
+        "dynamics_score": 1.2616332880864078
+      },
+      "global_dynamics": {
+        "static_ratio": 0.2330230034722222,
+        "dynamic_ratio": 0.7669769965277777,
+        "mean_dynamic_magnitude": 5.921823709622866,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 13,
+      "static_dynamics": {
+        "mean_magnitude": 0.9242141625386915,
+        "std_magnitude": 0.5345269452491995,
+        "max_magnitude": 5.596587488776705,
+        "dynamics_score": 1.1914776351632912
+      },
+      "global_dynamics": {
+        "static_ratio": 0.2418891059027778,
+        "dynamic_ratio": 0.7581108940972222,
+        "mean_dynamic_magnitude": 5.656517122292429,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 14,
+      "static_dynamics": {
+        "mean_magnitude": 0.5618460969023413,
+        "std_magnitude": 0.41220093643406097,
+        "max_magnitude": 5.452823271910826,
+        "dynamics_score": 0.7679465651193718
+      },
+      "global_dynamics": {
+        "static_ratio": 0.08355794270833333,
+        "dynamic_ratio": 0.9164420572916667,
+        "mean_dynamic_magnitude": 5.665434320781306,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 15,
+      "static_dynamics": {
+        "mean_magnitude": 0.6584943952454377,
+        "std_magnitude": 0.5249531826860362,
+        "max_magnitude": 5.321183214802068,
+        "dynamics_score": 0.9209709865884559
+      },
+      "global_dynamics": {
+        "static_ratio": 0.08351888020833333,
+        "dynamic_ratio": 0.9164811197916667,
+        "mean_dynamic_magnitude": 4.983486546195026,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 16,
+      "static_dynamics": {
+        "mean_magnitude": 0.5797070040970641,
+        "std_magnitude": 0.4172823205622789,
+        "max_magnitude": 5.411843482389845,
+        "dynamics_score": 0.7883481643782035
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07506727430555556,
+        "dynamic_ratio": 0.9249327256944444,
+        "mean_dynamic_magnitude": 5.297990822137853,
+        "consistency_score": 0.1468296730742531
+      }
+    },
+    {
+      "frame_index": 17,
+      "static_dynamics": {
+        "mean_magnitude": 0.6780141652539657,
+        "std_magnitude": 0.5040269242240561,
+        "max_magnitude": 5.527689153802175,
+        "dynamics_score": 0.9300276273659938
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06988823784722223,
+        "dynamic_ratio": 0.9301117621527778,
+        "mean_dynamic_magnitude": 5.131122984320252,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 18,
+      "static_dynamics": {
+        "mean_magnitude": 0.5958408862279523,
+        "std_magnitude": 0.40562749455504926,
+        "max_magnitude": 5.313982116275102,
+        "dynamics_score": 0.7986546335054769
+      },
+      "global_dynamics": {
+        "static_ratio": 0.0678146701388889,
+        "dynamic_ratio": 0.9321853298611111,
+        "mean_dynamic_magnitude": 5.662859478896723,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 19,
+      "static_dynamics": {
+        "mean_magnitude": 0.743302451454639,
+        "std_magnitude": 0.5556845674951271,
+        "max_magnitude": 5.493726548197791,
+        "dynamics_score": 1.0211447352022025
+      },
+      "global_dynamics": {
+        "static_ratio": 0.08375868055555556,
+        "dynamic_ratio": 0.9162413194444444,
+        "mean_dynamic_magnitude": 5.238943344682487,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 20,
+      "static_dynamics": {
+        "mean_magnitude": 0.5921077882768543,
+        "std_magnitude": 0.46596276755614596,
+        "max_magnitude": 5.080996661646299,
+        "dynamics_score": 0.8250891720549273
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06357096354166666,
+        "dynamic_ratio": 0.9364290364583333,
+        "mean_dynamic_magnitude": 5.370258843323554,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 21,
+      "static_dynamics": {
+        "mean_magnitude": 0.7269801937734236,
+        "std_magnitude": 0.5620443876395002,
+        "max_magnitude": 5.15671478447748,
+        "dynamics_score": 1.0080023875931736
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06651801215277778,
+        "dynamic_ratio": 0.9334819878472222,
+        "mean_dynamic_magnitude": 5.333757942528801,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 22,
+      "static_dynamics": {
+        "mean_magnitude": 0.5754153005513019,
+        "std_magnitude": 0.43656165617261555,
+        "max_magnitude": 5.186517593963911,
+        "dynamics_score": 0.7936961286376096
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07718424479166666,
+        "dynamic_ratio": 0.9228157552083334,
+        "mean_dynamic_magnitude": 5.483583139559102,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 23,
+      "static_dynamics": {
+        "mean_magnitude": 0.5557925232771639,
+        "std_magnitude": 0.4088970618110079,
+        "max_magnitude": 4.866590321903457,
+        "dynamics_score": 0.7602410541826679
+      },
+      "global_dynamics": {
+        "static_ratio": 0.080546875,
+        "dynamic_ratio": 0.919453125,
+        "mean_dynamic_magnitude": 5.255892285202161,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 24,
+      "static_dynamics": {
+        "mean_magnitude": 0.5933247192256853,
+        "std_magnitude": 0.45457787864680665,
+        "max_magnitude": 5.731404185421018,
+        "dynamics_score": 0.8206136585490886
+      },
+      "global_dynamics": {
+        "static_ratio": 0.066962890625,
+        "dynamic_ratio": 0.9330371093750001,
+        "mean_dynamic_magnitude": 5.916294764650335,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 25,
+      "static_dynamics": {
+        "mean_magnitude": 0.6050585723432469,
+        "std_magnitude": 0.4334676618389252,
+        "max_magnitude": 5.347701089809287,
+        "dynamics_score": 0.8217924032627095
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06905924479166667,
+        "dynamic_ratio": 0.9309407552083333,
+        "mean_dynamic_magnitude": 5.698309838756119,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 26,
+      "static_dynamics": {
+        "mean_magnitude": 0.5404257059724755,
+        "std_magnitude": 0.458128623350804,
+        "max_magnitude": 5.262571153607142,
+        "dynamics_score": 0.7694900176478775
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06251410590277778,
+        "dynamic_ratio": 0.9374858940972222,
+        "mean_dynamic_magnitude": 6.1234195706556545,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 27,
+      "static_dynamics": {
+        "mean_magnitude": 0.533657416741896,
+        "std_magnitude": 0.4136622623260565,
+        "max_magnitude": 4.852005475681064,
+        "dynamics_score": 0.7404885479049244
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06594184027777777,
+        "dynamic_ratio": 0.9340581597222222,
+        "mean_dynamic_magnitude": 5.892271980718553,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 28,
+      "static_dynamics": {
+        "mean_magnitude": 0.7816266382118965,
+        "std_magnitude": 0.6062652450593382,
+        "max_magnitude": 4.612738145200993,
+        "dynamics_score": 1.0847592607415657
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07573025173611111,
+        "dynamic_ratio": 0.9242697482638889,
+        "mean_dynamic_magnitude": 5.689956352680113,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 29,
+      "static_dynamics": {
+        "mean_magnitude": 0.6780484984777556,
+        "std_magnitude": 0.4969793483513326,
+        "max_magnitude": 4.31115228404116,
+        "dynamics_score": 0.9265381726534219
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07408962673611111,
+        "dynamic_ratio": 0.9259103732638889,
+        "mean_dynamic_magnitude": 5.270018455673224,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 30,
+      "static_dynamics": {
+        "mean_magnitude": 0.5776892346660467,
+        "std_magnitude": 0.45454794981440266,
+        "max_magnitude": 4.915411252316675,
+        "dynamics_score": 0.8049632095732481
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07808485243055556,
+        "dynamic_ratio": 0.9219151475694445,
+        "mean_dynamic_magnitude": 5.472237977876155,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 31,
+      "static_dynamics": {
+        "mean_magnitude": 0.5798239717817568,
+        "std_magnitude": 0.4422199957000415,
+        "max_magnitude": 5.118496163954671,
+        "dynamics_score": 0.8009339696317775
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07392903645833333,
+        "dynamic_ratio": 0.9260709635416666,
+        "mean_dynamic_magnitude": 5.5649725817057965,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 32,
+      "static_dynamics": {
+        "mean_magnitude": 0.5888901124267699,
+        "std_magnitude": 0.4906334818092914,
+        "max_magnitude": 5.396759402635312,
+        "dynamics_score": 0.8342068533314156
+      },
+      "global_dynamics": {
+        "static_ratio": 0.05914930555555555,
+        "dynamic_ratio": 0.9408506944444445,
+        "mean_dynamic_magnitude": 5.996699245927436,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 33,
+      "static_dynamics": {
+        "mean_magnitude": 0.5424235090655565,
+        "std_magnitude": 0.46982003205103484,
+        "max_magnitude": 4.782056760151464,
+        "dynamics_score": 0.7773335250910739
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06442816840277778,
+        "dynamic_ratio": 0.9355718315972222,
+        "mean_dynamic_magnitude": 5.883021683125251,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 34,
+      "static_dynamics": {
+        "mean_magnitude": 0.576510509096732,
+        "std_magnitude": 0.4484777537710244,
+        "max_magnitude": 4.421675730491536,
+        "dynamics_score": 0.8007493859822441
+      },
+      "global_dynamics": {
+        "static_ratio": 0.07397026909722222,
+        "dynamic_ratio": 0.9260297309027777,
+        "mean_dynamic_magnitude": 5.56852301735191,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 35,
+      "static_dynamics": {
+        "mean_magnitude": 0.5212727466060001,
+        "std_magnitude": 0.4558846572121183,
+        "max_magnitude": 4.753859573251111,
+        "dynamics_score": 0.7492150752120592
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06707790798611112,
+        "dynamic_ratio": 0.9329220920138889,
+        "mean_dynamic_magnitude": 5.670748206021607,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 36,
+      "static_dynamics": {
+        "mean_magnitude": 0.5810912581849722,
+        "std_magnitude": 0.4695739076318136,
+        "max_magnitude": 5.035662743701926,
+        "dynamics_score": 0.815878212000879
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06437065972222222,
+        "dynamic_ratio": 0.9356293402777778,
+        "mean_dynamic_magnitude": 5.867096017715878,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 37,
+      "static_dynamics": {
+        "mean_magnitude": 0.5715622456258466,
+        "std_magnitude": 0.4398247703689103,
+        "max_magnitude": 4.729571950667619,
+        "dynamics_score": 0.7914746308103018
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06274739583333333,
+        "dynamic_ratio": 0.9372526041666667,
+        "mean_dynamic_magnitude": 6.314674188835102,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 38,
+      "static_dynamics": {
+        "mean_magnitude": 0.5395089463216207,
+        "std_magnitude": 0.43841210578742235,
+        "max_magnitude": 4.766479607631313,
+        "dynamics_score": 0.7587149992153319
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06656358506944444,
+        "dynamic_ratio": 0.9334364149305555,
+        "mean_dynamic_magnitude": 5.96315838909392,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 39,
+      "static_dynamics": {
+        "mean_magnitude": 0.5237502006659073,
+        "std_magnitude": 0.44895432516314454,
+        "max_magnitude": 5.1585083978426916,
+        "dynamics_score": 0.7482273632474795
+      },
+      "global_dynamics": {
+        "static_ratio": 0.06490234375,
+        "dynamic_ratio": 0.93509765625,
+        "mean_dynamic_magnitude": 5.931882672432216,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 40,
+      "static_dynamics": {
+        "mean_magnitude": 1.1093120364643836,
+        "std_magnitude": 0.5308137973948792,
+        "max_magnitude": 4.922449716236111,
+        "dynamics_score": 1.3747189351618232
+      },
+      "global_dynamics": {
+        "static_ratio": 0.22909722222222223,
+        "dynamic_ratio": 0.7709027777777777,
+        "mean_dynamic_magnitude": 5.749478990003513,
+        "consistency_score": 0.0
+      }
+    },
+    {
+      "frame_index": 41,
+      "static_dynamics": {
+        "mean_magnitude": 0.5812099504211075,
+        "std_magnitude": 0.46028231131575487,
+        "max_magnitude": 5.186245829241929,
+        "dynamics_score": 0.8113511060789849
+      },
+      "global_dynamics": {
+        "static_ratio": 0.05511610243055556,
+        "dynamic_ratio": 0.9448838975694445,
+        "mean_dynamic_magnitude": 6.071983613626499,
+        "consistency_score": 0.0
+      }
+    }
+  ]
+}

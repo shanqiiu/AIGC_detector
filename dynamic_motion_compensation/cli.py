@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 CLI for global-shutter multi-view motion compensation focused on dynamic objects.
 Steps:

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 视频处理器 - 处理相机转动拍摄静态建筑的视频
 计算静态物体的动态度
@@ -131,7 +132,14 @@ class VideoProcessor:
         flows = []
         for i in tqdm(range(len(frames) - 1), desc="计算光流"):
             flow = self.raft_predictor.predict_flow(frames[i], frames[i + 1])
-            flows.append(flow.transpose(1, 2, 0))  # 转换为 (H, W, 2)
+            # 确保flow格式正确 (2, H, W) -> (H, W, 2)
+            if flow.shape[0] == 2:
+                flow = flow.transpose(1, 2, 0)  # (2, H, W) -> (H, W, 2)
+            elif len(flow.shape) == 2:
+                # 如果是2D，可能需要添加通道维度
+                print(f"警告: 帧{i}的光流形状异常: {flow.shape}")
+                continue
+            flows.append(flow)
         
         print("开始分析静态物体动态度...")
         
@@ -395,6 +403,9 @@ def batch_process_videos(processor, input_dir, output_dir, camera_fov):
     for ext in video_extensions:
         video_files.extend(glob.glob(os.path.join(input_dir, ext)))
         video_files.extend(glob.glob(os.path.join(input_dir, ext.upper())))
+    
+    # 去重（Windows系统下大小写不敏感会导致重复）
+    video_files = list(set(video_files))
     
     if not video_files:
         print(f"错误: 在 {input_dir} 中未找到视频文件")

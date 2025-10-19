@@ -1,0 +1,28 @@
+======================================================================
+批量视频处理总结
+======================================================================
+
+总视频数: 2
+成功处理: 2
+处理失败: 0
+
+======================================================================
+详细结果
+======================================================================
+
+视频: The camera orbits around. Acropolis, the camera circles around.-0
+  状态: ✓ 成功
+  帧数: 43
+  平均动态度分数: 0.998
+  平均静态区域比例: 0.354
+  时序稳定性: 0.876
+  输出目录: results/The camera orbits around. Acropolis, the camera circles around.-0
+
+视频: The camera orbits around. Bathtub, the camera circles around.-1
+  状态: ✓ 成功
+  帧数: 43
+  平均动态度分数: 0.899
+  平均静态区域比例: 0.090
+  时序稳定性: 0.834
+  输出目录: results/The camera orbits around. Bathtub, the camera circles around.-1
+

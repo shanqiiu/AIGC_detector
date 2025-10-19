@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 SE(3) utilities and camera projection helpers for global-shutter motion compensation.
 """

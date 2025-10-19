@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 统一光流估计模块
 支持多种光流算法：Farneback, TV-L1, RAFT官方模型
