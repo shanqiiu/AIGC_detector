@@ -1,5 +1,6 @@
 """
-ç®€åŒ–ç‰ˆRAFTæ¨¡å‹ï¼Œç”¨äºæ¼”ç¤ºé™æ€ç‰©ä½“åŠ¨æ€åº¦è®¡ç®—
+¼ò»¯°æRAFTÄ£ĞÍ£¬ÓÃÓÚÑİÊ¾¾²Ì¬ÎïÌå¶¯Ì¬¶È¼ÆËã
+Ö§³Ö¶àÖÖ¹âÁ÷Ëã·¨£ºFarneback, TV-L1µÈ
 """
 
 import torch
@@ -11,14 +12,50 @@ from typing import Tuple
 
 
 class SimpleRAFT:
-    """ç®€åŒ–ç‰ˆRAFTå…‰æµä¼°è®¡"""
+    """¼ò»¯°æRAFT¹âÁ÷¹À¼Æ - Ö§³Ö¶àÖÖ¹âÁ÷Ëã·¨"""
     
-    def __init__(self, device='cpu'):
+    def __init__(self, device='cpu', method='farneback'):
+        """
+        ³õÊ¼»¯¹âÁ÷¹À¼ÆÆ÷
+        
+        Args:
+            device: ¼ÆËãÉè±¸ ('cpu' »ò 'cuda')
+            method: ¹âÁ÷·½·¨
+                - 'farneback': ¿ìËÙ£¬¾«¶ÈÖĞµÈ (Ä¬ÈÏ)
+                - 'tvl1': ½ÏÂı£¬¾«¶È¸ß£¬±ß½çÇåÎú
+        """
         self.device = device
+        self.method = method
+        
+        # Èç¹ûÊ¹ÓÃTV-L1£¬´´½¨¹âÁ÷¶ÔÏó
+        if method == 'tvl1':
+            try:
+                self.tvl1 = cv2.optflow.DualTVL1OpticalFlow_create(
+                    tau=0.25,          # Ê±¼ä²½³¤
+                    lambda_=0.15,      # Êı¾İÏîÈ¨ÖØ
+                    theta=0.3,         # Æ½»¬ÏîÈ¨ÖØ  
+                    nscales=5,         # ½ğ×ÖËş²ãÊı
+                    warps=5,           # Warp´ÎÊı
+                    epsilon=0.01,      # Í£Ö¹ãĞÖµ
+                    innerIterations=30,
+                    outerIterations=10,
+                    scaleStep=0.8,
+                    gamma=0.0,
+                    useInitialFlow=False
+                )
+                print(f"? Ê¹ÓÃTV-L1¹âÁ÷Ëã·¨£¨¸ß¾«¶È£©")
+            except AttributeError:
+                print("? opencv-contrib-pythonÎ´°²×°£¬TV-L1²»¿ÉÓÃ")
+                print("  ×Ô¶¯»ØÍËµ½FarnebackËã·¨")
+                print("  °²×°ÃüÁî£ºpip install opencv-contrib-python")
+                self.method = 'farneback'
+        
+        if method == 'farneback':
+            print(f"? Ê¹ÓÃFarneback¹âÁ÷Ëã·¨£¨¿ìËÙ£©")
     
     def estimate_flow_opencv(self, image1, image2):
-        """ä½¿ç”¨OpenCVçš„å…‰æµä¼°è®¡ä½œä¸ºRAFTçš„æ›¿ä»£"""
-        # è½¬æ¢ä¸ºç°åº¦å›¾
+        """Ê¹ÓÃOpenCVµÄ¹âÁ÷¹À¼Æ×÷ÎªRAFTµÄÌæ´ú"""
+        # ×ª»»Îª»Ò¶ÈÍ¼
         if len(image1.shape) == 3:
             gray1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
         else:
@@ -29,25 +66,36 @@ class SimpleRAFT:
         else:
             gray2 = image2
         
-        # ä½¿ç”¨Farnebackå…‰æµç®—æ³•
-        flow = cv2.calcOpticalFlowFarneback(
-            gray1, gray2, None, 
-            pyr_scale=0.5, levels=3, winsize=15, 
-            iterations=3, poly_n=5, poly_sigma=1.2, flags=0
-        )
+        # ¸ù¾İÑ¡ÔñµÄ·½·¨¼ÆËã¹âÁ÷
+        if self.method == 'tvl1':
+            # TV-L1¹âÁ÷£¨±ä·Ö·½·¨£¬±ß½ç±£³ÖºÃ£¬¾«¶È¸ß£©
+            flow = self.tvl1.calc(gray1, gray2, None)
+            
+        else:  # 'farneback' »òÄ¬ÈÏ
+            # Farneback¹âÁ÷Ëã·¨£¨ËÙ¶È¿ì£¬¾«¶ÈÖĞµÈ£©
+            flow = cv2.calcOpticalFlowFarneback(
+                gray1, gray2, None, 
+                pyr_scale=0.5,     # ½ğ×ÖËşËõ·Å
+                levels=5,          # ½ğ×ÖËş²ãÊı£¨Ôö¼ÓÒÔ´¦Àí´óÎ»ÒÆ£©
+                winsize=15,        # ´°¿Ú´óĞ¡
+                iterations=3,      # Ã¿²ãµü´ú´ÎÊı
+                poly_n=7,          # ¶àÏîÊ½À©Õ¹ÁÚÓò£¨Ôö¼ÓÆ½»¬ĞÔ£©
+                poly_sigma=1.5,    # ¸ßË¹±ê×¼²î
+                flags=0
+            )
         
         return flow
     
     def predict_flow(self, image1, image2):
-        """é¢„æµ‹å…‰æµ"""
-        # ä½¿ç”¨OpenCVä¼°è®¡å…‰æµ
+        """Ô¤²â¹âÁ÷"""
+        # Ê¹ÓÃOpenCV¹À¼Æ¹âÁ÷
         flow = self.estimate_flow_opencv(image1, image2)
         
-        # è½¬æ¢ä¸ºPyTorchå¼ é‡æ ¼å¼ (2, H, W)
+        # ×ª»»ÎªPyTorchÕÅÁ¿¸ñÊ½ (2, H, W)
         if isinstance(flow, np.ndarray):
             flow_tensor = torch.from_numpy(flow.transpose(2, 0, 1)).float()
         else:
-            # å¦‚æœOpenCVè¿”å›Noneï¼Œåˆ›å»ºé›¶å…‰æµ
+            # Èç¹ûOpenCV·µ»ØNone£¬´´½¨Áã¹âÁ÷
             h, w = image1.shape[:2]
             flow_tensor = torch.zeros(2, h, w, dtype=torch.float32)
         
@@ -55,20 +103,58 @@ class SimpleRAFT:
 
 
 class SimpleRAFTPredictor:
-    """ç®€åŒ–ç‰ˆRAFTé¢„æµ‹å™¨"""
+    """¼ò»¯°æRAFTÔ¤²âÆ÷"""
     
-    def __init__(self, model_path=None, device='cpu'):
+    def __init__(self, model_path=None, device='cpu', method='farneback'):
+        """
+        ³õÊ¼»¯Ô¤²âÆ÷
+        
+        Args:
+            model_path: Ä£ĞÍÂ·¾¶£¨¼æÈİ²ÎÊı£¬´ËÊµÏÖÖĞ²»Ê¹ÓÃ£©
+            device: ¼ÆËãÉè±¸
+            method: ¹âÁ÷·½·¨
+                - 'farneback': ¿ìËÙ£¬¾«¶ÈÖĞµÈ (Ä¬ÈÏ)
+                - 'tvl1': ½ÏÂı£¬¾«¶È¸ß£¬±ß½çÇåÎú
+        
+        Ê¾Àı:
+            # Ê¹ÓÃFarneback£¨¿ìËÙ£©
+            predictor = SimpleRAFTPredictor(method='farneback')
+            
+            # Ê¹ÓÃTV-L1£¨¸ß¾«¶È£©
+            predictor = SimpleRAFTPredictor(method='tvl1')
+        """
         self.device = device
-        self.model = SimpleRAFT(device)
+        self.method = method
+        self.model = SimpleRAFT(device, method)
     
     def predict_flow(self, image1, image2):
-        """é¢„æµ‹å…‰æµ"""
+        """Ô¤²â¹âÁ÷"""
         return self.model.predict_flow(image1, image2)
     
     def predict_flow_sequence(self, images):
-        """é¢„æµ‹å›¾åƒåºåˆ—çš„å…‰æµ"""
+        """Ô¤²âÍ¼ÏñĞòÁĞµÄ¹âÁ÷"""
         flows = []
         for i in range(len(images) - 1):
             flow = self.predict_flow(images[i], images[i + 1])
             flows.append(flow)
         return flows
+
+
+if __name__ == '__main__':
+    print("=" * 60)
+    print("¼ò»¯°æRAFT¹âÁ÷Ô¤²âÆ÷ - Ê¹ÓÃÊ¾Àı")
+    print("=" * 60)
+    
+    # ·½·¨1: Ê¹ÓÃFarneback£¨Ä¬ÈÏ£©
+    print("\n·½·¨1: Farneback¹âÁ÷£¨¿ìËÙ£©")
+    predictor_fast = SimpleRAFTPredictor(method='farneback')
+    
+    # ·½·¨2: Ê¹ÓÃTV-L1£¨¸ß¾«¶È£©
+    print("\n·½·¨2: TV-L1¹âÁ÷£¨¸ß¾«¶È£©")
+    predictor_accurate = SimpleRAFTPredictor(method='tvl1')
+    
+    print("\n" + "=" * 60)
+    print("Ñ¡Ôñ½¨Òé£º")
+    print("- ¿ìËÙÔ­ĞÍ/ÑİÊ¾ ¡ú method='farneback'")
+    print("- Éú²ú»·¾³/¸ß¾«¶È ¡ú method='tvl1'")
+    print("=" * 60)
