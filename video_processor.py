@@ -17,6 +17,7 @@ import argparse
 from simple_raft import SimpleRAFTPredictor as RAFTPredictor
 from static_object_analyzer import StaticObjectDynamicsCalculator
 from dynamic_motion_compensation.camera_compensation import CameraCompensator
+from unified_dynamics_scorer import UnifiedDynamicsScorer, DynamicsClassifier
 
 
 class VideoProcessor:
@@ -53,6 +54,10 @@ class VideoProcessor:
         if camera_compensation_params is None:
             camera_compensation_params = {}
         self.camera_compensator = CameraCompensator(**camera_compensation_params) if enable_camera_compensation else None
+        
+        # 初始化统一动态度评分器
+        self.unified_scorer = UnifiedDynamicsScorer(mode='static_scene')
+        self.dynamics_classifier = DynamicsClassifier()
         
     def load_video(self, video_path: str) -> List[np.ndarray]:
         """加载视频帧"""
@@ -178,6 +183,21 @@ class VideoProcessor:
         temporal_result['camera_compensation_results'] = camera_compensation_results
         temporal_result['original_flows'] = original_flows  # 保存原始光流供可视化使用
         
+        # 计算统一动态度分数
+        print("计算统一动态度分数...")
+        unified_result = self.unified_scorer.calculate_unified_score(
+            temporal_result, self.enable_camera_compensation
+        )
+        
+        # 分类动态度
+        classification = self.dynamics_classifier.classify(
+            unified_result['unified_dynamics_score']
+        )
+        
+        # 添加到结果中
+        temporal_result['unified_dynamics'] = unified_result
+        temporal_result['dynamics_classification'] = classification
+        
         # 保存结果
         self.save_results(temporal_result, frames, flows, output_dir)
         
@@ -195,7 +215,12 @@ class VideoProcessor:
             'temporal_stats': result['temporal_stats'],
             'frame_count': len(frames),
             'flow_count': len(flows),
-            'camera_compensation_enabled': result.get('camera_compensation_enabled', False)
+            'camera_compensation_enabled': result.get('camera_compensation_enabled', False),
+            # 统一动态度分数（新增）
+            'unified_dynamics_score': result.get('unified_dynamics', {}).get('unified_dynamics_score', None),
+            'scene_type': result.get('unified_dynamics', {}).get('scene_type', None),
+            'dynamics_category': result.get('dynamics_classification', {}).get('category', None),
+            'dynamics_category_id': result.get('dynamics_classification', {}).get('category_id', None)
         }
         
         # 添加相机补偿统计信息
@@ -430,14 +455,45 @@ class VideoProcessor:
         frame_count = len(result['frame_results'])
         camera_comp_enabled = result.get('camera_compensation_enabled', False)
         
+        # 获取统一动态度信息
+        unified_dynamics = result.get('unified_dynamics', {})
+        dynamics_class = result.get('dynamics_classification', {})
+        
         report = f"""
-相机转动拍摄静态建筑视频 - 静态物体动态度分析报告
+视频动态度综合分析报告
 ================================================
 
 视频基本信息:
 - 总帧数: {frame_count}
 - 分析帧数: {len(result['frame_results'])}
 - 相机补偿: {'启用' if camera_comp_enabled else '禁用'}
+
+"""
+        
+        # 添加统一动态度评估
+        if unified_dynamics:
+            unified_score = unified_dynamics.get('unified_dynamics_score', 0)
+            scene_type = unified_dynamics.get('scene_type', 'unknown')
+            confidence = unified_dynamics.get('confidence', 0)
+            
+            report += f"""
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📊 统一动态度评估 (Unified Dynamics Score)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+综合动态度分数: {unified_score:.3f} / 1.000
+场景类型: {scene_type}
+置信度: {confidence:.1%}
+
+分类结果: {dynamics_class.get('description', 'N/A')}
+典型例子: {', '.join(dynamics_class.get('typical_examples', []))}
+
+{unified_dynamics.get('interpretation', '')}
+
+"""
+        
+        report += """
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 """
         

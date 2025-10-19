@@ -12,6 +12,10 @@
   "frame_count": 43,
   "flow_count": 42,
   "camera_compensation_enabled": true,
+  "unified_dynamics_score": 0.43890267412227835,
+  "scene_type": "static",
+  "dynamics_category": "medium_dynamic",
+  "dynamics_category_id": 2,
   "camera_compensation_stats": {
     "success_rate": 1.0,
     "successful_frames": 42,

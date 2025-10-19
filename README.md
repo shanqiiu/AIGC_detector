@@ -1,236 +1,352 @@
-# é™æ€ç‰©ä½“åŠ¨æ€åº¦åˆ†æžç³»ç»Ÿ
+# AIGCÊÓÆµ¶¯Ì¬¶ÈÆÀ¹ÀÏµÍ³
 
-æœ¬ç³»ç»Ÿä¸“é—¨ç”¨äºŽè§£å†³ç›¸æœºè½¬åŠ¨æ‹æ‘„é™æ€å»ºç­‘è§†é¢‘ä¸­RAFTå…‰æµè®¡ç®—åé«˜çš„é—®é¢˜ï¼Œé€šè¿‡åŒºåˆ†ç›¸æœºè¿åŠ¨å’ŒçœŸå®žç‰©ä½“è¿åŠ¨ï¼Œä»…è®¡ç®—é™æ€ç‰©ä½“çš„åŠ¨æ€åº¦ã€‚
+## ¸ÅÊö
 
-## é—®é¢˜èƒŒæ™¯
+Ò»¸öÍêÕûµÄÊÓÆµ¶¯Ì¬¶ÈÆÀ¹ÀÏµÍ³£¬Ö§³Ö£º
+- ? **Í³Ò»¶¯Ì¬¶ÈÆÀ·Ö**£º½«ËùÓÐÖ¸±êÕûºÏÎª0-1±ê×¼»¯·ÖÊý
+- ? **Ïà»úÔË¶¯²¹³¥**£º×Ô¶¯È¥³ýÏà»úÔË¶¯Ó°Ïì
+- ? **¶àÊÓ½ÇÖ§³Ö**£ºÊÊÓÃÓÚ¾²Ì¬³¡¾°ºÍ¶¯Ì¬³¡¾°
+- ? **×Ô¶¯³¡¾°¼ì²â**£ºÖÇÄÜÊ¶±ðÊÓÆµÀàÐÍ
 
-åœ¨ä½¿ç”¨RAFTè¿›è¡Œç›¸æœºè½¬åŠ¨æ‹æ‘„é™æ€å»ºç­‘çš„è§†é¢‘æµ‹è¯•æ—¶ï¼Œç”±äºŽç›¸æœºè¿åŠ¨ä¼šå¯¼è‡´æ•´ä¸ªåœºæ™¯äº§ç”Ÿå…‰æµï¼Œä½¿å¾—RAFTè®¡ç®—å‡ºçš„åŠ¨æ€åº¦åé«˜ã€‚æœ¬ç³»ç»Ÿé€šè¿‡ä»¥ä¸‹æŠ€æœ¯è§£å†³è¿™ä¸ªé—®é¢˜ï¼š
-
-1. **ç›¸æœºè¿åŠ¨ä¼°è®¡**: ä½¿ç”¨ç‰¹å¾åŒ¹é…å’Œå•åº”æ€§çŸ©é˜µä¼°è®¡ç›¸æœºè¿åŠ¨
-2. **è¿åŠ¨è¡¥å¿**: ä»ŽåŽŸå§‹å…‰æµä¸­å‡åŽ»ç›¸æœºè¿åŠ¨åˆ†é‡
-3. **é™æ€åŒºåŸŸæ£€æµ‹**: è¯†åˆ«åœºæ™¯ä¸­çš„é™æ€ç‰©ä½“åŒºåŸŸ
-4. **åŠ¨æ€åº¦è®¡ç®—**: ä»…é’ˆå¯¹é™æ€ç‰©ä½“è®¡ç®—çœŸå®žçš„åŠ¨æ€åº¦
-
-## ç³»ç»Ÿæž¶æž„
+### ¶¯Ì¬¶È·ÖÊýº¬Òå
 
 ```
-â”œâ”€â”€ raft_model.py              # RAFTå…‰æµä¼°è®¡æ¨¡åž‹
-â”œâ”€â”€ static_object_analyzer.py  # é™æ€ç‰©ä½“åˆ†æžæ ¸å¿ƒç®—æ³•
-â”œâ”€â”€ video_processor.py         # è§†é¢‘å¤„ç†ä¸»ç¨‹åº
-â”œâ”€â”€ test_static_dynamics.py    # æµ‹è¯•è„šæœ¬
-â”œâ”€â”€ requirements.txt           # ä¾èµ–åŒ…åˆ—è¡¨
-â””â”€â”€ README.md                 # è¯´æ˜Žæ–‡æ¡£
+0.0 ©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥ 1.0
+ ¡ü         ¡ü         ¡ü         ¡ü        ¡ü
+´¿¾²Ì¬    µÍ¶¯Ì¬    ÖÐµÈ¶¯Ì¬   ¸ß¶¯Ì¬  ¼«¸ß¶¯Ì¬
+(½¨Öþ)   (ÆìÖÄ)    (ÐÐÈË)    (ÅÜ²½)  (ÌøÎè)
 ```
 
-## å®‰è£…ä¾èµ–
+---
+
+## ¿ìËÙ¿ªÊ¼
+
+### °²×°ÒÀÀµ
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## æ ¸å¿ƒåŠŸèƒ½
-
-### 1. ç›¸æœºè¿åŠ¨ä¼°è®¡ (`CameraMotionEstimator`)
-
-- ä½¿ç”¨ORB/SIFTç‰¹å¾æ£€æµ‹å™¨æå–ç‰¹å¾ç‚¹
-- é€šè¿‡ç‰¹å¾åŒ¹é…å’ŒRANSACç®—æ³•ä¼°è®¡å•åº”æ€§çŸ©é˜µ
-- åˆ†è§£å•åº”æ€§çŸ©é˜µå¾—åˆ°ç›¸æœºè¿åŠ¨å‚æ•°
-
-### 2. é™æ€ç‰©ä½“æ£€æµ‹ (`StaticObjectDetector`)
-
-- åŸºäºŽå…‰æµå¹…åº¦é˜ˆå€¼æ£€æµ‹é™æ€åŒºåŸŸ
-- ä½¿ç”¨ç›¸æœºè¿åŠ¨è¡¥å¿æ¶ˆé™¤ç›¸æœºè¿åŠ¨å½±å“
-- ç»“åˆå›¾åƒæ¢¯åº¦ä¿¡æ¯ç»†åŒ–é™æ€åŒºåŸŸè¾¹ç•Œ
-
-### 3. åŠ¨æ€åº¦è®¡ç®— (`StaticObjectDynamicsCalculator`)
-
-- è®¡ç®—é™æ€åŒºåŸŸçš„å…‰æµç»Ÿè®¡é‡
-- æä¾›å¤šç§åŠ¨æ€åº¦æŒ‡æ ‡ï¼šå¹³å‡å¹…åº¦ã€æ ‡å‡†å·®ã€æœ€å¤§å€¼ç­‰
-- æ”¯æŒæ—¶åºåˆ†æžå’Œç¨³å®šæ€§è¯„ä¼°
-
-## ä½¿ç”¨æ–¹æ³•
-
-### å‘½ä»¤è¡Œä½¿ç”¨
+### »ù±¾Ê¹ÓÃ
 
 ```bash
-# å¤„ç†è§†é¢‘æ–‡ä»¶
-python video_processor.py -i video.mp4 -o output_dir
+# ´¦Àíµ¥¸öÊÓÆµ
+python video_processor.py -i video.mp4 -o output/
 
-# å¤„ç†å›¾åƒåºåˆ—
-python video_processor.py -i image_directory/ -o output_dir
-
-# æŒ‡å®šæ›´å¤šå‚æ•°
-python video_processor.py \
-    -i video.mp4 \
-    -o output_dir \
-    --max_frames 100 \
-    --frame_skip 2 \
-    --fov 60 \
-    --device cuda
+# ÅúÁ¿´¦Àí
+python video_processor.py -i videos/ -o results/ --batch
 ```
 
-### å‚æ•°è¯´æ˜Ž
-
-- `--input, -i`: è¾“å…¥è§†é¢‘æ–‡ä»¶æˆ–å›¾åƒç›®å½•è·¯å¾„
-- `--output, -o`: è¾“å‡ºç›®å½•è·¯å¾„ (é»˜è®¤: output)
-- `--raft_model, -m`: RAFTé¢„è®­ç»ƒæ¨¡åž‹è·¯å¾„ (å¯é€‰)
-- `--max_frames`: æœ€å¤§å¤„ç†å¸§æ•° (å¯é€‰)
-- `--frame_skip`: å¸§è·³è·ƒé—´éš” (é»˜è®¤: 1)
-- `--device`: è®¡ç®—è®¾å¤‡ cuda/cpu (é»˜è®¤: cuda)
-- `--fov`: ç›¸æœºè§†åœºè§’åº¦æ•° (é»˜è®¤: 60.0)
-
-### ç¼–ç¨‹æŽ¥å£ä½¿ç”¨
+### Python API
 
 ```python
 from video_processor import VideoProcessor
-from static_object_analyzer import StaticObjectDynamicsCalculator
 
-# åˆ›å»ºå¤„ç†å™¨
+# ´´½¨´¦ÀíÆ÷
 processor = VideoProcessor(device='cuda')
 
-# åŠ è½½è§†é¢‘
-frames = processor.load_video('video.mp4')
+# ´¦ÀíÊÓÆµ
+frames = processor.load_video("video.mp4")
+result = processor.process_video(frames, output_dir="output")
 
-# å¤„ç†å¹¶åˆ†æž
-result = processor.process_video(frames, output_dir='output')
+# »ñÈ¡Í³Ò»¶¯Ì¬¶È·ÖÊý
+score = result['unified_dynamics']['unified_dynamics_score']
+category = result['dynamics_classification']['category']
 
-# èŽ·å–ç»“æžœ
-temporal_stats = result['temporal_stats']
-print(f"å¹³å‡åŠ¨æ€åº¦åˆ†æ•°: {temporal_stats['mean_dynamics_score']:.3f}")
+print(f"¶¯Ì¬¶È: {score:.3f} - {category}")
 ```
 
-## è¾“å‡ºç»“æžœ
+---
 
-ç³»ç»Ÿä¼šåœ¨è¾“å‡ºç›®å½•ä¸­ç”Ÿæˆä»¥ä¸‹æ–‡ä»¶ï¼š
+## ºËÐÄ¹¦ÄÜ
 
-```
-output/
-â”œâ”€â”€ analysis_results.json      # æ•°å€¼åˆ†æžç»“æžœ
-â”œâ”€â”€ analysis_report.txt        # æ–‡å­—åˆ†æžæŠ¥å‘Š
-â””â”€â”€ visualizations/           # å¯è§†åŒ–ç»“æžœ
-    â”œâ”€â”€ frame_0000_analysis.png
-    â”œâ”€â”€ frame_0025_analysis.png
-    â”œâ”€â”€ temporal_dynamics.png
-    â””â”€â”€ static_ratio_changes.png
-```
+### 1. Í³Ò»¶¯Ì¬¶ÈÆÀ·Ö
 
-### ç»“æžœè§£è¯»
+ÕûºÏ5¸öÎ¬¶ÈÖ¸±ê£¬Êä³ö0-1±ê×¼»¯·ÖÊý£º
 
-#### åŠ¨æ€åº¦åˆ†æ•° (Dynamics Score)
-- **< 1.0**: é™æ€ç‰©ä½“åŠ¨æ€åº¦ä½Žï¼Œç›¸æœºè¿åŠ¨è¡¥å¿æ•ˆæžœè‰¯å¥½
-- **1.0-2.0**: åŠ¨æ€åº¦ä¸­ç­‰ï¼Œå­˜åœ¨è½»å¾®æ®‹ä½™è¿åŠ¨
-- **> 2.0**: åŠ¨æ€åº¦é«˜ï¼Œå¯èƒ½å­˜åœ¨è¡¥å¿è¯¯å·®æˆ–çœŸå®žç‰©ä½“è¿åŠ¨
+| Î¬¶È | È¨ÖØ | º¬Òå |
+|------|------|------|
+| ¹âÁ÷·ù¶È | 35% | ÔË¶¯Ç¿¶È |
+| ¿Õ¼ä¸²¸Ç | 25% | ÔË¶¯ÇøÓòÕ¼±È |
+| Ê±Ðò±ä»¯ | 20% | Ê±¼ä±ä»¯·á¸»¶È |
+| ¿Õ¼äÒ»ÖÂÐÔ | 10% | ÔË¶¯¾ùÔÈÐÔ |
+| Ïà»úÒò×Ó | 10% | ²¹³¥Ð§¹û |
 
-#### é™æ€åŒºåŸŸæ¯”ä¾‹ (Static Ratio)
-- **> 0.7**: åœºæ™¯ä¸»è¦ç”±é™æ€ç‰©ä½“ç»„æˆï¼Œé€‚åˆåˆ†æž
-- **0.5-0.7**: é™æ€å’ŒåŠ¨æ€åŒºåŸŸæ¯”ä¾‹é€‚ä¸­
-- **< 0.5**: åŠ¨æ€åŒºåŸŸè¾ƒå¤šï¼Œåˆ†æžç»“æžœå¯èƒ½ä¸å¤Ÿå‡†ç¡®
+**·ÖÀà±ê×¼**£º
+- 0.0-0.2: ´¿¾²Ì¬£¨½¨Öþ¡¢µñËÜ£©
+- 0.2-0.4: µÍ¶¯Ì¬£¨Æ®¶¯ÆìÖÄ£©
+- 0.4-0.6: ÖÐµÈ¶¯Ì¬£¨ÐÐ×ßµÄÈË£©
+- 0.6-0.8: ¸ß¶¯Ì¬£¨ÅÜ²½¡¢ÌøÎè£©
+- 0.8-1.0: ¼«¸ß¶¯Ì¬£¨¼¤ÁÒÔË¶¯£©
 
-#### æ—¶åºç¨³å®šæ€§ (Temporal Stability)
-- **> 0.8**: ç¨³å®šæ€§é«˜ï¼Œç»“æžœå¯é 
-- **0.6-0.8**: ç¨³å®šæ€§ä¸­ç­‰
-- **< 0.6**: ç¨³å®šæ€§ä½Žï¼Œç»“æžœæ³¢åŠ¨è¾ƒå¤§
+### 2. Ïà»úÔË¶¯²¹³¥
 
-## ç®—æ³•åŽŸç†
+×Ô¶¯¼ì²â²¢È¥³ýÏà»úÔË¶¯Ó°Ïì£º
+- Ê¹ÓÃÌØÕ÷Æ¥ÅäºÍRANSAC¹À¼ÆÏà»úÔË¶¯
+- ´Ó¹âÁ÷ÖÐ·ÖÀëÏà»úÔË¶¯ºÍÎïÌåÔË¶¯
+- ÊÊÓÃÓÚ»·ÈÆÅÄÉã¡¢ÊÖ³ÖÅÄÉãµÈ³¡¾°
 
-### 1. RAFTå…‰æµä¼°è®¡
+### 3. ×Ô¶¯³¡¾°¼ì²â
 
-ä½¿ç”¨æ”¹è¿›çš„RAFTç½‘ç»œè®¡ç®—å¸§é—´å…‰æµï¼š
-- ç‰¹å¾æå–ç½‘ç»œæå–å¤šå°ºåº¦ç‰¹å¾
-- ç›¸å…³æ€§è®¡ç®—æž„å»ºç›¸å…³æ€§é‡‘å­—å¡”
-- è¿­ä»£æ›´æ–°ç½‘ç»œç»†åŒ–å…‰æµé¢„æµ‹
+ÖÇÄÜÊ¶±ð³¡¾°ÀàÐÍ²¢µ÷ÕûÆÀ¹À²ßÂÔ£º
+- **¾²Ì¬³¡¾°**£¨Ïà»úÔË¶¯£©¡ú Ê¹ÓÃ²Ð²î¹âÁ÷
+- **¶¯Ì¬³¡¾°**£¨ÎïÌåÔË¶¯£©¡ú Ê¹ÓÃÔ­Ê¼¹âÁ÷
 
-### 2. ç›¸æœºè¿åŠ¨è¡¥å¿
+---
 
-```python
-# å•åº”æ€§å˜æ¢è¡¥å¿ç›¸æœºè¿åŠ¨
-transformed_coords = homography @ coords
-camera_flow = transformed_coords - original_coords
-compensated_flow = original_flow - camera_flow
-```
+## ÃüÁîÐÐ²ÎÊý
 
-### 3. é™æ€åŒºåŸŸæ£€æµ‹
-
-```python
-# åŸºäºŽå…‰æµå¹…åº¦æ£€æµ‹é™æ€åŒºåŸŸ
-flow_magnitude = sqrt(flow_xÂ² + flow_yÂ²)
-static_mask = flow_magnitude < threshold
-
-# å½¢æ€å­¦æ“ä½œåŽ»é™¤å™ªå£°
-static_mask = morphology_close(morphology_open(static_mask))
-```
-
-### 4. åŠ¨æ€åº¦è®¡ç®—
-
-```python
-# è®¡ç®—é™æ€åŒºåŸŸåŠ¨æ€åº¦
-static_flow = compensated_flow[static_mask]
-dynamics_score = mean(magnitude) + 0.5 * std(magnitude)
-```
-
-## æµ‹è¯•
-
-è¿è¡Œæµ‹è¯•è„šæœ¬éªŒè¯ç³»ç»ŸåŠŸèƒ½ï¼š
+### »ù±¾²ÎÊý
 
 ```bash
-python test_static_dynamics.py
+--input, -i          # ÊäÈëÊÓÆµ/Í¼ÏñÄ¿Â¼
+--output, -o         # Êä³öÄ¿Â¼£¨Ä¬ÈÏ: output£©
+--device             # ¼ÆËãÉè±¸ cuda/cpu£¨Ä¬ÈÏ: cuda£©
+--batch              # ÅúÁ¿´¦ÀíÄ£Ê½
 ```
 
-æµ‹è¯•åŒ…æ‹¬ï¼š
-- ç›¸æœºè¿åŠ¨è¡¥å¿æµ‹è¯•
-- é™æ€åŒºåŸŸæ£€æµ‹æµ‹è¯•  
-- åŠ¨æ€åº¦è®¡ç®—æµ‹è¯•
-- æŠ¥å‘Šç”Ÿæˆæµ‹è¯•
-- ç«¯åˆ°ç«¯åŠŸèƒ½æµ‹è¯•
+### Ïà»ú²¹³¥²ÎÊý
 
-## åº”ç”¨åœºæ™¯
+```bash
+--no-camera-compensation      # ½ûÓÃÏà»ú²¹³¥£¨Ä¬ÈÏÆôÓÃ£©
+--camera-ransac-thresh FLOAT  # RANSACãÐÖµ£¨Ä¬ÈÏ: 1.0£©
+--camera-max-features INT     # ×î´óÌØÕ÷µãÊý£¨Ä¬ÈÏ: 2000£©
+```
 
-æœ¬ç³»ç»Ÿç‰¹åˆ«é€‚ç”¨äºŽï¼š
+### ÆäËû²ÎÊý
 
-1. **å»ºç­‘ç‰©æ£€æµ‹**: ç›¸æœºç»•å»ºç­‘ç‰©è½¬åŠ¨æ‹æ‘„çš„è§†é¢‘åˆ†æž
-2. **é™æ€åœºæ™¯ç›‘æŽ§**: éœ€è¦æ£€æµ‹é™æ€åœºæ™¯ä¸­å¾®å°å˜åŒ–çš„åº”ç”¨
-3. **è§†é¢‘è´¨é‡è¯„ä¼°**: è¯„ä¼°è§†é¢‘ä¸­é™æ€å†…å®¹çš„ç¨³å®šæ€§
-4. **ç›¸æœºè¿åŠ¨åˆ†æž**: åˆ†æžå’Œè¡¥å¿ç›¸æœºè¿åŠ¨å¯¹å…‰æµè®¡ç®—çš„å½±å“
+```bash
+--max_frames INT     # ×î´ó´¦ÀíÖ¡Êý
+--frame_skip INT     # Ö¡ÌøÔ¾¼ä¸ô£¨Ä¬ÈÏ: 1£©
+--fov FLOAT          # Ïà»úÊÓ³¡½Ç¶ÈÊý£¨Ä¬ÈÏ: 60.0£©
+--no-visualize       # ½ûÓÃ¿ÉÊÓ»¯Éú³É
+```
 
-## æŠ€æœ¯ç‰¹ç‚¹
+---
 
-- **é«˜ç²¾åº¦**: é€šè¿‡ç›¸æœºè¿åŠ¨è¡¥å¿æ˜¾è‘—æé«˜é™æ€ç‰©ä½“åŠ¨æ€åº¦è®¡ç®—ç²¾åº¦
-- **é²æ£’æ€§**: æ”¯æŒå¤šç§ç‰¹å¾æ£€æµ‹å™¨å’ŒåŒ¹é…ç®—æ³•
-- **å¯è§†åŒ–**: æä¾›ä¸°å¯Œçš„å¯è§†åŒ–ç»“æžœå’Œåˆ†æžæŠ¥å‘Š
-- **çµæ´»æ€§**: æ”¯æŒè§†é¢‘æ–‡ä»¶å’Œå›¾åƒåºåˆ—è¾“å…¥
-- **å¯æ‰©å±•**: æ¨¡å—åŒ–è®¾è®¡ï¼Œæ˜“äºŽæ‰©å±•å’Œå®šåˆ¶
+## Êä³ö½á¹û
 
-## æ³¨æ„äº‹é¡¹
+### JSON½á¹û
 
-1. **ç›¸æœºæ ‡å®š**: å¦‚æžœæœ‰ç²¾ç¡®çš„ç›¸æœºå†…å‚ï¼Œå¯ä»¥æä¾›æ›´å‡†ç¡®çš„ç»“æžœ
-2. **åœºæ™¯é€‰æ‹©**: é™æ€ç‰©ä½“å æ¯”é«˜çš„åœºæ™¯åˆ†æžæ•ˆæžœæ›´å¥½
-3. **è®¡ç®—èµ„æº**: RAFTæ¨¡åž‹éœ€è¦ä¸€å®šçš„GPUè®¡ç®—èµ„æº
-4. **å‚æ•°è°ƒä¼˜**: å¯æ ¹æ®å…·ä½“åœºæ™¯è°ƒæ•´é˜ˆå€¼å‚æ•°
+```json
+{
+  "unified_dynamics_score": 0.652,
+  "scene_type": "dynamic",
+  "dynamics_category": "high_dynamic",
+  "confidence": 0.85,
+  
+  "temporal_stats": {
+    "mean_dynamics_score": 0.92,
+    "mean_static_ratio": 0.18
+  }
+}
+```
 
-## æ•…éšœæŽ’é™¤
+### ÎÄ±¾±¨¸æ
 
-### å¸¸è§é—®é¢˜
+```
+©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥
+Í³Ò»¶¯Ì¬¶ÈÆÀ¹À (Unified Dynamics Score)
+©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥©¥
 
-1. **CUDAå†…å­˜ä¸è¶³**
-   ```bash
-   # ä½¿ç”¨CPUæ¨¡å¼
-   python video_processor.py -i video.mp4 --device cpu
-   ```
+×ÛºÏ¶¯Ì¬¶È·ÖÊý: 0.652 / 1.000
+³¡¾°ÀàÐÍ: dynamic
+ÖÃÐÅ¶È: 85.0%
 
-2. **ç‰¹å¾åŒ¹é…å¤±è´¥**
-   - æ£€æŸ¥è¾“å…¥å›¾åƒè´¨é‡
-   - å°è¯•ä¸åŒçš„ç‰¹å¾æ£€æµ‹å™¨
-   - è°ƒæ•´ç‰¹å¾æ£€æµ‹å‚æ•°
+·ÖÀà½á¹û: ¸ß¶¯Ì¬³¡¾°
+µäÐÍÀý×Ó: ÅÜ²½, ÌøÎè, ÌåÓýÔË¶¯
+```
 
-3. **åŠ¨æ€åº¦å¼‚å¸¸é«˜**
-   - æ£€æŸ¥ç›¸æœºè¿åŠ¨ä¼°è®¡æ˜¯å¦å‡†ç¡®
-   - è°ƒæ•´é™æ€åŒºåŸŸæ£€æµ‹é˜ˆå€¼
-   - éªŒè¯è¾“å…¥è§†é¢‘è´¨é‡
+---
 
-## è´¡çŒ®
+## Ó¦ÓÃ³¡¾°
 
-æ¬¢è¿Žæäº¤Issueå’ŒPull Requestæ¥æ”¹è¿›ç³»ç»ŸåŠŸèƒ½ã€‚
+### 1. ÊÓÆµ·ÖÀà
 
-## è®¸å¯è¯
+```python
+if score < 0.2:
+    label = "¾²Ì¬½¨ÖþÊÓÆµ"
+elif score < 0.5:
+    label = "µÍ¶¯Ì¬ÊÓÆµ"
+else:
+    label = "¸ß¶¯Ì¬ÊÓÆµ"
+```
 
-æœ¬é¡¹ç›®é‡‡ç”¨MITè®¸å¯è¯ã€‚
+### 2. ÖÊÁ¿É¸Ñ¡
+
+```python
+# É¸Ñ¡´¿¾²Ì¬ÊÓÆµ
+static_videos = [v for v in videos if v['score'] < 0.2]
+
+# É¸Ñ¡¸ß¶¯Ì¬ÊÓÆµ
+dynamic_videos = [v for v in videos if v['score'] > 0.7]
+```
+
+### 3. Êý¾Ý¼¯±ê×¢
+
+```python
+# Ö±½ÓÊ¹ÓÃ0-1·ÖÊý×÷Îª±êÇ©
+dataset['dynamics_label'] = unified_score
+```
+
+---
+
+## ¸ß¼¶ÅäÖÃ
+
+### ×Ô¶¨ÒåÈ¨ÖØ
+
+```python
+from unified_dynamics_scorer import UnifiedDynamicsScorer
+
+scorer = UnifiedDynamicsScorer(
+    weights={
+        'flow_magnitude': 0.5,
+        'spatial_coverage': 0.3,
+        'temporal_variation': 0.1,
+        'spatial_consistency': 0.05,
+        'camera_factor': 0.05
+    }
+)
+
+processor.unified_scorer = scorer
+```
+
+### ×Ô¶¨Òå·ÖÀàãÐÖµ
+
+```python
+from unified_dynamics_scorer import DynamicsClassifier
+
+classifier = DynamicsClassifier(
+    thresholds={
+        'pure_static': 0.10,
+        'low_dynamic': 0.30,
+        'medium_dynamic': 0.60,
+        'high_dynamic': 0.80
+    }
+)
+
+processor.dynamics_classifier = classifier
+```
+
+---
+
+## ÏîÄ¿½á¹¹
+
+```
+AIGC_detector/
+©À©¤©¤ video_processor.py              # Ö÷´¦ÀíÆ÷
+©À©¤©¤ unified_dynamics_scorer.py      # Í³Ò»¶¯Ì¬¶ÈÆÀ·Ö
+©À©¤©¤ static_object_analyzer.py       # ¾²Ì¬ÎïÌå·ÖÎö
+©À©¤©¤ simple_raft.py                  # RAFT¹âÁ÷¼ÆËã
+©À©¤©¤ dynamic_motion_compensation/    # Ïà»ú²¹³¥Ä£¿é
+©¦   ©À©¤©¤ camera_compensation.py
+©¦   ©À©¤©¤ object_motion.py
+©¦   ©¸©¤©¤ se3_utils.py
+©À©¤©¤ tests/                          # ²âÊÔÎÄ¼þ
+©¦   ©À©¤©¤ test_unified_dynamics.py
+©¦   ©À©¤©¤ test_camera_compensation.py
+©¦   ©¸©¤©¤ test_static_dynamics.py
+©À©¤©¤ requirements.txt                # ÒÀÀµ
+©¸©¤©¤ README.md                       # ±¾ÎÄµµ
+```
+
+---
+
+## ²âÊÔ
+
+```bash
+# ÔËÐÐÍ³Ò»¶¯Ì¬¶È²âÊÔ
+python tests/test_unified_dynamics.py
+
+# ÔËÐÐÏà»ú²¹³¥²âÊÔ
+python tests/test_camera_compensation.py
+
+# ÔËÐÐËùÓÐ²âÊÔ
+python -m pytest tests/
+```
+
+---
+
+## ³£¼ûÎÊÌâ
+
+### Q1: ·ÖÊýÓëÔ¤ÆÚ²»·û£¿
+
+**½â¾ö·½°¸**£º
+```python
+# µ÷Õû¹éÒ»»¯ãÐÖµ
+scorer = UnifiedDynamicsScorer(
+    thresholds={'flow_mid': 8.0}
+)
+
+# »òÖ¸¶¨³¡¾°Ä£Ê½
+scorer = UnifiedDynamicsScorer(mode='static_scene')
+```
+
+### Q2: Ïà»ú²¹³¥³É¹¦ÂÊµÍ£¿
+
+**½â¾ö·½°¸**£º
+```bash
+# Ôö¼ÓÌØÕ÷µã
+--camera-max-features 3000
+
+# ·Å¿íRANSACãÐÖµ
+--camera-ransac-thresh 2.0
+```
+
+### Q3: ÈçºÎ½ûÓÃÏà»ú²¹³¥£¿
+
+```bash
+python video_processor.py -i video.mp4 -o output/ --no-camera-compensation
+```
+
+---
+
+## ¼¼ÊõÌØÐÔ
+
+- **¶àÎ¬¶ÈÈÚºÏ**£ºÕûºÏ¹âÁ÷¡¢¿Õ¼ä¡¢Ê±ÐòµÈ5¸öÎ¬¶È
+- **×ÔÊÊÓ¦È¨ÖØ**£º¸ù¾Ý³¡¾°ÀàÐÍÖÇÄÜµ÷Õû
+- **Sigmoid¹éÒ»»¯**£ºÆ½»¬Ó³Éäµ½0-1·¶Î§
+- **ÖÃÐÅ¶ÈÆÀ¹À**£ºÆÀ¹À½á¹û¿É¿¿ÐÔ
+- **Áã¶îÍâ¿ªÏú**£º»ùÓÚÏÖÓÐÊý¾Ý£¬ÎÞÐè¶îÍâ¼ÆËã
+
+---
+
+## ÒÀÀµÒªÇó
+
+- Python >= 3.7
+- PyTorch >= 1.6
+- OpenCV >= 4.0
+- NumPy, SciPy, scikit-learn
+- matplotlib, tqdm
+
+Ïê¼û `requirements.txt`
+
+---
+
+## Ðí¿ÉÖ¤
+
+MIT License
+
+---
+
+## ¸üÐÂÈÕÖ¾
+
+### v1.0 (2025-10-19)
+- ? ÐÂÔöÍ³Ò»¶¯Ì¬¶ÈÆÀ·ÖÏµÍ³
+- ? ¼¯³ÉÏà»úÔË¶¯²¹³¥
+- ? Ö§³Ö×Ô¶¯³¡¾°¼ì²â
+- ? ÍêÕûµÄ²âÊÔ¸²¸Ç
+
+---
+
+## ÁªÏµ·½Ê½
+
+ÈçÓÐÎÊÌâ»ò½¨Òé£¬»¶Ó­Ìá½» Issue¡£
+
+---
+
+**¿ìËÙ¿ªÊ¼**£º
+```bash
+python video_processor.py -i your_video.mp4 -o output/
+```
+
