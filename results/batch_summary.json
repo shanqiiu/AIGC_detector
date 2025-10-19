@@ -3,18 +3,18 @@
     "video_name": "The camera orbits around. Acropolis, the camera circles around.-0",
     "status": "success",
     "frame_count": 43,
-    "mean_dynamics_score": 0.9983365888334897,
-    "mean_static_ratio": 0.3536429398148148,
-    "temporal_stability": 0.8760511423425954,
+    "mean_dynamics_score": 0.9457442768182873,
+    "mean_static_ratio": 0.0788394665591931,
+    "temporal_stability": 0.6104216815607879,
     "output_dir": "results/The camera orbits around. Acropolis, the camera circles around.-0"
   },
   {
     "video_name": "The camera orbits around. Bathtub, the camera circles around.-1",
     "status": "success",
     "frame_count": 43,
-    "mean_dynamics_score": 0.8993230729663315,
-    "mean_static_ratio": 0.09001501012731482,
-    "temporal_stability": 0.8335621667809238,
+    "mean_dynamics_score": 1.6309035004703358,
+    "mean_static_ratio": 0.04412584738756614,
+    "temporal_stability": 0.7488910590869383,
     "output_dir": "results/The camera orbits around. Bathtub, the camera circles around.-1"
   }
 ]

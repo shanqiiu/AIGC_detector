@@ -13,16 +13,16 @@
 视频: The camera orbits around. Acropolis, the camera circles around.-0
   状态: ✓ 成功
   帧数: 43
-  平均动态度分数: 0.998
-  平均静态区域比例: 0.354
-  时序稳定性: 0.876
+  平均动态度分数: 0.946
+  平均静态区域比例: 0.079
+  时序稳定性: 0.610
   输出目录: results/The camera orbits around. Acropolis, the camera circles around.-0
 
 视频: The camera orbits around. Bathtub, the camera circles around.-1
   状态: ✓ 成功
   帧数: 43
-  平均动态度分数: 0.899
-  平均静态区域比例: 0.090
-  时序稳定性: 0.834
+  平均动态度分数: 1.631
+  平均静态区域比例: 0.044
+  时序稳定性: 0.749
   输出目录: results/The camera orbits around. Bathtub, the camera circles around.-1
 

@@ -16,6 +16,7 @@ import argparse
 
 from simple_raft import SimpleRAFTPredictor as RAFTPredictor
 from static_object_analyzer import StaticObjectDynamicsCalculator
+from dynamic_motion_compensation.camera_compensation import CameraCompensator
 
 
 class VideoProcessor:
@@ -26,7 +27,9 @@ class VideoProcessor:
                  device: str = 'cuda',
                  max_frames: Optional[int] = None,
                  frame_skip: int = 1,
-                 enable_visualization: bool = True):
+                 enable_visualization: bool = True,
+                 enable_camera_compensation: bool = True,
+                 camera_compensation_params: Optional[Dict] = None):
         """
         初始化视频处理器
         
@@ -36,12 +39,20 @@ class VideoProcessor:
             max_frames: 最大处理帧数
             frame_skip: 帧跳跃间隔
             enable_visualization: 是否生成可视化结果
+            enable_camera_compensation: 是否启用相机补偿（默认True）
+            camera_compensation_params: 相机补偿参数字典
         """
-        self.raft_predictor = RAFTPredictor(raft_model_path, device)
+        self.raft_predictor = RAFTPredictor(raft_model_path, device, method='raft')
         self.dynamics_calculator = StaticObjectDynamicsCalculator()
         self.max_frames = max_frames
         self.frame_skip = frame_skip
         self.enable_visualization = enable_visualization
+        self.enable_camera_compensation = enable_camera_compensation
+        
+        # 初始化相机补偿器
+        if camera_compensation_params is None:
+            camera_compensation_params = {}
+        self.camera_compensator = CameraCompensator(**camera_compensation_params) if enable_camera_compensation else None
         
     def load_video(self, video_path: str) -> List[np.ndarray]:
         """加载视频帧"""
@@ -129,7 +140,10 @@ class VideoProcessor:
         print("开始计算光流...")
         
         # 计算所有帧间的光流
-        flows = []
+        flows = []  # 用于分析的光流（可能是补偿后的）
+        original_flows = []  # 原始光流
+        camera_compensation_results = []  # 存储相机补偿结果
+        
         for i in tqdm(range(len(frames) - 1), desc="计算光流"):
             flow = self.raft_predictor.predict_flow(frames[i], frames[i + 1])
             # 确保flow格式正确 (2, H, W) -> (H, W, 2)
@@ -139,7 +153,18 @@ class VideoProcessor:
                 # 如果是2D，可能需要添加通道维度
                 print(f"警告: 帧{i}的光流形状异常: {flow.shape}")
                 continue
-            flows.append(flow)
+            
+            original_flows.append(flow.copy())  # 保存原始光流
+            
+            # 应用相机补偿
+            if self.enable_camera_compensation and self.camera_compensator is not None:
+                comp_result = self.camera_compensator.compensate(flow, frames[i], frames[i + 1])
+                camera_compensation_results.append(comp_result)
+                # 使用残差光流（补偿后的光流）用于分析
+                flows.append(comp_result['residual_flow'])
+            else:
+                flows.append(flow)
+                camera_compensation_results.append(None)
         
         print("开始分析静态物体动态度...")
         
@@ -147,6 +172,11 @@ class VideoProcessor:
         temporal_result = self.dynamics_calculator.calculate_temporal_dynamics(
             flows, frames, camera_matrix
         )
+        
+        # 添加相机补偿信息到结果中
+        temporal_result['camera_compensation_enabled'] = self.enable_camera_compensation
+        temporal_result['camera_compensation_results'] = camera_compensation_results
+        temporal_result['original_flows'] = original_flows  # 保存原始光流供可视化使用
         
         # 保存结果
         self.save_results(temporal_result, frames, flows, output_dir)
@@ -164,8 +194,15 @@ class VideoProcessor:
         numeric_result = {
             'temporal_stats': result['temporal_stats'],
             'frame_count': len(frames),
-            'flow_count': len(flows)
+            'flow_count': len(flows),
+            'camera_compensation_enabled': result.get('camera_compensation_enabled', False)
         }
+        
+        # 添加相机补偿统计信息
+        if result.get('camera_compensation_enabled', False):
+            camera_comp_results = result.get('camera_compensation_results', [])
+            comp_stats = self._calculate_camera_compensation_stats(camera_comp_results)
+            numeric_result['camera_compensation_stats'] = comp_stats
         
         # 添加每帧的数值结果
         numeric_result['frame_results'] = []
@@ -175,6 +212,17 @@ class VideoProcessor:
                 'static_dynamics': frame_result['static_dynamics'],
                 'global_dynamics': frame_result['global_dynamics']
             }
+            
+            # 添加相机补偿信息
+            if result.get('camera_compensation_enabled', False) and i < len(result.get('camera_compensation_results', [])):
+                comp_result = result['camera_compensation_results'][i]
+                if comp_result is not None:
+                    numeric_frame_result['camera_compensation'] = {
+                        'inliers': comp_result['inliers'],
+                        'total_matches': comp_result['total_matches'],
+                        'homography_found': comp_result['homography'] is not None
+                    }
+            
             numeric_result['frame_results'].append(numeric_frame_result)
         
         # 保存JSON结果
@@ -191,6 +239,36 @@ class VideoProcessor:
             self.save_visualizations(result, frames, flows, output_dir)
         
         print(f"结果已保存到: {output_dir}")
+    
+    def _calculate_camera_compensation_stats(self, camera_comp_results: List[Optional[Dict]]) -> Dict:
+        """计算相机补偿统计信息"""
+        if not camera_comp_results:
+            return {}
+        
+        valid_results = [r for r in camera_comp_results if r is not None and r['homography'] is not None]
+        
+        if not valid_results:
+            return {
+                'success_rate': 0.0,
+                'mean_inliers': 0.0,
+                'mean_match_ratio': 0.0
+            }
+        
+        total_frames = len(camera_comp_results)
+        successful_frames = len(valid_results)
+        
+        inliers = [r['inliers'] for r in valid_results]
+        match_ratios = [r['inliers'] / max(r['total_matches'], 1) for r in valid_results]
+        
+        return {
+            'success_rate': successful_frames / total_frames,
+            'successful_frames': successful_frames,
+            'total_frames': total_frames,
+            'mean_inliers': float(np.mean(inliers)) if inliers else 0.0,
+            'std_inliers': float(np.std(inliers)) if inliers else 0.0,
+            'mean_match_ratio': float(np.mean(match_ratios)) if match_ratios else 0.0,
+            'std_match_ratio': float(np.std(match_ratios)) if match_ratios else 0.0
+        }
     
     def save_visualizations(self, 
                            result: Dict,
@@ -220,6 +298,10 @@ class VideoProcessor:
         
         # 绘制静态区域比例变化
         self.plot_static_ratio_changes(result, os.path.join(vis_dir, 'static_ratio_changes.png'))
+        
+        # 如果启用了相机补偿，绘制补偿效果对比
+        if result.get('camera_compensation_enabled', False):
+            self.plot_camera_compensation_comparison(result, frames, os.path.join(vis_dir, 'camera_compensation_comparison.png'))
     
     def plot_temporal_dynamics(self, result: Dict, save_path: str):
         """绘制时序动态度曲线"""
@@ -260,6 +342,64 @@ class VideoProcessor:
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         plt.close()
     
+    def plot_camera_compensation_comparison(self, result: Dict, frames: List[np.ndarray], save_path: str):
+        """绘制相机补偿效果对比"""
+        original_flows = result.get('original_flows', [])
+        camera_comp_results = result.get('camera_compensation_results', [])
+        
+        if not original_flows or not camera_comp_results:
+            return
+        
+        # 选择几个关键帧进行对比
+        key_frames = [0, len(original_flows)//4, len(original_flows)//2, 3*len(original_flows)//4, len(original_flows)-1]
+        key_frames = [i for i in key_frames if i < len(original_flows) and camera_comp_results[i] is not None]
+        
+        if not key_frames:
+            return
+        
+        # 创建对比图
+        n_frames = min(3, len(key_frames))  # 最多显示3帧
+        fig, axes = plt.subplots(n_frames, 4, figsize=(20, 5*n_frames))
+        
+        if n_frames == 1:
+            axes = axes.reshape(1, -1)
+        
+        for idx, frame_idx in enumerate(key_frames[:n_frames]):
+            original_flow = original_flows[frame_idx]
+            comp_result = camera_comp_results[frame_idx]
+            
+            # 计算幅度
+            original_mag = np.sqrt(original_flow[:, :, 0]**2 + original_flow[:, :, 1]**2)
+            camera_mag = np.sqrt(comp_result['camera_flow'][:, :, 0]**2 + comp_result['camera_flow'][:, :, 1]**2)
+            residual_mag = np.sqrt(comp_result['residual_flow'][:, :, 0]**2 + comp_result['residual_flow'][:, :, 1]**2)
+            
+            # 原始帧
+            axes[idx, 0].imshow(frames[frame_idx])
+            axes[idx, 0].set_title(f'Frame {frame_idx}')
+            axes[idx, 0].axis('off')
+            
+            # 原始光流
+            im1 = axes[idx, 1].imshow(original_mag, cmap='jet', vmin=0, vmax=np.percentile(original_mag, 95))
+            axes[idx, 1].set_title(f'Original Flow\n(mean={original_mag.mean():.2f})')
+            axes[idx, 1].axis('off')
+            plt.colorbar(im1, ax=axes[idx, 1], fraction=0.046)
+            
+            # 相机光流
+            im2 = axes[idx, 2].imshow(camera_mag, cmap='jet', vmin=0, vmax=np.percentile(original_mag, 95))
+            axes[idx, 2].set_title(f'Camera Flow\n(inliers={comp_result["inliers"]})')
+            axes[idx, 2].axis('off')
+            plt.colorbar(im2, ax=axes[idx, 2], fraction=0.046)
+            
+            # 残差光流
+            im3 = axes[idx, 3].imshow(residual_mag, cmap='jet', vmin=0, vmax=np.percentile(residual_mag, 95))
+            axes[idx, 3].set_title(f'Residual Flow\n(mean={residual_mag.mean():.2f})')
+            axes[idx, 3].axis('off')
+            plt.colorbar(im3, ax=axes[idx, 3], fraction=0.046)
+        
+        plt.tight_layout()
+        plt.savefig(save_path, dpi=300, bbox_inches='tight')
+        plt.close()
+    
     def plot_static_ratio_changes(self, result: Dict, save_path: str):
         """绘制静态区域比例变化"""
         frame_results = result['frame_results']
@@ -288,6 +428,7 @@ class VideoProcessor:
         """生成视频分析报告"""
         temporal_stats = result['temporal_stats']
         frame_count = len(result['frame_results'])
+        camera_comp_enabled = result.get('camera_compensation_enabled', False)
         
         report = f"""
 相机转动拍摄静态建筑视频 - 静态物体动态度分析报告
@@ -296,8 +437,22 @@ class VideoProcessor:
 视频基本信息:
 - 总帧数: {frame_count}
 - 分析帧数: {len(result['frame_results'])}
+- 相机补偿: {'启用' if camera_comp_enabled else '禁用'}
 
-时序动态度统计:
+"""
+        
+        # 添加相机补偿统计
+        if camera_comp_enabled and 'camera_compensation_results' in result:
+            comp_stats = self._calculate_camera_compensation_stats(result['camera_compensation_results'])
+            if comp_stats:
+                report += f"""相机运动补偿统计:
+- 成功率: {comp_stats['success_rate']:.1%} ({comp_stats['successful_frames']}/{comp_stats['total_frames']})
+- 平均内点数: {comp_stats['mean_inliers']:.1f} ± {comp_stats['std_inliers']:.1f}
+- 平均匹配率: {comp_stats['mean_match_ratio']:.1%} ± {comp_stats['std_match_ratio']:.1%}
+
+"""
+        
+        report += f"""时序动态度统计:
 - 平均动态度分数: {temporal_stats['mean_dynamics_score']:.3f}
 - 动态度分数标准差: {temporal_stats['std_dynamics_score']:.3f}
 - 最大动态度分数: {temporal_stats['max_dynamics_score']:.3f}
@@ -477,7 +632,7 @@ def main():
                        help='输入视频文件、图像目录或视频目录路径（批量模式）')
     parser.add_argument('--output', '-o', default='output',
                        help='输出目录路径')
-    parser.add_argument('--raft_model', '-m', default=None,
+    parser.add_argument('--raft_model', '-m', default="pretrained_models/raft-things.pth",
                        help='RAFT模型路径')
     parser.add_argument('--max_frames', type=int, default=None,
                        help='最大处理帧数')
@@ -491,9 +646,21 @@ def main():
                        help='批量处理模式：处理输入目录下的所有视频')
     parser.add_argument('--no-visualize', dest='visualize', action='store_false',
                        help='禁用可视化生成（加快处理速度）')
-    parser.set_defaults(visualize=True)
+    parser.add_argument('--no-camera-compensation', dest='camera_compensation', action='store_false',
+                       help='禁用相机补偿（默认启用）')
+    parser.add_argument('--camera-ransac-thresh', type=float, default=1.0,
+                       help='相机补偿RANSAC阈值（像素）')
+    parser.add_argument('--camera-max-features', type=int, default=2000,
+                       help='相机补偿最大特征点数')
+    parser.set_defaults(visualize=True, camera_compensation=True)
     
     args = parser.parse_args()
+    
+    # 准备相机补偿参数
+    camera_compensation_params = {
+        'ransac_thresh': args.camera_ransac_thresh,
+        'max_features': args.camera_max_features
+    }
     
     # 创建视频处理器
     processor = VideoProcessor(
@@ -501,7 +668,9 @@ def main():
         device=args.device,
         max_frames=args.max_frames,
         frame_skip=args.frame_skip,
-        enable_visualization=args.visualize
+        enable_visualization=args.visualize,
+        enable_camera_compensation=args.camera_compensation,
+        camera_compensation_params=camera_compensation_params
     )
     
     # 批量处理模式
