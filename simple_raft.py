@@ -1,61 +1,190 @@
 """
-¼ò»¯°æRAFTÄ£ĞÍ£¬ÓÃÓÚÑİÊ¾¾²Ì¬ÎïÌå¶¯Ì¬¶È¼ÆËã
-Ö§³Ö¶àÖÖ¹âÁ÷Ëã·¨£ºFarneback, TV-L1µÈ
+ç»Ÿä¸€å…‰æµä¼°è®¡æ¨¡å—
+æ”¯æŒå¤šç§å…‰æµç®—æ³•ï¼šFarneback, TV-L1, RAFTå®˜æ–¹æ¨¡å‹
+
+ä½¿ç”¨ç¤ºä¾‹:
+    # å¿«é€Ÿ - Farneback
+    predictor = SimpleRAFTPredictor(method='farneback')
+    
+    # é«˜ç²¾åº¦ - TV-L1
+    predictor = SimpleRAFTPredictor(method='tvl1')
+    
+    # æœ€é«˜ç²¾åº¦ - RAFTå®˜æ–¹
+    predictor = SimpleRAFTPredictor(
+        method='raft',
+        model_path='pretrained_models/raft-things.pth'
+    )
 """
 
+import sys
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import numpy as np
 import cv2
-from typing import Tuple
+from pathlib import Path
+from typing import Tuple, List, Optional
 
 
 class SimpleRAFT:
-    """¼ò»¯°æRAFT¹âÁ÷¹À¼Æ - Ö§³Ö¶àÖÖ¹âÁ÷Ëã·¨"""
+    """ç»Ÿä¸€å…‰æµä¼°è®¡å™¨ - æ”¯æŒ Farneback, TV-L1, RAFT"""
     
-    def __init__(self, device='cpu', method='farneback'):
+    def __init__(self, device='cpu', method='farneback', model_path=None):
         """
-        ³õÊ¼»¯¹âÁ÷¹À¼ÆÆ÷
+        åˆå§‹åŒ–å…‰æµä¼°è®¡å™¨
         
         Args:
-            device: ¼ÆËãÉè±¸ ('cpu' »ò 'cuda')
-            method: ¹âÁ÷·½·¨
-                - 'farneback': ¿ìËÙ£¬¾«¶ÈÖĞµÈ (Ä¬ÈÏ)
-                - 'tvl1': ½ÏÂı£¬¾«¶È¸ß£¬±ß½çÇåÎú
+            device: è®¡ç®—è®¾å¤‡ ('cpu' æˆ– 'cuda')
+            method: å…‰æµæ–¹æ³•
+                - 'farneback': å¿«é€Ÿï¼Œç²¾åº¦ä¸­ç­‰ (é»˜è®¤ï¼ŒOpenCVå†…ç½®)
+                - 'tvl1': è¾ƒæ…¢ï¼Œç²¾åº¦é«˜ï¼Œè¾¹ç•Œæ¸…æ™° (éœ€è¦ opencv-contrib-python)
+                - 'raft': æœ€é«˜ç²¾åº¦ (éœ€è¦æ¨¡å‹æ–‡ä»¶å’Œ third_party/RAFT)
+            model_path: RAFTæ¨¡å‹è·¯å¾„ (ä»…å½“ method='raft' æ—¶ä½¿ç”¨)
         """
-        self.device = device
+        self.device = device if torch.cuda.is_available() else 'cpu'
         self.method = method
+        self.model_path = model_path
+        self.raft_model = None
         
-        # Èç¹ûÊ¹ÓÃTV-L1£¬´´½¨¹âÁ÷¶ÔÏó
+        # åˆå§‹åŒ–ä¸åŒçš„å…‰æµæ–¹æ³•
         if method == 'tvl1':
-            try:
-                self.tvl1 = cv2.optflow.DualTVL1OpticalFlow_create(
-                    tau=0.25,          # Ê±¼ä²½³¤
-                    lambda_=0.15,      # Êı¾İÏîÈ¨ÖØ
-                    theta=0.3,         # Æ½»¬ÏîÈ¨ÖØ  
-                    nscales=5,         # ½ğ×ÖËş²ãÊı
-                    warps=5,           # Warp´ÎÊı
-                    epsilon=0.01,      # Í£Ö¹ãĞÖµ
-                    innerIterations=30,
-                    outerIterations=10,
-                    scaleStep=0.8,
-                    gamma=0.0,
-                    useInitialFlow=False
-                )
-                print(f"? Ê¹ÓÃTV-L1¹âÁ÷Ëã·¨£¨¸ß¾«¶È£©")
-            except AttributeError:
-                print("? opencv-contrib-pythonÎ´°²×°£¬TV-L1²»¿ÉÓÃ")
-                print("  ×Ô¶¯»ØÍËµ½FarnebackËã·¨")
-                print("  °²×°ÃüÁî£ºpip install opencv-contrib-python")
-                self.method = 'farneback'
-        
-        if method == 'farneback':
-            print(f"? Ê¹ÓÃFarneback¹âÁ÷Ëã·¨£¨¿ìËÙ£©")
+            self._init_tvl1()
+        elif method == 'raft':
+            self._init_raft()
+        elif method == 'farneback':
+            print(f"ä½¿ç”¨Farnebackå…‰æµç®—æ³•ï¼ˆå¿«é€Ÿï¼‰")
+        else:
+            print(f"è­¦å‘Š: æœªçŸ¥æ–¹æ³• '{method}'ï¼Œä½¿ç”¨é»˜è®¤Farneback")
+            self.method = 'farneback'
     
-    def estimate_flow_opencv(self, image1, image2):
-        """Ê¹ÓÃOpenCVµÄ¹âÁ÷¹À¼Æ×÷ÎªRAFTµÄÌæ´ú"""
-        # ×ª»»Îª»Ò¶ÈÍ¼
+    def _init_tvl1(self):
+        """åˆå§‹åŒ–TV-L1å…‰æµ"""
+        try:
+            # ä½¿ç”¨é»˜è®¤å‚æ•°åˆ›å»ºï¼Œé¿å…ä¸åŒOpenCVç‰ˆæœ¬çš„å‚æ•°åç§°å·®å¼‚
+            self.tvl1 = cv2.optflow.DualTVL1OpticalFlow_create()
+            # å¯ä»¥è®¾ç½®çš„é€šç”¨å‚æ•°
+            self.tvl1.setTau(0.25)
+            self.tvl1.setLambda(0.15)
+            self.tvl1.setTheta(0.3)
+            self.tvl1.setScalesNumber(5)
+            self.tvl1.setWarpingsNumber(5)
+            self.tvl1.setEpsilon(0.01)
+            print(f"ä½¿ç”¨TV-L1å…‰æµç®—æ³•ï¼ˆé«˜ç²¾åº¦ï¼‰")
+        except AttributeError:
+            print("é”™è¯¯: opencv-contrib-pythonæœªå®‰è£…ï¼ŒTV-L1ä¸å¯ç”¨")
+            print("  å®‰è£…å‘½ä»¤: pip install opencv-contrib-python")
+            print("  è‡ªåŠ¨å›é€€åˆ°Farnebackç®—æ³•")
+            self.method = 'farneback'
+    
+    def _init_raft(self):
+        """åˆå§‹åŒ–RAFTå®˜æ–¹æ¨¡å‹"""
+        if not self.model_path or not Path(self.model_path).exists():
+            print(f"é”™è¯¯: RAFTæ¨¡å‹æ–‡ä»¶ä¸å­˜åœ¨: {self.model_path}")
+            print("  è‡ªåŠ¨å›é€€åˆ°Farnebackç®—æ³•")
+            self.method = 'farneback'
+            return
+        
+        try:
+            # æ·»åŠ RAFTå®˜æ–¹ä»£ç è·¯å¾„
+            raft_core_path = Path(__file__).parent / 'third_party' / 'RAFT' / 'core'
+            if not raft_core_path.exists():
+                raft_core_path = Path(__file__).parent.parent / 'third_party' / 'RAFT' / 'core'
+            
+            if not raft_core_path.exists():
+                raise FileNotFoundError("third_party/RAFT/core ç›®å½•ä¸å­˜åœ¨")
+            
+            sys.path.insert(0, str(raft_core_path))
+            
+            # å¯¼å…¥RAFT
+            from raft import RAFT  # type: ignore
+            import argparse
+            
+            # åˆ›å»ºargså¯¹è±¡
+            args = argparse.Namespace()
+            args.small = False
+            args.mixed_precision = False
+            args.alternate_corr = False
+            args.dropout = 0
+            args.corr_levels = 4
+            args.corr_radius = 4
+            
+            self.raft_model = RAFT(args)
+            
+            # åŠ è½½é¢„è®­ç»ƒæƒé‡
+            state_dict = torch.load(self.model_path, map_location=self.device)
+            
+            # å¤„ç†å¯èƒ½çš„state_dictåŒ…è£…
+            if 'state_dict' in state_dict:
+                state_dict = state_dict['state_dict']
+            elif 'model' in state_dict:
+                state_dict = state_dict['model']
+            
+            # ç§»é™¤å¯èƒ½çš„module.å‰ç¼€
+            new_state_dict = {}
+            for k, v in state_dict.items():
+                name = k.replace('module.', '')
+                new_state_dict[name] = v
+            
+            self.raft_model.load_state_dict(new_state_dict, strict=False)
+            self.raft_model.to(self.device)
+            self.raft_model.eval()
+            
+            print(f"æˆåŠŸåŠ è½½RAFTå®˜æ–¹æ¨¡å‹: {self.model_path}")
+            
+        except Exception as e:
+            print(f"é”™è¯¯: åŠ è½½RAFTæ¨¡å‹å¤±è´¥: {e}")
+            print("  è‡ªåŠ¨å›é€€åˆ°Farnebackç®—æ³•")
+            self.method = 'farneback'
+    
+    def predict_flow(self, image1, image2):
+        """
+        é¢„æµ‹å…‰æµ
+        
+        Args:
+            image1: ç¬¬ä¸€å¸§å›¾åƒ (H, W, 3) numpyæ•°ç»„ï¼ŒRGBæ ¼å¼ï¼Œ0-255
+            image2: ç¬¬äºŒå¸§å›¾åƒ (H, W, 3) numpyæ•°ç»„ï¼ŒRGBæ ¼å¼ï¼Œ0-255
+            
+        Returns:
+            flow: å…‰æµ (2, H, W) numpyæ•°ç»„
+        """
+        if self.method == 'raft' and self.raft_model is not None:
+            return self._predict_flow_raft(image1, image2)
+        else:
+            return self._predict_flow_opencv(image1, image2)
+    
+    def _predict_flow_raft(self, image1, image2):
+        """ä½¿ç”¨RAFTæ¨¡å‹é¢„æµ‹å…‰æµ"""
+        with torch.no_grad():
+            # é¢„å¤„ç†
+            img1 = self._preprocess_image_raft(image1)
+            img2 = self._preprocess_image_raft(image2)
+            
+            # é¢„æµ‹
+            _, flow_up = self.raft_model(img1, img2, iters=20, test_mode=True)
+            
+            # è½¬æ¢ä¸ºnumpy (2, H, W)
+            flow = flow_up[0].cpu().numpy()
+            return flow
+    
+    def _preprocess_image_raft(self, img):
+        """é¢„å¤„ç†å›¾åƒä¸ºRAFTè¾“å…¥æ ¼å¼"""
+        # è½¬æ¢ä¸ºtensor: (H, W, 3) -> (1, 3, H, W)
+        img_tensor = torch.from_numpy(img).permute(2, 0, 1).float()
+        img_tensor = img_tensor.unsqueeze(0)
+        
+        # Paddingåˆ°8çš„å€æ•°
+        _, _, h, w = img_tensor.shape
+        pad_h = (8 - h % 8) % 8
+        pad_w = (8 - w % 8) % 8
+        
+        if pad_h > 0 or pad_w > 0:
+            img_tensor = F.pad(img_tensor, (0, pad_w, 0, pad_h), mode='replicate')
+        
+        return img_tensor.to(self.device)
+    
+    def _predict_flow_opencv(self, image1, image2):
+        """ä½¿ç”¨OpenCVé¢„æµ‹å…‰æµ"""
+        # è½¬æ¢ä¸ºç°åº¦å›¾
         if len(image1.shape) == 3:
             gray1 = cv2.cvtColor(image1, cv2.COLOR_RGB2GRAY)
         else:
@@ -66,36 +195,28 @@ class SimpleRAFT:
         else:
             gray2 = image2
         
-        # ¸ù¾İÑ¡ÔñµÄ·½·¨¼ÆËã¹âÁ÷
+        # æ ¹æ®é€‰æ‹©çš„æ–¹æ³•è®¡ç®—å…‰æµ
         if self.method == 'tvl1':
-            # TV-L1¹âÁ÷£¨±ä·Ö·½·¨£¬±ß½ç±£³ÖºÃ£¬¾«¶È¸ß£©
+            # TV-L1å…‰æµï¼ˆå˜åˆ†æ–¹æ³•ï¼Œè¾¹ç•Œä¿æŒå¥½ï¼Œç²¾åº¦é«˜ï¼‰
             flow = self.tvl1.calc(gray1, gray2, None)
-            
-        else:  # 'farneback' »òÄ¬ÈÏ
-            # Farneback¹âÁ÷Ëã·¨£¨ËÙ¶È¿ì£¬¾«¶ÈÖĞµÈ£©
+        else:  # 'farneback' æˆ–é»˜è®¤
+            # Farnebackå…‰æµç®—æ³•ï¼ˆé€Ÿåº¦å¿«ï¼Œç²¾åº¦ä¸­ç­‰ï¼‰
             flow = cv2.calcOpticalFlowFarneback(
                 gray1, gray2, None, 
-                pyr_scale=0.5,     # ½ğ×ÖËşËõ·Å
-                levels=5,          # ½ğ×ÖËş²ãÊı£¨Ôö¼ÓÒÔ´¦Àí´óÎ»ÒÆ£©
-                winsize=15,        # ´°¿Ú´óĞ¡
-                iterations=3,      # Ã¿²ãµü´ú´ÎÊı
-                poly_n=7,          # ¶àÏîÊ½À©Õ¹ÁÚÓò£¨Ôö¼ÓÆ½»¬ĞÔ£©
-                poly_sigma=1.5,    # ¸ßË¹±ê×¼²î
+                pyr_scale=0.5,     # é‡‘å­—å¡”ç¼©æ”¾
+                levels=5,          # é‡‘å­—å¡”å±‚æ•°ï¼ˆå¢åŠ ä»¥å¤„ç†å¤§ä½ç§»ï¼‰
+                winsize=15,        # çª—å£å¤§å°
+                iterations=3,      # æ¯å±‚è¿­ä»£æ¬¡æ•°
+                poly_n=7,          # å¤šé¡¹å¼æ‰©å±•é‚»åŸŸï¼ˆå¢åŠ å¹³æ»‘æ€§ï¼‰
+                poly_sigma=1.5,    # é«˜æ–¯æ ‡å‡†å·®
                 flags=0
             )
         
-        return flow
-    
-    def predict_flow(self, image1, image2):
-        """Ô¤²â¹âÁ÷"""
-        # Ê¹ÓÃOpenCV¹À¼Æ¹âÁ÷
-        flow = self.estimate_flow_opencv(image1, image2)
-        
-        # ×ª»»ÎªPyTorchÕÅÁ¿¸ñÊ½ (2, H, W)
+        # è½¬æ¢ä¸ºPyTorchå¼ é‡æ ¼å¼ (2, H, W)
         if isinstance(flow, np.ndarray):
             flow_tensor = torch.from_numpy(flow.transpose(2, 0, 1)).float()
         else:
-            # Èç¹ûOpenCV·µ»ØNone£¬´´½¨Áã¹âÁ÷
+            # å¦‚æœOpenCVè¿”å›Noneï¼Œåˆ›å»ºé›¶å…‰æµ
             h, w = image1.shape[:2]
             flow_tensor = torch.zeros(2, h, w, dtype=torch.float32)
         
@@ -103,36 +224,61 @@ class SimpleRAFT:
 
 
 class SimpleRAFTPredictor:
-    """¼ò»¯°æRAFTÔ¤²âÆ÷"""
+    """ç»Ÿä¸€å…‰æµé¢„æµ‹å™¨æ¥å£"""
     
     def __init__(self, model_path=None, device='cpu', method='farneback'):
         """
-        ³õÊ¼»¯Ô¤²âÆ÷
+        åˆå§‹åŒ–é¢„æµ‹å™¨
         
         Args:
-            model_path: Ä£ĞÍÂ·¾¶£¨¼æÈİ²ÎÊı£¬´ËÊµÏÖÖĞ²»Ê¹ÓÃ£©
-            device: ¼ÆËãÉè±¸
-            method: ¹âÁ÷·½·¨
-                - 'farneback': ¿ìËÙ£¬¾«¶ÈÖĞµÈ (Ä¬ÈÏ)
-                - 'tvl1': ½ÏÂı£¬¾«¶È¸ß£¬±ß½çÇåÎú
+            model_path: æ¨¡å‹è·¯å¾„ï¼ˆä»…å½“ method='raft' æ—¶éœ€è¦ï¼‰
+            device: è®¡ç®—è®¾å¤‡ ('cpu' æˆ– 'cuda')
+            method: å…‰æµæ–¹æ³•
+                - 'farneback': å¿«é€Ÿï¼Œç²¾åº¦ä¸­ç­‰ (é»˜è®¤)
+                - 'tvl1': è¾ƒæ…¢ï¼Œç²¾åº¦é«˜ï¼Œè¾¹ç•Œæ¸…æ™°
+                - 'raft': æœ€é«˜ç²¾åº¦ï¼ˆéœ€è¦æ¨¡å‹æ–‡ä»¶ï¼‰
         
-        Ê¾Àı:
-            # Ê¹ÓÃFarneback£¨¿ìËÙ£©
+        ç¤ºä¾‹:
+            # ä½¿ç”¨Farnebackï¼ˆå¿«é€Ÿï¼Œé»˜è®¤ï¼‰
             predictor = SimpleRAFTPredictor(method='farneback')
             
-            # Ê¹ÓÃTV-L1£¨¸ß¾«¶È£©
+            # ä½¿ç”¨TV-L1ï¼ˆé«˜ç²¾åº¦ï¼‰
             predictor = SimpleRAFTPredictor(method='tvl1')
+            
+            # ä½¿ç”¨RAFTå®˜æ–¹æ¨¡å‹ï¼ˆæœ€é«˜ç²¾åº¦ï¼‰
+            predictor = SimpleRAFTPredictor(
+                method='raft',
+                model_path='pretrained_models/raft-things.pth',
+                device='cuda'
+            )
         """
         self.device = device
         self.method = method
-        self.model = SimpleRAFT(device, method)
+        self.model = SimpleRAFT(device, method, model_path)
     
     def predict_flow(self, image1, image2):
-        """Ô¤²â¹âÁ÷"""
+        """
+        é¢„æµ‹å…‰æµ
+        
+        Args:
+            image1: ç¬¬ä¸€å¸§å›¾åƒ (H, W, 3) numpyæ•°ç»„
+            image2: ç¬¬äºŒå¸§å›¾åƒ (H, W, 3) numpyæ•°ç»„
+            
+        Returns:
+            flow: å…‰æµ (2, H, W) numpyæ•°ç»„
+        """
         return self.model.predict_flow(image1, image2)
     
     def predict_flow_sequence(self, images):
-        """Ô¤²âÍ¼ÏñĞòÁĞµÄ¹âÁ÷"""
+        """
+        é¢„æµ‹å›¾åƒåºåˆ—çš„å…‰æµ
+        
+        Args:
+            images: å›¾åƒåˆ—è¡¨ï¼Œæ¯ä¸ªå›¾åƒä¸º (H, W, 3) numpyæ•°ç»„
+            
+        Returns:
+            flows: å…‰æµåˆ—è¡¨ï¼Œæ¯ä¸ªå…‰æµä¸º (2, H, W) numpyæ•°ç»„
+        """
         flows = []
         for i in range(len(images) - 1):
             flow = self.predict_flow(images[i], images[i + 1])
@@ -141,20 +287,37 @@ class SimpleRAFTPredictor:
 
 
 if __name__ == '__main__':
-    print("=" * 60)
-    print("¼ò»¯°æRAFT¹âÁ÷Ô¤²âÆ÷ - Ê¹ÓÃÊ¾Àı")
-    print("=" * 60)
+    print("=" * 70)
+    print("ç»Ÿä¸€å…‰æµé¢„æµ‹å™¨ - ä½¿ç”¨ç¤ºä¾‹")
+    print("=" * 70)
     
-    # ·½·¨1: Ê¹ÓÃFarneback£¨Ä¬ÈÏ£©
-    print("\n·½·¨1: Farneback¹âÁ÷£¨¿ìËÙ£©")
+    # æ–¹æ³•1: ä½¿ç”¨Farnebackï¼ˆé»˜è®¤ï¼Œæœ€å¿«ï¼‰
+    print("\næ–¹æ³•1: Farnebackå…‰æµï¼ˆå¿«é€Ÿï¼ŒOpenCVå†…ç½®ï¼‰")
     predictor_fast = SimpleRAFTPredictor(method='farneback')
     
-    # ·½·¨2: Ê¹ÓÃTV-L1£¨¸ß¾«¶È£©
-    print("\n·½·¨2: TV-L1¹âÁ÷£¨¸ß¾«¶È£©")
+    # æ–¹æ³•2: ä½¿ç”¨TV-L1ï¼ˆé«˜ç²¾åº¦ï¼‰
+    print("\næ–¹æ³•2: TV-L1å…‰æµï¼ˆé«˜ç²¾åº¦ï¼Œéœ€è¦opencv-contrib-pythonï¼‰")
     predictor_accurate = SimpleRAFTPredictor(method='tvl1')
     
-    print("\n" + "=" * 60)
-    print("Ñ¡Ôñ½¨Òé£º")
-    print("- ¿ìËÙÔ­ĞÍ/ÑİÊ¾ ¡ú method='farneback'")
-    print("- Éú²ú»·¾³/¸ß¾«¶È ¡ú method='tvl1'")
-    print("=" * 60)
+    # æ–¹æ³•3: ä½¿ç”¨RAFTå®˜æ–¹æ¨¡å‹ï¼ˆæœ€é«˜ç²¾åº¦ï¼‰
+    print("\næ–¹æ³•3: RAFTå®˜æ–¹æ¨¡å‹ï¼ˆæœ€é«˜ç²¾åº¦ï¼Œéœ€è¦æ¨¡å‹æ–‡ä»¶ï¼‰")
+    model_path = 'pretrained_models/raft-things.pth'
+    if Path(model_path).exists():
+        predictor_best = SimpleRAFTPredictor(
+            method='raft',
+            model_path=model_path,
+            device='cuda' if torch.cuda.is_available() else 'cpu'
+        )
+    else:
+        print(f"  æ¨¡å‹æ–‡ä»¶ä¸å­˜åœ¨: {model_path}")
+        print("  è¯·ä¸‹è½½RAFTé¢„è®­ç»ƒæƒé‡:")
+        print("  - è®¿é—®: https://github.com/princeton-vl/RAFT")
+        print("  - ä¸‹è½½: raft-things.pth")
+        print("  - æ”¾ç½®åˆ°: pretrained_models/")
+    
+    print("\n" + "=" * 70)
+    print("é€‰æ‹©å»ºè®®ï¼š")
+    print("  å¿«é€ŸåŸå‹/æ¼”ç¤º        â†’ method='farneback'")
+    print("  ç”Ÿäº§ç¯å¢ƒ/é«˜ç²¾åº¦      â†’ method='tvl1'")
+    print("  ç ”ç©¶/æè‡´ç²¾åº¦        â†’ method='raft'")
+    print("=" * 70)

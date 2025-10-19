@@ -13,10 +13,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import argparse
 
-try:
-    from raft_model import RAFTPredictor
-except ImportError:
-    from simple_raft import SimpleRAFTPredictor as RAFTPredictor
+from simple_raft import SimpleRAFTPredictor as RAFTPredictor
 from static_object_analyzer import StaticObjectDynamicsCalculator
 
 
@@ -27,7 +24,8 @@ class VideoProcessor:
                  raft_model_path: Optional[str] = None,
                  device: str = 'cuda',
                  max_frames: Optional[int] = None,
-                 frame_skip: int = 1):
+                 frame_skip: int = 1,
+                 enable_visualization: bool = True):
         """
         初始化视频处理器
         
@@ -36,11 +34,13 @@ class VideoProcessor:
             device: 计算设备
             max_frames: 最大处理帧数
             frame_skip: 帧跳跃间隔
+            enable_visualization: 是否生成可视化结果
         """
         self.raft_predictor = RAFTPredictor(raft_model_path, device)
         self.dynamics_calculator = StaticObjectDynamicsCalculator()
         self.max_frames = max_frames
         self.frame_skip = frame_skip
+        self.enable_visualization = enable_visualization
         
     def load_video(self, video_path: str) -> List[np.ndarray]:
         """加载视频帧"""
@@ -178,8 +178,9 @@ class VideoProcessor:
         with open(os.path.join(output_dir, 'analysis_report.txt'), 'w', encoding='utf-8') as f:
             f.write(report)
         
-        # 保存可视化结果
-        self.save_visualizations(result, frames, flows, output_dir)
+        # 保存可视化结果（如果启用）
+        if self.enable_visualization:
+            self.save_visualizations(result, frames, flows, output_dir)
         
         print(f"结果已保存到: {output_dir}")
     
@@ -347,11 +348,122 @@ class VideoProcessor:
         return report
 
 
+def process_single_video(processor, video_path, output_dir, camera_fov):
+    """处理单个视频"""
+    video_name = os.path.splitext(os.path.basename(video_path))[0]
+    video_output_dir = os.path.join(output_dir, video_name)
+    
+    print(f"\n{'='*70}")
+    print(f"处理视频: {video_name}")
+    print(f"{'='*70}")
+    
+    try:
+        # 加载视频
+        frames = processor.load_video(video_path)
+        
+        # 估计相机内参
+        camera_matrix = processor.estimate_camera_matrix(frames[0].shape, camera_fov)
+        
+        # 处理视频
+        result = processor.process_video(frames, camera_matrix, video_output_dir)
+        
+        # 返回简要结果
+        temporal_stats = result['temporal_stats']
+        return {
+            'video_name': video_name,
+            'status': 'success',
+            'frame_count': len(frames),
+            'mean_dynamics_score': temporal_stats['mean_dynamics_score'],
+            'mean_static_ratio': temporal_stats['mean_static_ratio'],
+            'temporal_stability': temporal_stats['temporal_stability'],
+            'output_dir': video_output_dir
+        }
+    except Exception as e:
+        print(f"错误: 处理视频失败 - {e}")
+        return {
+            'video_name': video_name,
+            'status': 'failed',
+            'error': str(e)
+        }
+
+
+def batch_process_videos(processor, input_dir, output_dir, camera_fov):
+    """批量处理目录下的所有视频"""
+    # 查找所有视频文件
+    video_extensions = ['*.mp4', '*.avi', '*.mov', '*.mkv', '*.flv', '*.wmv']
+    video_files = []
+    for ext in video_extensions:
+        video_files.extend(glob.glob(os.path.join(input_dir, ext)))
+        video_files.extend(glob.glob(os.path.join(input_dir, ext.upper())))
+    
+    if not video_files:
+        print(f"错误: 在 {input_dir} 中未找到视频文件")
+        return []
+    
+    video_files.sort()
+    print(f"\n找到 {len(video_files)} 个视频文件")
+    
+    # 处理每个视频
+    results = []
+    for i, video_path in enumerate(video_files, 1):
+        print(f"\n进度: {i}/{len(video_files)}")
+        result = process_single_video(processor, video_path, output_dir, camera_fov)
+        results.append(result)
+    
+    # 保存批量处理总结
+    save_batch_summary(results, output_dir)
+    
+    return results
+
+
+def save_batch_summary(results, output_dir):
+    """保存批量处理总结"""
+    summary_path = os.path.join(output_dir, 'batch_summary.txt')
+    
+    # 统计成功和失败数量
+    success_count = sum(1 for r in results if r['status'] == 'success')
+    failed_count = len(results) - success_count
+    
+    with open(summary_path, 'w', encoding='utf-8') as f:
+        f.write("=" * 70 + "\n")
+        f.write("批量视频处理总结\n")
+        f.write("=" * 70 + "\n\n")
+        
+        f.write(f"总视频数: {len(results)}\n")
+        f.write(f"成功处理: {success_count}\n")
+        f.write(f"处理失败: {failed_count}\n\n")
+        
+        f.write("=" * 70 + "\n")
+        f.write("详细结果\n")
+        f.write("=" * 70 + "\n\n")
+        
+        for result in results:
+            f.write(f"视频: {result['video_name']}\n")
+            if result['status'] == 'success':
+                f.write(f"  状态: ✓ 成功\n")
+                f.write(f"  帧数: {result['frame_count']}\n")
+                f.write(f"  平均动态度分数: {result['mean_dynamics_score']:.3f}\n")
+                f.write(f"  平均静态区域比例: {result['mean_static_ratio']:.3f}\n")
+                f.write(f"  时序稳定性: {result['temporal_stability']:.3f}\n")
+                f.write(f"  输出目录: {result['output_dir']}\n")
+            else:
+                f.write(f"  状态: ✗ 失败\n")
+                f.write(f"  错误: {result['error']}\n")
+            f.write("\n")
+    
+    # 同时保存JSON格式
+    summary_json_path = os.path.join(output_dir, 'batch_summary.json')
+    with open(summary_json_path, 'w', encoding='utf-8') as f:
+        json.dump(results, f, indent=2, ensure_ascii=False)
+    
+    print(f"\n批量处理总结已保存到: {summary_path}")
+
+
 def main():
     """主函数"""
     parser = argparse.ArgumentParser(description='静态物体动态度分析')
     parser.add_argument('--input', '-i', required=True, 
-                       help='输入视频文件或图像目录路径')
+                       help='输入视频文件、图像目录或视频目录路径（批量模式）')
     parser.add_argument('--output', '-o', default='output',
                        help='输出目录路径')
     parser.add_argument('--raft_model', '-m', default=None,
@@ -364,6 +476,11 @@ def main():
                        help='计算设备 (cuda/cpu)')
     parser.add_argument('--fov', type=float, default=60.0,
                        help='相机视场角 (度)')
+    parser.add_argument('--batch', action='store_true',
+                       help='批量处理模式：处理输入目录下的所有视频')
+    parser.add_argument('--no-visualize', dest='visualize', action='store_false',
+                       help='禁用可视化生成（加快处理速度）')
+    parser.set_defaults(visualize=True)
     
     args = parser.parse_args()
     
@@ -372,32 +489,52 @@ def main():
         raft_model_path=args.raft_model,
         device=args.device,
         max_frames=args.max_frames,
-        frame_skip=args.frame_skip
+        frame_skip=args.frame_skip,
+        enable_visualization=args.visualize
     )
     
-    # 加载视频或图像
-    if os.path.isfile(args.input):
-        # 视频文件
-        frames = processor.load_video(args.input)
-    elif os.path.isdir(args.input):
-        # 图像目录
-        frames = processor.extract_frames_from_images(args.input)
+    # 批量处理模式
+    if args.batch:
+        if not os.path.isdir(args.input):
+            raise ValueError(f"批量模式需要提供目录路径: {args.input}")
+        
+        results = batch_process_videos(processor, args.input, args.output, args.fov)
+        
+        # 打印总结
+        success_count = sum(1 for r in results if r['status'] == 'success')
+        print(f"\n{'='*70}")
+        print(f"批量处理完成!")
+        print(f"总计: {len(results)} 个视频")
+        print(f"成功: {success_count} 个")
+        print(f"失败: {len(results) - success_count} 个")
+        print(f"结果保存到: {args.output}")
+        print(f"{'='*70}")
+        
+    # 单个视频/图像目录处理模式
     else:
-        raise ValueError(f"输入路径无效: {args.input}")
-    
-    # 估计相机内参
-    camera_matrix = processor.estimate_camera_matrix(frames[0].shape, args.fov)
-    
-    # 处理视频
-    result = processor.process_video(frames, camera_matrix, args.output)
-    
-    # 打印简要结果
-    temporal_stats = result['temporal_stats']
-    print(f"\n分析完成!")
-    print(f"平均静态物体动态度分数: {temporal_stats['mean_dynamics_score']:.3f}")
-    print(f"平均静态区域比例: {temporal_stats['mean_static_ratio']:.3f}")
-    print(f"时序稳定性: {temporal_stats['temporal_stability']:.3f}")
-    print(f"详细结果已保存到: {args.output}")
+        # 加载视频或图像
+        if os.path.isfile(args.input):
+            # 单个视频文件
+            frames = processor.load_video(args.input)
+        elif os.path.isdir(args.input):
+            # 图像序列目录
+            frames = processor.extract_frames_from_images(args.input)
+        else:
+            raise ValueError(f"输入路径无效: {args.input}")
+        
+        # 估计相机内参
+        camera_matrix = processor.estimate_camera_matrix(frames[0].shape, args.fov)
+        
+        # 处理视频
+        result = processor.process_video(frames, camera_matrix, args.output)
+        
+        # 打印简要结果
+        temporal_stats = result['temporal_stats']
+        print(f"\n分析完成!")
+        print(f"平均静态物体动态度分数: {temporal_stats['mean_dynamics_score']:.3f}")
+        print(f"平均静态区域比例: {temporal_stats['mean_static_ratio']:.3f}")
+        print(f"时序稳定性: {temporal_stats['temporal_stability']:.3f}")
+        print(f"详细结果已保存到: {args.output}")
 
 
 if __name__ == '__main__':
