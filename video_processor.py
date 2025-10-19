@@ -826,7 +826,7 @@ def main():
                        help='BadCase不匹配阈值（默认0.3）')
     
     # 可视化参数
-    parser.add_argument('--no-visualize', dest='visualize', action='store_true',
+    parser.add_argument('--visualize', dest='visualize', action='store_true',
                        help='禁用可视化生成（加快处理速度）')
     parser.add_argument('--no-camera-compensation', dest='camera_compensation', action='store_false',
                        help='禁用相机补偿（默认启用）')
@@ -916,6 +916,14 @@ def main():
         elif os.path.isdir(args.input):
             # 图像序列目录
             frames = processor.extract_frames_from_images(args.input)
+            if len(frames) == 0:
+                raise ValueError(
+                    f"错误：目录 '{args.input}' 中未找到有效的图像文件！\n"
+                    f"提示：\n"
+                    f"  - 如果要处理单个视频，请直接指定视频文件路径\n"
+                    f"  - 如果要批量处理视频目录，请添加 --batch 参数\n"
+                    f"  - 如果是图像序列，请确保目录包含 .jpg/.png 等图像文件"
+                )
         else:
             raise ValueError(f"输入路径无效: {args.input}")
         
