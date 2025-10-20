@@ -19,6 +19,9 @@ from static_object_analyzer import StaticObjectDynamicsCalculator
 from dynamic_motion_compensation.camera_compensation import CameraCompensator
 from unified_dynamics_scorer import UnifiedDynamicsScorer, DynamicsClassifier
 from badcase_detector import BadCaseDetector, BadCaseAnalyzer, QualityFilter
+from unified_dynamics_calculator import UnifiedDynamicsCalculator
+from video_quality_filter import VideoQualityFilter
+from dynamics_config import get_config
 
 
 class VideoProcessor:
@@ -33,7 +36,9 @@ class VideoProcessor:
                  enable_camera_compensation: bool = True,
                  camera_compensation_params: Optional[Dict] = None,
                  use_normalized_flow: bool = False,
-                 flow_threshold_ratio: float = 0.002):
+                 flow_threshold_ratio: float = 0.002,
+                 use_new_calculator: bool = True,
+                 config_preset: str = 'balanced'):
         """
         初始化视频处理器
         
@@ -47,6 +52,8 @@ class VideoProcessor:
             camera_compensation_params: 相机补偿参数字典
             use_normalized_flow: 是否使用分辨率归一化（默认False保持兼容）
             flow_threshold_ratio: 归一化阈值比例（默认0.002）
+            use_new_calculator: 是否使用新的统一动态度计算器（默认True）
+            config_preset: 配置预设 ('strict', 'balanced', 'lenient')
         """
         self.raft_predictor = RAFTPredictor(raft_model_path, device, method='raft')
         self.max_frames = max_frames
@@ -54,17 +61,30 @@ class VideoProcessor:
         self.enable_visualization = enable_visualization
         self.enable_camera_compensation = enable_camera_compensation
         self.use_normalized_flow = use_normalized_flow
+        self.use_new_calculator = use_new_calculator
+        
+        # 加载配置
+        self.config = get_config(config_preset)
         
         # 初始化相机补偿器
         if camera_compensation_params is None:
             camera_compensation_params = {}
         self.camera_compensator = CameraCompensator(**camera_compensation_params) if enable_camera_compensation else None
         
-        # 初始化动态度计算器（支持归一化）
+        # 初始化动态度计算器（保留旧版本用于兼容）
         self.dynamics_calculator = StaticObjectDynamicsCalculator(
             use_normalized_flow=use_normalized_flow,
             flow_threshold_ratio=flow_threshold_ratio
         )
+        
+        # 初始化新的统一动态度计算器
+        if use_new_calculator:
+            self.unified_calculator = UnifiedDynamicsCalculator(
+                static_threshold=self.config['detection']['static_threshold'],
+                subject_threshold=self.config['detection']['subject_threshold'],
+                use_normalized_flow=use_normalized_flow,
+                scene_auto_detect=self.config['scene_classification']['scene_auto_detect']
+            )
         
         # 初始化统一动态度评分器（传递归一化状态）
         self.unified_scorer = UnifiedDynamicsScorer(
@@ -76,6 +96,9 @@ class VideoProcessor:
         # 初始化BadCase检测器
         self.badcase_detector = BadCaseDetector()
         self.badcase_analyzer = BadCaseAnalyzer()
+        
+        # 初始化视频质量筛选器
+        self.quality_filter = VideoQualityFilter()
         
     def load_video(self, video_path: str) -> List[np.ndarray]:
         """加载视频帧"""
@@ -189,32 +212,62 @@ class VideoProcessor:
                 flows.append(flow)
                 camera_compensation_results.append(None)
         
-        print("开始分析静态物体动态度...")
-        
-        # 计算时序动态度
-        temporal_result = self.dynamics_calculator.calculate_temporal_dynamics(
-            flows, frames, camera_matrix
-        )
-        
-        # 添加相机补偿信息到结果中
-        temporal_result['camera_compensation_enabled'] = self.enable_camera_compensation
-        temporal_result['camera_compensation_results'] = camera_compensation_results
-        temporal_result['original_flows'] = original_flows  # 保存原始光流供可视化使用
-        
-        # 计算统一动态度分数
-        print("计算统一动态度分数...")
-        unified_result = self.unified_scorer.calculate_unified_score(
-            temporal_result, self.enable_camera_compensation
-        )
-        
-        # 分类动态度
-        classification = self.dynamics_classifier.classify(
-            unified_result['unified_dynamics_score']
-        )
-        
-        # 添加到结果中
-        temporal_result['unified_dynamics'] = unified_result
-        temporal_result['dynamics_classification'] = classification
+        # 使用新的统一计算器或旧的计算器
+        if self.use_new_calculator:
+            print("使用新的统一动态度计算器...")
+            
+            # 使用新的统一计算器
+            unified_result = self.unified_calculator.calculate_unified_dynamics(
+                flows, frames, camera_matrix
+            )
+            
+            # 添加相机补偿信息
+            unified_result['camera_compensation_enabled'] = self.enable_camera_compensation
+            unified_result['camera_compensation_results'] = camera_compensation_results
+            unified_result['original_flows'] = original_flows
+            
+            # 兼容旧格式
+            temporal_result = {
+                'frame_results': unified_result['frame_results'],
+                'temporal_stats': unified_result['temporal_stats'],
+                'unified_dynamics': {
+                    'unified_dynamics_score': unified_result['unified_dynamics_score'],
+                    'scene_type': unified_result['scene_type'],
+                    'confidence': unified_result['temporal_stats'].get('temporal_stability', 0.0)
+                },
+                'dynamics_classification': unified_result['classification'],
+                'camera_compensation_enabled': self.enable_camera_compensation,
+                'camera_compensation_results': camera_compensation_results,
+                'original_flows': original_flows
+            }
+            
+        else:
+            print("使用旧版动态度计算器...")
+            
+            # 计算时序动态度（旧版）
+            temporal_result = self.dynamics_calculator.calculate_temporal_dynamics(
+                flows, frames, camera_matrix
+            )
+            
+            # 添加相机补偿信息到结果中
+            temporal_result['camera_compensation_enabled'] = self.enable_camera_compensation
+            temporal_result['camera_compensation_results'] = camera_compensation_results
+            temporal_result['original_flows'] = original_flows
+            
+            # 计算统一动态度分数
+            print("计算统一动态度分数...")
+            unified_result = self.unified_scorer.calculate_unified_score(
+                temporal_result, self.enable_camera_compensation
+            )
+            
+            # 分类动态度
+            classification = self.dynamics_classifier.classify(
+                unified_result['unified_dynamics_score']
+            )
+            
+            # 添加到结果中
+            temporal_result['unified_dynamics'] = unified_result
+            temporal_result['dynamics_classification'] = classification
         
         # 保存结果
         self.save_results(temporal_result, frames, flows, output_dir)
