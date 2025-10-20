@@ -1,726 +1,840 @@
-# AIGC视频质量评估系统
+# AIGC Video Dynamics Assessment System v2.0
 
 [![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg)](https://www.python.org/downloads/)
 [![PyTorch](https://img.shields.io/badge/PyTorch-1.9+-red.svg)](https://pytorch.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-2.0-green.svg)](WHATS_NEW.md)
 
-> 基于光流分析的AIGC视频质量评估与BadCase检测系统
+> **v2.0 New**: Unified 0-1 scoring, dual-mode analysis, quality filtering, simplified architecture
 
-## ? 项目简介
+> Unified video dynamics assessment system for AIGC (AI-Generated Content) videos
 
-本项目是一个专为AIGC（AI Generated Content）视频设计的自动化质量评估系统，通过分析视频中静态物体的异常运动来检测生成质量问题。核心创新在于**分辨率公平归一化**和**相机运动补偿**技术，能够公平地评估不同分辨率视频的动态质量。
+## ? What's New in v2.0
 
-### 核心特性
+- ? **Unified 0-1 Scoring**: No more forced score segmentation
+- ? **Can Filter Low-Motion Videos**: Identify videos where subjects barely moved
+- ? **Dual-Mode Analysis**: Auto-adapts to static scenes (buildings) and dynamic scenes (people)
+- ? **Quality Filtering Tools**: Built-in filters for quality control
+- ? **Simplified API**: 30% less code, easier to use
+- ? **Configuration Presets**: Three presets for different use cases
 
-- ? **智能光流分析** - 基于RAFT的高精度光流估计
-- ? **分辨率归一化** - 支持混合分辨率视频的公平评估
-- ? **相机运动补偿** - 区分相机运动与物体运动
-- ? **BadCase自动检测** - 基于动态度不匹配的质量问题识别
-- ? **可视化分析** - 丰富的可视化输出，便于调试和分析
-- ? **批量处理** - 高效的批量视频处理能力
-- ? **灵活配置** - 全面的参数化配置选项
+[Read full changelog →](WHATS_NEW.md)
+
+## Overview
+
+A comprehensive system for automatically assessing video dynamics using optical flow analysis. The system intelligently adapts to different scene types and outputs unified 0-1 dynamics scores.
+
+### Key Features
+
+- **Unified Scoring**: 0-1 standardized dynamics score for all videos
+- **Dual-Mode Analysis**: Adapts to static scenes (buildings) and dynamic scenes (people/animals)
+- **Automatic Scene Detection**: Intelligently classifies scene types
+- **Quality Filtering**: Filter low-motion videos in dynamic scenes
+- **Camera Compensation**: Removes camera motion to focus on subject dynamics
+- **Resolution Normalization**: Fair comparison across different resolutions
+- **Batch Processing**: Efficient multi-video processing
+- **Rich Visualizations**: Detailed analysis plots and reports
 
 ---
 
-## ? 快速开始
+## Quick Start
 
-### 环境要求
+### Prerequisites
 
 - Python 3.8+
-- CUDA 10.2+ (推荐，用于GPU加速)
+- CUDA 10.2+ (recommended for GPU acceleration)
 - 8GB+ RAM
-- 2GB+ GPU显存（使用GPU时）
+- 2GB+ GPU memory (when using GPU)
 
-### 安装步骤
+### Installation
 
-#### 1. 克隆项目
+#### 1. Clone repository
 
 ```bash
 git clone <repository_url>
 cd AIGC_detector
 ```
 
-#### 2. 创建虚拟环境（推荐）
+#### 2. Create virtual environment (recommended)
 
 ```bash
 python -m venv venv
 source venv/bin/activate  # Linux/Mac
-# 或
+# or
 venv\Scripts\activate     # Windows
 ```
 
-#### 3. 安装依赖
+#### 3. Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-#### 4. 下载RAFT预训练模型
+#### 4. Download RAFT pretrained model
 
-下载 [raft-things.pth](https://drive.google.com/file/d/1x1FLCHaGFn_Tr4wMo5f9NLPwKKGDtDa7/view?usp=sharing) 并放置到 `pretrained_models/` 目录：
+Download [raft-things.pth](https://drive.google.com/file/d/1x1FLCHaGFn_Tr4wMo5f9NLPwKKGDtDa7/view?usp=sharing) and place it in `pretrained_models/` directory.
 
-```bash
-mkdir -p pretrained_models
-# 将下载的 raft-things.pth 放置到此目录
-```
+---
 
-### 基础用法
+## Basic Usage
 
-#### 单视频分析
+### Single Video Processing
 
 ```bash
-python video_processor.py -i video.mp4 -o output/
+python video_processor.py \
+    -i video.mp4 \
+    -o output/ \
+    --config balanced
 ```
 
-#### 批量分析
-
-```bash
-python video_processor.py -i videos/ -o output/ --batch
+**Output**:
+```
+output/
+├── analysis_report.txt       # Detailed text report
+├── analysis_results.json     # Structured JSON results
+└── visualizations/
+    ├── frame_0000.png
+    ├── temporal_dynamics.png
+    └── camera_compensation.png
 ```
 
-#### BadCase检测（推荐）
+### Batch Processing
 
 ```bash
 python video_processor.py \
     -i videos/ \
-    -o output/ \
+    -o batch_output/ \
     --batch \
-    --badcase-labels labels.json \
-    --normalize-by-resolution
+    --config balanced
 ```
 
----
-
-## ? 详细使用说明
-
-### 使用场景
-
-#### 场景1：单个视频质量分析
-
-适用于详细分析单个视频的动态质量。
-
-```bash
-python video_processor.py \
-    -i test_video.mp4 \
-    -o results/ \
-    --visualize \
-    --normalize-by-resolution
+**Output**:
 ```
-
-**输出**：
-```
-results/
-├── analysis_report.txt          # 文本分析报告
-├── analysis_results.json        # JSON格式结果
-└── visualizations/              # 可视化结果
-    ├── frame_0000_analysis.png
-    ├── static_ratio_changes.png
-    ├── temporal_dynamics.png
-    └── camera_compensation_comparison.png
-```
-
-#### 场景2：批量视频处理
-
-适用于大量视频的批量处理。
-
-```bash
-python video_processor.py \
-    -i video_folder/ \
-    -o batch_results/ \
-    --batch \
-    --normalize-by-resolution
-```
-
-**输出**：
-```
-batch_results/
-├── batch_summary.txt            # 批量汇总
-├── batch_summary.json           # JSON格式汇总
-├── video1/                      # 单个视频结果
+batch_output/
+├── batch_summary.txt         # Summary report
+├── batch_summary.json        # JSON summary
+├── video1/
 │   ├── analysis_report.txt
 │   └── analysis_results.json
 └── video2/
     └── ...
 ```
 
-#### 场景3：BadCase检测（核心功能）
+---
 
-适用于质量问题自动检测和分类。
+## Understanding the Scores
+
+### Unified Dynamics Score (0-1)
+
+The system outputs a **single unified score** that reflects the overall motion intensity:
+
+#### For Static Scenes (Buildings/Still Objects)
+
+| Score Range | Level | Meaning | Examples |
+|-------------|-------|---------|----------|
+| 0.00-0.15 | Pure Static | Perfectly still | Buildings, sculptures |
+| 0.15-0.35 | Low Dynamic | Slight vibration | Flags, leaves in breeze |
+| 0.35-0.60 | Medium Dynamic | Noticeable motion | Swaying objects |
+| 0.60-0.85 | High Dynamic | Abnormal motion | Strong wind, vibration |
+| 0.85-1.00 | Extreme Dynamic | Severe anomaly | Equipment failure |
+
+#### For Dynamic Scenes (People/Animals)
+
+| Score Range | Level | Meaning | Examples |
+|-------------|-------|---------|----------|
+| 0.00-0.15 | Pure Static | Almost no motion | Standing still, sitting |
+| 0.15-0.35 | Low Dynamic | Slight motion | Slow movement, gestures |
+| 0.35-0.60 | Medium Dynamic | Normal motion | Walking, daily activities |
+| 0.60-0.85 | High Dynamic | Active motion | Running, dancing |
+| 0.85-1.00 | Extreme Dynamic | Intense motion | Fast dance, sports |
+
+### Scene Type Detection
+
+The system automatically detects:
+- **Static Scene**: Main subject is static (buildings, landscapes)
+- **Dynamic Scene**: Main subject is dynamic (people, animals)
+
+---
+
+## Advanced Usage
+
+### Configuration Presets
+
+Three built-in presets for different use cases:
 
 ```bash
-python video_processor.py \
-    -i videos/ \
-    -o badcase_output/ \
-    --batch \
-    --badcase-labels labels.json \
-    --mismatch-threshold 0.3 \
-    --normalize-by-resolution
+# Strict mode - Higher quality requirements
+python video_processor.py -i videos/ -o output/ --batch --config strict
+
+# Balanced mode - Default, recommended
+python video_processor.py -i videos/ -o output/ --batch --config balanced
+
+# Lenient mode - More permissive
+python video_processor.py -i videos/ -o output/ --batch --config lenient
 ```
 
-**标签文件格式** (`labels.json`):
-```json
-{
-  "video_name1": "high",
-  "video_name2": "low",
-  "video_name3": "medium"
-}
+| Preset | Use Case | Characteristics |
+|--------|----------|-----------------|
+| `strict` | High quality control | Stricter thresholds, filters more videos |
+| `balanced` | General purpose | Balanced accuracy and inclusivity |
+| `lenient` | Accept more videos | Looser thresholds, filters fewer videos |
+
+### Quality Filtering
+
+#### Example: Filter low-motion videos in dynamic scenes
+
+```python
+from video_processor import batch_process_videos
+from video_quality_filter import VideoQualityFilter
+
+# Batch process
+processor = VideoProcessor(config_preset='balanced')
+results = batch_process_videos(processor, 'videos/', 'output/', 60.0)
+
+# Filter low-dynamic videos in dynamic scenes
+quality_filter = VideoQualityFilter()
+low_dynamic_videos = quality_filter.filter_low_dynamics_in_dynamic_scenes(
+    results,
+    threshold=0.3  # Videos with score < 0.3 will be filtered
+)
+
+print(f"Found {len(low_dynamic_videos)} low-motion videos:")
+for video in low_dynamic_videos:
+    print(f"  {video['video_name']}: score={video['score']:.3f}")
+    print(f"    {video['reason']}")
 ```
 
-**输出**：
-```
-badcase_output/
-├── badcase_summary.txt          # BadCase汇总
-├── badcase_summary.json         # JSON格式
-├── badcase_videos.txt           # BadCase视频列表
-└── video_name/
-    ├── analysis_report.txt
-    ├── analysis_results.json
-    └── badcase_report.txt       # BadCase详细报告
+#### Example: Get quality statistics
+
+```python
+from video_quality_filter import VideoQualityFilter
+
+quality_filter = VideoQualityFilter()
+stats = quality_filter.get_quality_statistics(results)
+
+print(f"Total videos: {stats['total_videos']}")
+print(f"Mean score: {stats['score_statistics']['mean']:.3f}")
+print(f"Scene distribution: {stats['scene_type_distribution']}")
+print(f"Category distribution: {stats['category_distribution']}")
 ```
 
 ---
 
-## ?? 参数配置
+## Command Line Arguments
 
-### 基础参数
+### Basic Parameters
 
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `-i, --input` | string | **必需** | 输入视频文件或目录 |
-| `-o, --output` | string | `output` | 输出目录 |
-| `-m, --raft_model` | string | `pretrained_models/raft-things.pth` | RAFT模型路径 |
-| `--device` | string | `cuda` | 计算设备 (cuda/cpu) |
-| `--batch` | flag | False | 批量处理模式 |
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `-i, --input` | string | **Required** | Input video file or directory |
+| `-o, --output` | string | `output` | Output directory |
+| `-m, --raft_model` | string | `pretrained_models/raft-things.pth` | RAFT model path |
+| `--device` | string | `cuda` | Computing device (cuda/cpu) |
+| `--batch` | flag | False | Batch processing mode |
+| `--config` | string | `balanced` | Preset config (strict/balanced/lenient) |
 
-### BadCase检测参数
+### Advanced Parameters
 
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `--badcase-labels, -l` | string | None | 期望标签文件（JSON格式） |
-| `--mismatch-threshold` | float | `0.3` | BadCase不匹配阈值 |
-
-### 分辨率归一化参数（重要）?
-
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `--normalize-by-resolution` | flag | False | **启用分辨率归一化（强烈推荐）** |
-| `--flow-threshold-ratio` | float | `0.002` | 归一化后的静态阈值比例 |
-
-> **为什么需要归一化？**  
-> 不同分辨率视频（如1280x720 vs 750x960）的光流值范围差异巨大，直接比较会导致评估不公平。归一化通过对角线距离标准化，确保评分可比性。
-
-### 相机补偿参数
-
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `--no-camera-compensation` | flag | False | 禁用相机补偿（默认启用） |
-| `--camera-ransac-thresh` | float | `1.0` | RANSAC阈值（像素） |
-| `--camera-max-features` | int | `2000` | 最大特征点数 |
-| `--fov` | float | `60.0` | 相机视场角（度） |
-
-### 处理控制参数
-
-| 参数 | 类型 | 默认值 | 说明 |
-|------|------|--------|------|
-| `--max_frames` | int | None | 最大处理帧数 |
-| `--frame_skip` | int | `1` | 帧跳跃间隔 |
-| `--visualize` | flag | False | 生成可视化结果 |
+| Argument | Type | Default | Description |
+|----------|------|---------|-------------|
+| `--max_frames` | int | None | Max frames to process |
+| `--frame_skip` | int | 1 | Frame skip interval |
+| `--fov` | float | 60.0 | Camera field of view (degrees) |
+| `--no-viz` | flag | False | Disable visualization |
+| `--no-camera-comp` | flag | False | Disable camera compensation |
 
 ---
 
-## ? 输出结果说明
+## Python API
 
-### 分析报告 (`analysis_report.txt`)
+### Basic Usage
 
-```
-====================================================================
-视频动态度分析报告
-====================================================================
+```python
+from video_processor import VideoProcessor
 
-基本信息:
------------
-处理帧数: 128
-视频分辨率: 1280x720
-归一化模式: 启用
-处理时间: 45.23s
+# Create processor
+processor = VideoProcessor(
+    raft_model_path="pretrained_models/raft-things.pth",
+    device='cuda',
+    enable_camera_compensation=True,
+    config_preset='balanced'
+)
 
-静态物体动态度分析:
------------
-平均动态度分数: 0.245
-标准差: 0.082
-最大值: 0.512
-最小值: 0.089
-变异系数: 0.335
+# Load and process video
+frames = processor.load_video("video.mp4")
+result = processor.process_video(frames, output_dir='output/')
 
-时序稳定性: 0.823 (稳定)
+# Access results
+print(f"Score: {result['unified_dynamics']['unified_dynamics_score']:.3f}")
+print(f"Scene: {result['unified_dynamics']['scene_type']}")
+print(f"Category: {result['dynamics_classification']['category']}")
 ```
 
-### JSON结果 (`analysis_results.json`)
+### Batch Processing with Filtering
+
+```python
+from video_processor import batch_process_videos
+from video_quality_filter import VideoQualityFilter
+
+# Batch process
+processor = VideoProcessor(config_preset='balanced')
+results = batch_process_videos(processor, 'videos/', 'output/', 60.0)
+
+# Filter videos
+quality_filter = VideoQualityFilter()
+
+# Filter 1: Low-motion in dynamic scenes
+low_videos = quality_filter.filter_low_dynamics_in_dynamic_scenes(
+    results, threshold=0.3
+)
+
+# Filter 2: High-anomaly in static scenes
+anomaly_videos = quality_filter.filter_high_static_anomaly(
+    results, threshold=0.5
+)
+
+# Filter 3: By score range
+range_videos = quality_filter.filter_by_score_range(
+    results, min_score=0.2, max_score=0.4
+)
+```
+
+### Custom Configuration
+
+```python
+from dynamics_config import get_config
+
+# Load and modify config
+config = get_config('balanced')
+config['detection']['static_threshold'] = 0.0015  # More strict
+
+# Create processor with custom settings
+processor = VideoProcessor(config_preset='balanced')
+processor.dynamics_calculator.static_threshold = 0.0015
+```
+
+---
+
+## Output Format
+
+### JSON Results Structure
 
 ```json
 {
-  "metadata": {
-    "total_frames": 128,
-    "resolution": [1280, 720],
-    "normalized": true,
-    "processing_time": 45.23
+  "unified_dynamics_score": 0.52,
+  "scene_type": "dynamic",
+  "classification": {
+    "category": "medium_dynamic",
+    "description": "Medium Dynamic",
+    "typical_examples": ["Walking", "Daily activities"]
   },
   "temporal_stats": {
-    "mean_dynamics_score": 0.245,
-    "std_dynamics_score": 0.082,
-    "max_dynamics_score": 0.512,
-    "min_dynamics_score": 0.089,
-    "temporal_stability": 0.823
+    "mean_score": 0.025,
+    "temporal_stability": 0.95,
+    "mean_static_ratio": 0.65,
+    "mean_dynamic_ratio": 0.35
   },
-  "unified_scores": {
-    "final_score": 0.627,
-    "flow_magnitude_score": 0.234,
-    "spatial_coverage_score": 0.456,
-    "temporal_variation_score": 0.189
-  }
+  "confidence": 0.95
 }
-```
-
-### BadCase报告 (`badcase_report.txt`)
-
-```
-====================================================================
-BADCASE 检测报告
-====================================================================
-
-视频: example_video.mp4
-期望动态度: high
-实际动态度: low
-严重程度: severe
-不匹配度: 0.752
-
-详细分析:
------------
-实际得分: 0.124 (low)
-期望得分: 0.750 (high)
-差异: -0.626
-
-判定原因:
-- 期望高动态但实际低动态
-- 可能的生成质量问题
-- 建议: 重新生成或调整参数
 ```
 
 ---
 
-## ?? 项目架构
+## System Architecture
 
-### 目录结构
+### Core Components
+
+```
+video_processor.py              # Main processor
+├── Coordinates all modules
+├── Handles batch processing
+└── Generates reports
+
+unified_dynamics_calculator.py  # Core algorithm
+├── Detects static/dynamic regions
+├── Auto-classifies scene type
+└── Outputs unified 0-1 score
+
+video_quality_filter.py         # Quality control
+├── Filters low-motion videos
+├── Filters high-anomaly videos
+└── Generates statistics
+
+dynamics_config.py              # Configuration
+├── Three presets
+├── Threshold parameters
+└── Easy customization
+```
+
+### Processing Pipeline
+
+```
+Video Frames
+    ↓
+Optical Flow (RAFT)
+    ↓
+Camera Motion Compensation
+    ↓
+Residual Flow
+    ↓
+Unified Dynamics Calculator
+  ├→ Detect static regions
+  ├→ Detect dynamic regions
+  ├→ Classify scene type
+  └→ Calculate unified score
+    ↓
+Quality Filter (Optional)
+    ↓
+Results & Reports
+```
+
+---
+
+## Use Cases
+
+### Use Case 1: Filter Low-Motion Videos
+
+**Scenario**: You have a batch of videos with people, but some actors barely moved.
+
+```python
+from video_processor import batch_process_videos
+from video_quality_filter import VideoQualityFilter
+
+processor = VideoProcessor(config_preset='strict')
+results = batch_process_videos(processor, 'videos/', 'output/', 60.0)
+
+quality_filter = VideoQualityFilter()
+low_motion = quality_filter.filter_low_dynamics_in_dynamic_scenes(
+    results, threshold=0.3
+)
+
+print(f"Found {len(low_motion)} videos with insufficient motion")
+```
+
+### Use Case 2: Assess Static Scene Quality
+
+**Scenario**: You have videos of buildings shot with a moving camera, and want to check if camera stabilization worked.
+
+```python
+processor = VideoProcessor(
+    enable_camera_compensation=True,
+    config_preset='balanced'
+)
+
+frames = processor.load_video("building.mp4")
+result = processor.process_video(frames)
+
+if result['unified_dynamics']['scene_type'] == 'static':
+    score = result['unified_dynamics']['unified_dynamics_score']
+    if score < 0.15:
+        print("Perfect stabilization!")
+    elif score < 0.35:
+        print("Good quality with minor residuals")
+    else:
+        print("Poor stabilization, check camera setup")
+```
+
+### Use Case 3: Quality Control Pipeline
+
+```python
+from video_quality_filter import VideoQualityFilter
+
+processor = VideoProcessor(config_preset='strict')
+results = batch_process_videos(processor, 'videos/', 'output/', 60.0)
+
+quality_filter = VideoQualityFilter()
+
+# Get statistics
+stats = quality_filter.get_quality_statistics(results)
+print(f"Mean score: {stats['score_statistics']['mean']:.3f}")
+print(f"Scene distribution: {stats['scene_type_distribution']}")
+
+# Filter problematic videos
+low_dynamic = quality_filter.filter_low_dynamics_in_dynamic_scenes(results, 0.3)
+high_anomaly = quality_filter.filter_high_static_anomaly(results, 0.5)
+
+print(f"\nProblematic videos:")
+print(f"  Low motion in dynamic scenes: {len(low_dynamic)}")
+print(f"  High anomaly in static scenes: {len(high_anomaly)}")
+
+# Export filtered list
+with open('low_motion_videos.txt', 'w') as f:
+    for v in low_dynamic:
+        f.write(f"{v['video_name']}: {v['score']:.3f}\n")
+```
+
+---
+
+## Configuration Guide
+
+### Preset Comparison
+
+| Parameter | Strict | Balanced | Lenient |
+|-----------|--------|----------|---------|
+| Static threshold | 0.0015 | 0.002 | 0.003 |
+| Subject threshold | 0.004 | 0.005 | 0.008 |
+| Low dynamic filter | 0.35 | 0.30 | 0.20 |
+| High anomaly filter | 0.40 | 0.50 | 0.60 |
+
+### When to Use Each Preset
+
+- **Strict**: Quality control for production, want to filter more videos
+- **Balanced**: General purpose, good for most scenarios (default)
+- **Lenient**: Accept more videos, exploratory analysis
+
+### Customizing Thresholds
+
+```python
+from dynamics_config import get_config
+
+config = get_config('balanced')
+
+# View current settings
+print(config['detection']['static_threshold'])    # 0.002
+print(config['detection']['subject_threshold'])   # 0.005
+
+# Modify as needed
+processor = VideoProcessor(config_preset='balanced')
+processor.dynamics_calculator.static_threshold = 0.0015  # More strict
+```
+
+---
+
+## Understanding the Results
+
+### Key Metrics
+
+1. **unified_dynamics_score** (0-1)
+   - The main output score
+   - 0 = completely static
+   - 1 = extremely dynamic
+
+2. **scene_type** ('static' or 'dynamic')
+   - Auto-detected scene classification
+   - 'static': Buildings, landscapes, still objects
+   - 'dynamic': People, animals, moving subjects
+
+3. **classification**
+   - Category: pure_static, low_dynamic, medium_dynamic, high_dynamic, extreme_dynamic
+   - Description and typical examples
+
+4. **confidence** (0-1)
+   - Reliability of the assessment
+   - Based on temporal stability
+
+### Example Results
+
+#### Static Scene (Building)
+```json
+{
+  "unified_dynamics_score": 0.08,
+  "scene_type": "static",
+  "classification": {
+    "category": "pure_static",
+    "description": "Pure Static"
+  },
+  "confidence": 0.95
+}
+```
+
+#### Dynamic Scene (Person Walking)
+```json
+{
+  "unified_dynamics_score": 0.52,
+  "scene_type": "dynamic",
+  "classification": {
+    "category": "medium_dynamic",
+    "description": "Medium Dynamic"
+  },
+  "confidence": 0.92
+}
+```
+
+#### Dynamic Scene (Person Almost Still) - Can be filtered!
+```json
+{
+  "unified_dynamics_score": 0.18,
+  "scene_type": "dynamic",
+  "classification": {
+    "category": "low_dynamic",
+    "description": "Low Dynamic"
+  },
+  "confidence": 0.88
+}
+```
+
+---
+
+## Quality Filtering
+
+### Filter Low-Motion Videos
+
+Identify videos where subjects have insufficient motion:
+
+```python
+from video_quality_filter import VideoQualityFilter
+
+quality_filter = VideoQualityFilter()
+
+# Filter dynamic scenes with score < 0.3
+low_motion_videos = quality_filter.filter_low_dynamics_in_dynamic_scenes(
+    results,
+    threshold=0.3
+)
+
+# Generate report
+report = quality_filter.generate_filter_report(
+    results,
+    low_motion_videos,
+    "Low Motion Filter"
+)
+```
+
+### Filter Anomaly Videos
+
+Identify static scenes with excessive residual motion:
+
+```python
+# Filter static scenes with score > 0.5
+anomaly_videos = quality_filter.filter_high_static_anomaly(
+    results,
+    threshold=0.5
+)
+```
+
+---
+
+## Project Structure
 
 ```
 AIGC_detector/
-├── video_processor.py              # 主入口（统一处理）
-├── badcase_detector.py             # BadCase检测器
-├── unified_dynamics_scorer.py      # 统一评分系统
-├── static_object_analyzer.py       # 静态物体分析
-├── simple_raft.py                  # RAFT光流封装
-├── dynamic_motion_compensation/    # 相机补偿模块
-│   ├── __init__.py
-│   └── camera_compensation.py
-├── third_party/RAFT/               # RAFT原始实现
-├── pretrained_models/              # 预训练模型
-│   └── raft-things.pth
-├── requirements.txt                # 依赖列表
-└── docs/                           # 文档
-```
-
-### 核心模块
-
-#### 1. VideoProcessor（主处理器）
-
-```python
-from video_processor import VideoProcessor
-
-processor = VideoProcessor(
-    raft_model_path="pretrained_models/raft-things.pth",
-    device="cuda",
-    enable_camera_compensation=True,
-    use_normalized_flow=True,        # 启用归一化
-    flow_threshold_ratio=0.002
-)
-```
-
-#### 2. StaticObjectAnalyzer（静态分析器）
-
-分析视频中静态区域的异常动态。
-
-```python
-from static_object_analyzer import StaticObjectDynamicsCalculator
-
-calculator = StaticObjectDynamicsCalculator(
-    use_normalized_flow=True,
-    flow_threshold_ratio=0.002
-)
-```
-
-#### 3. UnifiedDynamicsScorer（统一评分器）
-
-融合多个维度的动态度指标。
-
-```python
-from unified_dynamics_scorer import UnifiedDynamicsScorer
-
-scorer = UnifiedDynamicsScorer(
-    mode='auto',
-    use_normalized_flow=True
-)
-```
-
-#### 4. BadCaseDetector（BadCase检测器）
-
-自动检测质量问题。
-
-```python
-from badcase_detector import BadCaseDetector
-
-detector = BadCaseDetector(
-    mismatch_threshold=0.3
-)
+├── video_processor.py              # Main processor (refactored)
+├── unified_dynamics_calculator.py  # Core dynamics calculator
+├── video_quality_filter.py         # Quality filtering tools
+├── dynamics_config.py              # Configuration management
+├── simple_raft.py                  # RAFT optical flow wrapper
+├── badcase_detector.py             # BadCase detection
+├── dynamic_motion_compensation/
+│   └── camera_compensation.py      # Camera motion compensation
+├── pretrained_models/
+│   └── raft-things.pth            # RAFT model
+├── example_new_system.py          # Usage examples
+├── test_simple.py                 # Quick tests
+├── NEW_SYSTEM_GUIDE.md            # Detailed guide
+└── README.md                      # This file
 ```
 
 ---
 
-## ? 技术原理
+## Examples
 
-### 1. 分辨率归一化
+See `example_new_system.py` for comprehensive examples:
 
-**问题**：不同分辨率视频的光流值范围不同
-- 1280x720视频：光流值通常 0-30 像素
-- 750x960视频：光流值通常 0-20 像素
+```bash
+python example_new_system.py
+```
 
-**解决方案**：对角线归一化
+Examples include:
+1. Single video processing
+2. Batch processing with filtering
+3. Configuration comparison
+4. Quality statistics
+
+---
+
+## Frequently Asked Questions
+
+### Q: How to filter "dynamic scenes with low motion"?
+
 ```python
-diagonal = sqrt(height? + width?)
+low_videos = quality_filter.filter_low_dynamics_in_dynamic_scenes(
+    results, 
+    threshold=0.3  # Adjust as needed
+)
+```
+
+### Q: What's the difference between scene types?
+
+- **Static scene**: Camera moves around static objects (buildings)
+  - Focuses on residual flow after camera compensation
+  - Low scores indicate good stabilization
+  
+- **Dynamic scene**: Subject moves (people/animals)
+  - Focuses on subject motion intensity
+  - Low scores indicate insufficient motion
+
+### Q: How to adjust system sensitivity?
+
+Use different presets or modify thresholds:
+- More strict: `--config strict` or lower thresholds
+- More lenient: `--config lenient` or raise thresholds
+
+### Q: Can I use this without camera compensation?
+
+Yes! Use `--no-camera-comp` flag:
+```bash
+python video_processor.py -i video.mp4 -o output/ --no-camera-comp
+```
+
+---
+
+## Technical Details
+
+### Camera Compensation
+
+The system uses homography-based camera motion compensation:
+1. Detect feature points in consecutive frames
+2. Estimate camera motion via RANSAC homography
+3. Subtract camera motion from optical flow
+4. Analyze residual flow for subject dynamics
+
+### Resolution Normalization
+
+All flow magnitudes are normalized by image diagonal length:
+```python
+diagonal = sqrt(height^2 + width^2)
 normalized_flow = flow_magnitude / diagonal
 ```
 
-**效果**：
-- ? 不同分辨率视频评分可比
-- ? 阈值统一（0.002相对值）
-- ? 评估公平性提升
+This ensures fair comparison across different video resolutions.
 
-### 2. 相机运动补偿
+### Scene Type Detection
 
-**原理**：使用ORB特征匹配 + RANSAC估计全局运动
-
-```
-原始光流 = 相机运动 + 物体运动
-物体运动 = 原始光流 - 相机运动估计
-```
-
-**效果**：
-- ? 区分相机平移/旋转与物体运动
-- ? 聚焦于物体本身的异常运动
-- ? 提高静态物体检测准确性
-
-### 3. 统一动态度评分
-
-融合5个维度的特征：
-
-1. **光流幅度** (30%) - 运动强度
-2. **空间覆盖** (25%) - 运动区域占比
-3. **时序变化** (20%) - 运动时序模式
-4. **空间一致性** (15%) - 运动空间分布
-5. **相机因子** (10%) - 相机运动影响
-
-最终分数：`[0, 1]` 区间，越高表示动态度越强
+Automatic scene classification based on:
+- Dynamic region ratio
+- Motion intensity
+- Static region residual
+- Multi-factor weighted decision
 
 ---
 
-## ? 性能指标
+## Performance
 
-### 处理速度
+### Typical Processing Speed
 
-| 配置 | 分辨率 | 帧数 | 时间 | 速度 |
-|------|--------|------|------|------|
-| GPU (RTX 3090) | 1280x720 | 128 | ~45s | 2.8 FPS |
-| GPU (RTX 3090) | 1920x1080 | 128 | ~68s | 1.9 FPS |
-| CPU (i9-12900K) | 1280x720 | 128 | ~320s | 0.4 FPS |
+| Resolution | GPU (RTX 3090) | CPU (i7-10700K) |
+|-----------|----------------|-----------------|
+| 720p | ~15 FPS | ~2 FPS |
+| 1080p | ~8 FPS | ~1 FPS |
+| 4K | ~3 FPS | ~0.3 FPS |
 
-### 内存占用
+### Memory Requirements
 
-- GPU显存：1.5-2.5GB（取决于分辨率）
-- 系统内存：2-4GB
-
-### 准确性
-
-基于内部测试集：
-- BadCase检测准确率：~87%
-- 假阳性率：~8%
-- 假阴性率：~5%
+| Resolution | GPU Memory | RAM |
+|-----------|------------|-----|
+| 720p | ~2GB | ~4GB |
+| 1080p | ~3GB | ~6GB |
+| 4K | ~6GB | ~12GB |
 
 ---
 
-## ? 可视化示例
+## Troubleshooting
 
-### 帧级分析
-
-![Frame Analysis](docs/images/frame_analysis_example.png)
-
-- 左上：原始帧
-- 右上：静态区域mask
-- 左下：光流可视化
-- 右下：相机补偿后的光流
-
-### 时序分析
-
-![Temporal Analysis](docs/images/temporal_analysis_example.png)
-
-- 动态度随时间变化曲线
-- 静态区域比例变化
-- 异常帧标记
-
----
-
-## ? 常见问题
-
-### Q1: 是否必须使用GPU？
-
-**A**: 不是必须，但强烈推荐。CPU模式速度约为GPU的1/8。
+### CUDA Out of Memory
 
 ```bash
-# CPU模式
+# Reduce max frames
+python video_processor.py -i video.mp4 --max_frames 100
+
+# Use CPU
 python video_processor.py -i video.mp4 --device cpu
 ```
 
-### Q2: 如何处理混合分辨率的视频集？
+### Low Confidence Scores
 
-**A**: 必须启用 `--normalize-by-resolution` 参数。
+- Check if video has motion blur
+- Verify camera compensation is working
+- Try different config presets
 
-```bash
-python video_processor.py \
-    -i mixed_videos/ \
-    --batch \
-    --normalize-by-resolution  # 关键！
-```
+### All Videos Classified as Same Type
 
-### Q3: BadCase检测的阈值如何设置？
-
-**A**: `--mismatch-threshold` 默认0.3，可根据需求调整：
-
-- `0.2` - 更严格（检测更多BadCase）
-- `0.3` - 平衡（推荐）
-- `0.4` - 更宽松（减少误报）
-
-### Q4: 可视化结果占用空间大，如何关闭？
-
-**A**: 默认不生成可视化。如需生成，显式添加 `--visualize`。
-
-```bash
-# 不生成可视化（默认，快速）
-python video_processor.py -i video.mp4
-
-# 生成可视化（慢，占用空间）
-python video_processor.py -i video.mp4 --visualize
-```
-
-### Q5: 如何只处理视频的一部分帧？
-
-**A**: 使用 `--max_frames` 和 `--frame_skip` 参数。
-
-```bash
-# 只处理前50帧
-python video_processor.py -i video.mp4 --max_frames 50
-
-# 每隔2帧采样一次
-python video_processor.py -i video.mp4 --frame_skip 2
-```
-
-### Q6: RAFT模型下载失败怎么办？
-
-**A**: 手动下载并放置：
-
-1. 从 [Google Drive](https://drive.google.com/file/d/1x1FLCHaGFn_Tr4wMo5f9NLPwKKGDtDa7/view?usp=sharing) 下载
-2. 放置到 `pretrained_models/raft-things.pth`
-3. 验证文件大小约为 440MB
+- Adjust detection thresholds in config
+- Check if videos are actually similar
+- Review camera compensation effectiveness
 
 ---
 
-## ? 高级用法
+## Citation
 
-### 自定义阈值
+If you use this system in your research, please cite:
 
-```python
-from video_processor import VideoProcessor
-from unified_dynamics_scorer import UnifiedDynamicsScorer
-
-# 自定义阈值
-custom_thresholds = {
-    'flow_low': 0.001,
-    'flow_mid': 0.005,
-    'flow_high': 0.015,
-    'static_ratio': 0.6,
-    'temporal_std': 0.001
+```bibtex
+@software{aigc_dynamics_2024,
+  title={AIGC Video Dynamics Assessment System},
+  author={Your Name},
+  year={2024},
+  url={https://github.com/your-repo}
 }
-
-scorer = UnifiedDynamicsScorer(
-    use_normalized_flow=True,
-    thresholds=custom_thresholds
-)
-```
-
-### 自定义权重
-
-```python
-# 调整评分权重
-custom_weights = {
-    'flow_magnitude': 0.40,      # 增加光流权重
-    'spatial_coverage': 0.30,
-    'temporal_variation': 0.15,
-    'spatial_consistency': 0.10,
-    'camera_factor': 0.05        # 减少相机权重
-}
-
-scorer = UnifiedDynamicsScorer(
-    weights=custom_weights,
-    use_normalized_flow=True
-)
-```
-
-### 编程接口
-
-```python
-from video_processor import VideoProcessor
-
-# 初始化
-processor = VideoProcessor(
-    raft_model_path="pretrained_models/raft-things.pth",
-    device="cuda",
-    use_normalized_flow=True
-)
-
-# 加载视频
-frames = processor.load_video("test.mp4")
-
-# 估计相机参数
-camera_matrix = processor.estimate_camera_matrix(
-    frames[0].shape, fov=60.0
-)
-
-# 处理视频
-result = processor.process_video(
-    frames, camera_matrix, output_dir="output/"
-)
-
-# 访问结果
-print(f"平均动态度: {result['temporal_stats']['mean_dynamics_score']:.3f}")
-print(f"时序稳定性: {result['temporal_stats']['temporal_stability']:.3f}")
 ```
 
 ---
 
-## ? 使用示例
+## License
 
-### 示例1：快速质量检查
-
-```bash
-# 快速检查单个视频（不生成可视化）
-python video_processor.py \
-    -i suspect_video.mp4 \
-    -o quick_check/ \
-    --normalize-by-resolution
-```
-
-### 示例2：详细分析
-
-```bash
-# 详细分析，包含可视化
-python video_processor.py \
-    -i video_to_analyze.mp4 \
-    -o detailed_analysis/ \
-    --visualize \
-    --normalize-by-resolution
-```
-
-### 示例3：生产环境批量检测
-
-```bash
-# 批量BadCase检测（推荐配置）
-python video_processor.py \
-    -i production_videos/ \
-    -o badcase_reports/ \
-    --batch \
-    --badcase-labels expected_labels.json \
-    --mismatch-threshold 0.3 \
-    --normalize-by-resolution \
-    --device cuda \
-    --frame_skip 1
-```
-
-### 示例4：低资源环境
-
-```bash
-# CPU模式 + 降采样
-python video_processor.py \
-    -i video.mp4 \
-    -o output/ \
-    --device cpu \
-    --frame_skip 3 \
-    --max_frames 60 \
-    --normalize-by-resolution
-```
+MIT License - See LICENSE file for details
 
 ---
 
-## ? 贡献指南
+## Changelog
 
-欢迎贡献！请遵循以下步骤：
+### Version 2.0 (Current)
+- Complete system refactoring
+- Unified 0-1 scoring standard
+- Dual-mode analysis (static + dynamic)
+- Quality filtering capabilities
+- Simplified architecture
+- Removed backward compatibility code
 
-1. Fork本项目
-2. 创建特性分支 (`git checkout -b feature/AmazingFeature`)
-3. 提交更改 (`git commit -m 'Add some AmazingFeature'`)
-4. 推送到分支 (`git push origin feature/AmazingFeature`)
-5. 开启Pull Request
-
----
-
-## ? 许可证
-
-本项目采用 MIT 许可证 - 详见 [LICENSE](LICENSE) 文件
-
----
-
-## ? 联系方式
-
-如有问题或建议，请通过以下方式联系：
-
-- 提交 [Issue](https://github.com/your-repo/issues)
-- 发送邮件至：your-email@example.com
+### Version 1.0
+- Initial release
+- Static object dynamics analysis
+- Camera compensation
+- Basic visualization
 
 ---
 
-## ? 致谢
+## Support
 
-- [RAFT](https://github.com/princeton-vl/RAFT) - 光流估计模型
-- PyTorch团队 - 深度学习框架
-- OpenCV - 计算机视觉库
-
----
-
-## ? 更新日志
-
-### v1.0.0 (2025-10-19)
-
-- ? 初始版本发布
-- ? 分辨率归一化支持
-- ? 相机运动补偿
-- ? BadCase自动检测
-- ? 统一评分系统
-- ? 批量处理支持
-- ? 完整可视化功能
+For help and documentation:
+- Read `NEW_SYSTEM_GUIDE.md` for detailed guide
+- Run `python test_simple.py` for quick validation
+- Check `example_new_system.py` for usage examples
+- Run `python dynamics_config.py` for configuration options
 
 ---
 
-<div align="center">
+## Contributing
 
-**? 如果这个项目对您有帮助，请给我们一个Star！?**
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Submit a pull request
 
-Made with ?? by AIGC Video Quality Team
+---
 
-</div>
+## Acknowledgments
 
+- RAFT optical flow: [Princeton-VL/RAFT](https://github.com/princeton-vl/RAFT)
+- Camera compensation techniques from computer vision literature
+
+---
+
+## Documentation Navigation
+
+### Quick Access
+- ? **[Quick Start Guide](QUICK_START_V2.md)** - Get started in 5 minutes
+- ? **[System Overview](SYSTEM_OVERVIEW.md)** - Understand how it works
+- ? **[Usage Checklist](CHECKLIST.md)** - Step-by-step workflow
+- ? **[What's New in v2.0](WHATS_NEW.md)** - See latest changes
+
+### For Developers
+- ?? **[Project Structure](PROJECT_STRUCTURE.md)** - File organization
+- ? **[Refactoring Details](REFACTORING_COMPLETE.md)** - Technical changes
+- ? **[File Changes](FILE_CHANGES.md)** - Detailed changelog
+
+### Lost? Start Here
+- ?? **[Documentation Index](DOCS_INDEX.md)** - Find what you need
+
+---
+
+**Note**: This is the refactored v2.0 system with simplified architecture and enhanced capabilities. All backward compatibility code has been removed for a cleaner codebase.

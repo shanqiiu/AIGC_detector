@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """
-统一动态度计算器 (重构版)
-自动适应静态场景和动态场景，输出统一的 0-1 动态度分数
+Unified Dynamics Calculator (Refactored)
+Auto-adapts to static and dynamic scenes, outputs unified 0-1 dynamics score
 
-核心改进：
-1. 同时计算静态区域和动态区域指标
-2. 自动判断场景类型
-3. 使用统一的评分标准（0-1），不再强制分段
-4. 可以筛选出"动态场景中动态度很低"的视频
+Key improvements:
+1. Calculates both static and dynamic region metrics
+2. Auto-detects scene type
+3. Uses unified scoring standard (0-1), no forced segmentation
+4. Can filter "dynamic scenes with low motion"
 """
 
 import numpy as np
@@ -16,21 +16,21 @@ from typing import List, Dict, Tuple, Optional
 
 
 class UnifiedDynamicsCalculator:
-    """统一动态度计算器 - 自动适应场景类型"""
+    """Unified Dynamics Calculator - Auto-adapts to scene types"""
     
     def __init__(self, 
-                 static_threshold=0.002,   # 静态区域检测阈值（归一化）
-                 subject_threshold=0.005,  # 主体区域检测阈值（归一化）
+                 static_threshold=0.002,
+                 subject_threshold=0.005,
                  use_normalized_flow=True,
                  scene_auto_detect=True):
         """
-        初始化计算器
+        Initialize calculator
         
         Args:
-            static_threshold: 静态区域检测阈值
-            subject_threshold: 主体区域检测阈值
-            use_normalized_flow: 是否使用分辨率归一化
-            scene_auto_detect: 是否自动检测场景类型
+            static_threshold: Static region detection threshold (normalized)
+            subject_threshold: Subject region detection threshold (normalized)
+            use_normalized_flow: Whether to use resolution normalization
+            scene_auto_detect: Whether to auto-detect scene type
         """
         self.static_threshold = static_threshold
         self.subject_threshold = subject_threshold
@@ -42,45 +42,43 @@ class UnifiedDynamicsCalculator:
                                    images: List[np.ndarray],
                                    camera_matrix: Optional[np.ndarray] = None) -> Dict:
         """
-        计算统一动态度分数
+        Calculate unified dynamics score
         
         Args:
-            flows: 光流列表 (经过相机补偿后的残差光流)
-            images: 图像列表
-            camera_matrix: 相机内参矩阵（保留用于扩展）
+            flows: List of optical flows (residual flows after camera compensation)
+            images: List of images
+            camera_matrix: Camera intrinsic matrix (reserved for future use)
             
         Returns:
-            包含统一动态度分数和详细信息的字典
+            Dictionary containing unified dynamics score and details
         """
         
         if len(flows) == 0 or len(images) < 2:
             return self._get_empty_result()
         
-        # 分析每一帧
+        # Analyze each frame
         frame_results = []
         for i, flow in enumerate(flows):
-            # 归一化因子
             normalization_factor = 1.0
             if self.use_normalized_flow:
                 h, w = images[i].shape[:2]
                 normalization_factor = np.sqrt(h**2 + w**2)
             
-            # 分析单帧
             frame_result = self._analyze_single_frame(
                 flow, images[i].shape, normalization_factor
             )
             frame_results.append(frame_result)
         
-        # 场景类型判断
+        # Determine scene type
         scene_type = self._determine_scene_type(frame_results)
         
-        # 计算最终统一分数
+        # Calculate final unified score
         unified_score = self._calculate_final_score(frame_results, scene_type)
         
-        # 计算时序统计
+        # Calculate temporal statistics
         temporal_stats = self._calculate_temporal_stats(frame_results, scene_type)
         
-        # 分类动态度等级
+        # Classify dynamics level
         classification = self._classify_dynamics(unified_score, scene_type)
         
         return {
@@ -99,31 +97,31 @@ class UnifiedDynamicsCalculator:
                              image_shape: Tuple, 
                              normalization_factor: float) -> Dict:
         """
-        分析单帧，同时计算静态区域和动态区域指标
+        Analyze single frame - calculate both static and dynamic region metrics
         
         Args:
-            flow: 光流 (H, W, 2)
-            image_shape: 图像形状
-            normalization_factor: 归一化因子
+            flow: Optical flow (H, W, 2)
+            image_shape: Image shape
+            normalization_factor: Normalization factor
             
         Returns:
-            单帧分析结果
+            Single frame analysis result
         """
         
-        # 计算光流幅度
+        # Calculate flow magnitude
         flow_magnitude = np.sqrt(flow[:, :, 0]**2 + flow[:, :, 1]**2)
         
-        # 归一化
+        # Normalize
         if self.use_normalized_flow and normalization_factor > 0:
             flow_magnitude_norm = flow_magnitude / normalization_factor
         else:
             flow_magnitude_norm = flow_magnitude
         
-        # 检测静态区域和动态区域
+        # Detect static and dynamic regions
         static_mask = flow_magnitude_norm < self.static_threshold
         dynamic_mask = flow_magnitude_norm > self.subject_threshold
         
-        # 形态学处理动态区域（连接邻近区域）
+        # Morphological processing for dynamic regions
         kernel = np.ones((7, 7), np.uint8)
         dynamic_mask_cleaned = cv2.morphologyEx(
             dynamic_mask.astype(np.uint8), cv2.MORPH_CLOSE, kernel
@@ -133,17 +131,17 @@ class UnifiedDynamicsCalculator:
         )
         dynamic_mask = dynamic_mask_cleaned.astype(bool)
         
-        # 计算静态区域指标（用于静态场景）
+        # Calculate static region metrics (for static scenes)
         static_metrics = self._calculate_region_metrics(
             flow, static_mask, normalization_factor, 'static'
         )
         
-        # 计算动态区域指标（用于动态场景）
+        # Calculate dynamic region metrics (for dynamic scenes)
         dynamic_metrics = self._calculate_region_metrics(
             flow, dynamic_mask, normalization_factor, 'dynamic'
         )
         
-        # 计算全局指标
+        # Calculate global metrics
         global_metrics = self._calculate_global_metrics(
             flow_magnitude_norm, static_mask, dynamic_mask
         )
@@ -162,16 +160,16 @@ class UnifiedDynamicsCalculator:
                                   normalization_factor: float,
                                   region_type: str) -> Dict:
         """
-        计算区域指标
+        Calculate region metrics
         
         Args:
-            flow: 光流
-            mask: 区域掩码
-            normalization_factor: 归一化因子
-            region_type: 区域类型 ('static' 或 'dynamic')
+            flow: Optical flow
+            mask: Region mask
+            normalization_factor: Normalization factor
+            region_type: Region type ('static' or 'dynamic')
             
         Returns:
-            区域指标字典
+            Region metrics dictionary
         """
         
         if not np.any(mask):
@@ -184,29 +182,27 @@ class UnifiedDynamicsCalculator:
                 'pixel_count': 0
             }
         
-        # 提取区域光流
+        # Extract region flow
         flow_x = flow[:, :, 0][mask]
         flow_y = flow[:, :, 1][mask]
         magnitude = np.sqrt(flow_x**2 + flow_y**2)
         
-        # 归一化
+        # Normalize
         if self.use_normalized_flow and normalization_factor > 0:
             magnitude = magnitude / normalization_factor
         
-        # 计算统计量
+        # Calculate statistics
         mean_mag = np.mean(magnitude)
         max_mag = np.max(magnitude)
         std_mag = np.std(magnitude)
         median_mag = np.median(magnitude)
         
-        # 根据区域类型计算分数
+        # Calculate score based on region type
         if region_type == 'static':
-            # 静态区域：期望残差光流越小越好
-            # 综合考虑均值和标准差
+            # Static region: expect small residual flow
             score = mean_mag + 0.5 * std_mag
         else:
-            # 动态区域：关注运动强度
-            # 综合考虑均值、标准差和峰值
+            # Dynamic region: focus on motion intensity
             score = mean_mag + 0.8 * std_mag + 0.3 * max_mag
         
         return {
@@ -222,17 +218,14 @@ class UnifiedDynamicsCalculator:
                                   flow_magnitude_norm: np.ndarray,
                                   static_mask: np.ndarray,
                                   dynamic_mask: np.ndarray) -> Dict:
-        """计算全局指标"""
+        """Calculate global metrics"""
         
-        # 全局统计
         global_mean = np.mean(flow_magnitude_norm)
         global_std = np.std(flow_magnitude_norm)
         global_max = np.max(flow_magnitude_norm)
         
-        # 运动覆盖率
         motion_coverage = np.sum(dynamic_mask) / dynamic_mask.size
         
-        # 一致性分数
         consistency = 1.0 - (global_std / (global_mean + 1e-6))
         consistency = max(0.0, min(1.0, consistency))
         
@@ -246,41 +239,36 @@ class UnifiedDynamicsCalculator:
     
     def _determine_scene_type(self, frame_results: List[Dict]) -> str:
         """
-        判断场景类型
+        Determine scene type
         
-        核心逻辑：
-        - 如果动态区域占比高且动态强度明显 → 动态场景
-        - 如果静态区域的残差很小 → 静态场景
-        - 否则根据哪个指标更显著来判断
+        Logic:
+        - If dynamic region ratio is high and motion is obvious -> dynamic scene
+        - If static region residual is very small -> static scene
+        - Otherwise decide based on which indicator is stronger
         
         Returns:
-            'static' 或 'dynamic'
+            'static' or 'dynamic'
         """
         
         if not self.scene_auto_detect:
-            # 如果禁用自动检测，默认为动态场景
             return 'dynamic'
         
-        # 统计指标
+        # Calculate average metrics
         avg_dynamic_ratio = np.mean([r['dynamic_ratio'] for r in frame_results])
         avg_dynamic_score = np.mean([r['dynamic_metrics']['score'] for r in frame_results])
         avg_static_score = np.mean([r['static_metrics']['score'] for r in frame_results])
         avg_motion_coverage = np.mean([r['global_metrics']['motion_coverage'] for r in frame_results])
         
-        # 判断逻辑
-        # 条件1: 明显的动态主体
+        # Detection logic
         if avg_dynamic_ratio > 0.15 and avg_dynamic_score > 0.01:
             return 'dynamic'
         
-        # 条件2: 运动覆盖率高
         if avg_motion_coverage > 0.2 and avg_dynamic_score > 0.008:
             return 'dynamic'
         
-        # 条件3: 静态区域残差很小
         if avg_static_score < 0.003:
             return 'static'
         
-        # 条件4: 根据哪个指标更显著
         if avg_dynamic_score > avg_static_score * 2.5:
             return 'dynamic'
         else:
@@ -290,25 +278,23 @@ class UnifiedDynamicsCalculator:
                                frame_results: List[Dict], 
                                scene_type: str) -> float:
         """
-        计算最终统一分数（使用线性映射）
+        Calculate final unified score (linear mapping)
         
-        关键改进：
-        - 使用完整的 0-1 范围
-        - 场景类型只决定关注哪个区域
-        - 分数纯粹反映动态程度
+        Key improvement:
+        - Uses full 0-1 range
+        - Scene type only determines which region to focus on
+        - Score purely reflects dynamics level
         
         Returns:
-            0-1 之间的动态度分数
+            Dynamics score between 0-1
         """
         
         if scene_type == 'static':
-            # 静态场景：关注静态区域的残差
             scores = [r['static_metrics']['score'] for r in frame_results]
             mean_score = np.mean(scores)
             unified_score = self._normalize_static_score(mean_score)
             
         else:  # dynamic
-            # 动态场景：关注动态区域的运动强度
             scores = [r['dynamic_metrics']['score'] for r in frame_results]
             mean_score = np.mean(scores)
             unified_score = self._normalize_dynamic_score(mean_score)
@@ -317,17 +303,17 @@ class UnifiedDynamicsCalculator:
     
     def _normalize_static_score(self, raw_score: float) -> float:
         """
-        归一化静态场景分数（线性映射）
+        Normalize static scene score (linear mapping)
         
-        静态场景的残差光流映射：
-        raw_score | unified_score | 含义
-        0.0001   -> 0.00         | 完美静止
-        0.001    -> 0.10         | 极低残差
-        0.003    -> 0.25         | 低残差
-        0.005    -> 0.35         | 中等残差
-        0.01     -> 0.55         | 较高残差
-        0.02     -> 0.75         | 高残差
-        0.05+    -> 1.00         | 极高残差/异常
+        Mapping table:
+        raw_score | unified_score | meaning
+        0.0001   -> 0.00         | perfectly still
+        0.001    -> 0.10         | extremely low residual
+        0.003    -> 0.25         | low residual
+        0.005    -> 0.35         | medium residual
+        0.01     -> 0.55         | high residual
+        0.02     -> 0.75         | very high residual
+        0.05+    -> 1.00         | extreme residual/anomaly
         """
         
         if raw_score < 0.001:
@@ -345,17 +331,17 @@ class UnifiedDynamicsCalculator:
     
     def _normalize_dynamic_score(self, raw_score: float) -> float:
         """
-        归一化动态场景分数（线性映射）
+        Normalize dynamic scene score (linear mapping)
         
-        动态场景的主体光流映射：
-        raw_score | unified_score | 含义
-        0.005    -> 0.10         | 主体几乎不动 ← 可筛选！
-        0.008    -> 0.20         | 主体轻微动作
-        0.015    -> 0.35         | 主体正常动作
-        0.025    -> 0.50         | 主体活跃动作
-        0.04     -> 0.65         | 主体快速动作
-        0.08     -> 0.85         | 主体剧烈动作
-        0.15+    -> 1.00         | 主体极度剧烈
+        Mapping table:
+        raw_score | unified_score | meaning
+        0.005    -> 0.10         | subject almost still (can be filtered!)
+        0.008    -> 0.20         | subject slight motion
+        0.015    -> 0.35         | subject normal motion
+        0.025    -> 0.50         | subject active motion
+        0.04     -> 0.65         | subject fast motion
+        0.08     -> 0.85         | subject intense motion
+        0.15+    -> 1.00         | subject extreme motion
         """
         
         if raw_score < 0.008:
@@ -374,7 +360,7 @@ class UnifiedDynamicsCalculator:
     def _calculate_temporal_stats(self, 
                                   frame_results: List[Dict], 
                                   scene_type: str) -> Dict:
-        """计算时序统计"""
+        """Calculate temporal statistics"""
         
         if scene_type == 'static':
             scores = [r['static_metrics']['score'] for r in frame_results]
@@ -396,51 +382,51 @@ class UnifiedDynamicsCalculator:
     
     def _classify_dynamics(self, score: float, scene_type: str) -> Dict:
         """
-        分类动态度等级
+        Classify dynamics level
         
         Args:
-            score: 统一动态度分数 (0-1)
-            scene_type: 场景类型
+            score: Unified dynamics score (0-1)
+            scene_type: Scene type
             
         Returns:
-            分类信息字典
+            Classification dictionary
         """
         
         if score < 0.15:
             category = 'pure_static'
-            description = '纯静态'
+            description = 'Pure Static'
             if scene_type == 'static':
-                examples = ['完全静止的建筑', '雕塑', '固定相机拍摄的静物']
+                examples = ['Buildings', 'Sculptures', 'Static objects']
             else:
-                examples = ['人物几乎不动', '静坐', '静止站立']
+                examples = ['Person standing still', 'Sitting', 'Almost no motion']
         elif score < 0.35:
             category = 'low_dynamic'
-            description = '低动态'
+            description = 'Low Dynamic'
             if scene_type == 'static':
-                examples = ['轻微振动', '飘动的旗帜', '微风中的树叶']
+                examples = ['Flags waving', 'Leaves in breeze']
             else:
-                examples = ['缓慢移动', '轻微调整姿势', '手部小动作']
+                examples = ['Slow movement', 'Small gestures', 'Minor adjustments']
         elif score < 0.60:
             category = 'medium_dynamic'
-            description = '中等动态'
+            description = 'Medium Dynamic'
             if scene_type == 'static':
-                examples = ['明显振动', '较大幅度摇动']
+                examples = ['Noticeable vibration', 'Swaying']
             else:
-                examples = ['正常行走', '日常活动', '普通手势']
+                examples = ['Walking', 'Daily activities', 'Normal gestures']
         elif score < 0.85:
             category = 'high_dynamic'
-            description = '高动态'
+            description = 'High Dynamic'
             if scene_type == 'static':
-                examples = ['剧烈振动', '快速摇动']
+                examples = ['Strong vibration', 'Fast swaying']
             else:
-                examples = ['跑步', '跳舞', '挥舞动作']
+                examples = ['Running', 'Dancing', 'Active movements']
         else:
             category = 'extreme_dynamic'
-            description = '极高动态'
+            description = 'Extreme Dynamic'
             if scene_type == 'static':
-                examples = ['严重异常运动', '设备故障']
+                examples = ['Severe anomaly', 'Equipment failure']
             else:
-                examples = ['快速舞蹈', '体育运动', '打斗场面']
+                examples = ['Fast dancing', 'Sports', 'Fighting scenes']
         
         return {
             'category': category,
@@ -455,45 +441,44 @@ class UnifiedDynamicsCalculator:
                                 score: float, 
                                 scene_type: str,
                                 temporal_stats: Dict) -> str:
-        """生成文字解释"""
+        """Generate textual interpretation"""
         
         classification = self._classify_dynamics(score, scene_type)
         
         if scene_type == 'static':
-            scene_desc = "静态场景（建筑、静物等）"
-            metric_desc = f"静态区域残差光流均值: {temporal_stats['mean_magnitude']:.6f}"
+            scene_desc = "Static scene (buildings, still objects)"
+            metric_desc = f"Static region residual flow mean: {temporal_stats['mean_magnitude']:.6f}"
         else:
-            scene_desc = "动态场景（人物、动物等）"
-            metric_desc = f"主体区域光流强度均值: {temporal_stats['mean_magnitude']:.6f}"
+            scene_desc = "Dynamic scene (people, animals)"
+            metric_desc = f"Subject region flow intensity mean: {temporal_stats['mean_magnitude']:.6f}"
         
         interpretation = f"""
-【场景类型】{scene_desc}
-【动态度分数】{score:.3f} / 1.000
-【动态等级】{classification['description']} ({classification['category']})
-【典型示例】{', '.join(classification['typical_examples'])}
+[Scene Type] {scene_desc}
+[Dynamics Score] {score:.3f} / 1.000
+[Dynamics Level] {classification['description']} ({classification['category']})
+[Typical Examples] {', '.join(classification['typical_examples'])}
 
-【技术指标】
+[Technical Metrics]
 - {metric_desc}
-- 时序稳定性: {temporal_stats['temporal_stability']:.3f}
-- 静态区域占比: {temporal_stats['mean_static_ratio']:.1%}
-- 动态区域占比: {temporal_stats['mean_dynamic_ratio']:.1%}
+- Temporal stability: {temporal_stats['temporal_stability']:.3f}
+- Static region ratio: {temporal_stats['mean_static_ratio']:.1%}
+- Dynamic region ratio: {temporal_stats['mean_dynamic_ratio']:.1%}
 """
         return interpretation.strip()
     
     def _get_empty_result(self) -> Dict:
-        """返回空结果"""
+        """Return empty result"""
         return {
             'unified_dynamics_score': 0.0,
             'scene_type': 'unknown',
             'classification': {
                 'category': 'unknown',
                 'category_id': -1,
-                'description': '无效数据',
+                'description': 'Invalid data',
                 'typical_examples': [],
                 'scene_type': 'unknown'
             },
             'frame_results': [],
             'temporal_stats': {},
-            'interpretation': '无法分析：输入数据为空'
+            'interpretation': 'Cannot analyze: input data is empty'
         }
-

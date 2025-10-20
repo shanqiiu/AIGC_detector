@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-视频处理器 - 处理相机转动拍摄静态建筑的视频
-计算静态物体的动态度
+Video Processor - Unified Dynamics Assessment System
+Processes videos to calculate unified dynamics scores (0-1 range)
 """
 
 import cv2
@@ -9,23 +9,21 @@ import numpy as np
 import os
 import json
 import glob
-from typing import List, Dict, Optional, Tuple, Union
+from typing import List, Dict, Optional, Tuple
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import argparse
 
 from simple_raft import SimpleRAFTPredictor as RAFTPredictor
-from static_object_analyzer import StaticObjectDynamicsCalculator
 from dynamic_motion_compensation.camera_compensation import CameraCompensator
-from unified_dynamics_scorer import UnifiedDynamicsScorer, DynamicsClassifier
-from badcase_detector import BadCaseDetector, BadCaseAnalyzer, QualityFilter
 from unified_dynamics_calculator import UnifiedDynamicsCalculator
 from video_quality_filter import VideoQualityFilter
 from dynamics_config import get_config
+from badcase_detector import BadCaseDetector, BadCaseAnalyzer
 
 
 class VideoProcessor:
-    """视频处理器"""
+    """Video Processor with Unified Dynamics Assessment"""
     
     def __init__(self, 
                  raft_model_path: Optional[str] = None,
@@ -35,78 +33,56 @@ class VideoProcessor:
                  enable_visualization: bool = True,
                  enable_camera_compensation: bool = True,
                  camera_compensation_params: Optional[Dict] = None,
-                 use_normalized_flow: bool = False,
-                 flow_threshold_ratio: float = 0.002,
-                 use_new_calculator: bool = True,
                  config_preset: str = 'balanced'):
         """
-        初始化视频处理器
+        Initialize Video Processor
         
         Args:
-            raft_model_path: RAFT模型路径
-            device: 计算设备
-            max_frames: 最大处理帧数
-            frame_skip: 帧跳跃间隔
-            enable_visualization: 是否生成可视化结果
-            enable_camera_compensation: 是否启用相机补偿（默认True）
-            camera_compensation_params: 相机补偿参数字典
-            use_normalized_flow: 是否使用分辨率归一化（默认False保持兼容）
-            flow_threshold_ratio: 归一化阈值比例（默认0.002）
-            use_new_calculator: 是否使用新的统一动态度计算器（默认True）
-            config_preset: 配置预设 ('strict', 'balanced', 'lenient')
+            raft_model_path: Path to RAFT model
+            device: Computing device ('cuda' or 'cpu')
+            max_frames: Maximum number of frames to process
+            frame_skip: Frame skip interval
+            enable_visualization: Whether to generate visualizations
+            enable_camera_compensation: Whether to enable camera compensation
+            camera_compensation_params: Camera compensation parameters
+            config_preset: Configuration preset ('strict', 'balanced', 'lenient')
         """
         self.raft_predictor = RAFTPredictor(raft_model_path, device, method='raft')
         self.max_frames = max_frames
         self.frame_skip = frame_skip
         self.enable_visualization = enable_visualization
         self.enable_camera_compensation = enable_camera_compensation
-        self.use_normalized_flow = use_normalized_flow
-        self.use_new_calculator = use_new_calculator
         
-        # 加载配置
+        # Load configuration
         self.config = get_config(config_preset)
         
-        # 初始化相机补偿器
+        # Initialize camera compensator
         if camera_compensation_params is None:
             camera_compensation_params = {}
         self.camera_compensator = CameraCompensator(**camera_compensation_params) if enable_camera_compensation else None
         
-        # 初始化动态度计算器（保留旧版本用于兼容）
-        self.dynamics_calculator = StaticObjectDynamicsCalculator(
-            use_normalized_flow=use_normalized_flow,
-            flow_threshold_ratio=flow_threshold_ratio
+        # Initialize unified dynamics calculator
+        self.dynamics_calculator = UnifiedDynamicsCalculator(
+            static_threshold=self.config['detection']['static_threshold'],
+            subject_threshold=self.config['detection']['subject_threshold'],
+            use_normalized_flow=self.config['flow']['use_normalized_flow'],
+            scene_auto_detect=self.config['scene_classification']['scene_auto_detect']
         )
         
-        # 初始化新的统一动态度计算器
-        if use_new_calculator:
-            self.unified_calculator = UnifiedDynamicsCalculator(
-                static_threshold=self.config['detection']['static_threshold'],
-                subject_threshold=self.config['detection']['subject_threshold'],
-                use_normalized_flow=use_normalized_flow,
-                scene_auto_detect=self.config['scene_classification']['scene_auto_detect']
-            )
+        # Initialize quality filter
+        self.quality_filter = VideoQualityFilter()
         
-        # 初始化统一动态度评分器（传递归一化状态）
-        self.unified_scorer = UnifiedDynamicsScorer(
-            mode='auto',
-            use_normalized_flow=use_normalized_flow
-        )
-        self.dynamics_classifier = DynamicsClassifier()
-        
-        # 初始化BadCase检测器
+        # Initialize BadCase detector
         self.badcase_detector = BadCaseDetector()
         self.badcase_analyzer = BadCaseAnalyzer()
         
-        # 初始化视频质量筛选器
-        self.quality_filter = VideoQualityFilter()
-        
     def load_video(self, video_path: str) -> List[np.ndarray]:
-        """加载视频帧"""
+        """Load video frames"""
         cap = cv2.VideoCapture(video_path)
         frames = []
         frame_count = 0
         
-        print(f"正在加载视频: {video_path}")
+        print(f"Loading video: {video_path}")
         
         while True:
             ret, frame = cap.read()
@@ -114,7 +90,6 @@ class VideoProcessor:
                 break
                 
             if frame_count % self.frame_skip == 0:
-                # 转换BGR到RGB
                 frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
                 frames.append(frame_rgb)
                 
@@ -124,11 +99,11 @@ class VideoProcessor:
             frame_count += 1
         
         cap.release()
-        print(f"加载完成，共 {len(frames)} 帧")
+        print(f"Loaded {len(frames)} frames")
         return frames
     
     def extract_frames_from_images(self, image_dir: str) -> List[np.ndarray]:
-        """从图像目录加载帧"""
+        """Load frames from image directory"""
         image_files = []
         for ext in ['*.jpg', '*.jpeg', '*.png', '*.bmp']:
             image_files.extend(glob.glob(os.path.join(image_dir, ext)))
@@ -136,7 +111,7 @@ class VideoProcessor:
         image_files.sort()
         frames = []
         
-        print(f"正在从目录加载图像: {image_dir}")
+        print(f"Loading images from: {image_dir}")
         
         for i, img_path in enumerate(image_files):
             if self.max_frames and i >= self.max_frames:
@@ -147,17 +122,14 @@ class VideoProcessor:
                 img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
                 frames.append(img_rgb)
         
-        print(f"加载完成，共 {len(frames)} 帧")
+        print(f"Loaded {len(frames)} frames")
         return frames
     
     def estimate_camera_matrix(self, frame_shape: Tuple[int, int], fov: float = 60.0) -> np.ndarray:
-        """估计相机内参矩阵"""
+        """Estimate camera intrinsic matrix"""
         h, w = frame_shape[:2]
-        
-        # 基于视场角估计焦距
         focal_length = w / (2 * np.tan(np.radians(fov / 2)))
         
-        # 构建相机内参矩阵
         camera_matrix = np.array([
             [focal_length, 0, w / 2],
             [0, focal_length, h / 2],
@@ -170,146 +142,116 @@ class VideoProcessor:
                      frames: List[np.ndarray],
                      camera_matrix: Optional[np.ndarray] = None,
                      output_dir: str = 'output') -> Dict:
-        """处理视频序列"""
+        """Process video sequence"""
         
         if len(frames) < 2:
-            raise ValueError("至少需要2帧图像")
+            raise ValueError("At least 2 frames required")
         
-        # 创建输出目录
         os.makedirs(output_dir, exist_ok=True)
         
-        # 如果没有提供相机矩阵，估计一个
         if camera_matrix is None:
             camera_matrix = self.estimate_camera_matrix(frames[0].shape)
-            print("使用估计的相机内参矩阵")
+            print("Using estimated camera matrix")
         
-        print("开始计算光流...")
+        print("Computing optical flow...")
         
-        # 计算所有帧间的光流
-        flows = []  # 用于分析的光流（可能是补偿后的）
-        original_flows = []  # 原始光流
-        camera_compensation_results = []  # 存储相机补偿结果
+        # Calculate optical flow
+        flows = []
+        original_flows = []
+        camera_compensation_results = []
         
-        for i in tqdm(range(len(frames) - 1), desc="计算光流"):
+        for i in tqdm(range(len(frames) - 1), desc="Computing flow"):
             flow = self.raft_predictor.predict_flow(frames[i], frames[i + 1])
-            # 确保flow格式正确 (2, H, W) -> (H, W, 2)
+            
+            # Ensure flow format (2, H, W) -> (H, W, 2)
             if flow.shape[0] == 2:
-                flow = flow.transpose(1, 2, 0)  # (2, H, W) -> (H, W, 2)
+                flow = flow.transpose(1, 2, 0)
             elif len(flow.shape) == 2:
-                # 如果是2D，可能需要添加通道维度
-                print(f"警告: 帧{i}的光流形状异常: {flow.shape}")
+                print(f"Warning: abnormal flow shape at frame {i}: {flow.shape}")
                 continue
             
-            original_flows.append(flow.copy())  # 保存原始光流
+            original_flows.append(flow.copy())
             
-            # 应用相机补偿
+            # Apply camera compensation
             if self.enable_camera_compensation and self.camera_compensator is not None:
                 comp_result = self.camera_compensator.compensate(flow, frames[i], frames[i + 1])
                 camera_compensation_results.append(comp_result)
-                # 使用残差光流（补偿后的光流）用于分析
                 flows.append(comp_result['residual_flow'])
             else:
                 flows.append(flow)
                 camera_compensation_results.append(None)
         
-        # 使用新的统一计算器或旧的计算器
-        if self.use_new_calculator:
-            print("使用新的统一动态度计算器...")
-            
-            # 使用新的统一计算器
-            unified_result = self.unified_calculator.calculate_unified_dynamics(
-                flows, frames, camera_matrix
-            )
-            
-            # 添加相机补偿信息
-            unified_result['camera_compensation_enabled'] = self.enable_camera_compensation
-            unified_result['camera_compensation_results'] = camera_compensation_results
-            unified_result['original_flows'] = original_flows
-            
-            # 兼容旧格式
-            temporal_result = {
-                'frame_results': unified_result['frame_results'],
-                'temporal_stats': unified_result['temporal_stats'],
-                'unified_dynamics': {
-                    'unified_dynamics_score': unified_result['unified_dynamics_score'],
-                    'scene_type': unified_result['scene_type'],
-                    'confidence': unified_result['temporal_stats'].get('temporal_stability', 0.0)
-                },
-                'dynamics_classification': unified_result['classification'],
-                'camera_compensation_enabled': self.enable_camera_compensation,
-                'camera_compensation_results': camera_compensation_results,
-                'original_flows': original_flows
-            }
-            
-        else:
-            print("使用旧版动态度计算器...")
-            
-            # 计算时序动态度（旧版）
-            temporal_result = self.dynamics_calculator.calculate_temporal_dynamics(
-                flows, frames, camera_matrix
-            )
-            
-            # 添加相机补偿信息到结果中
-            temporal_result['camera_compensation_enabled'] = self.enable_camera_compensation
-            temporal_result['camera_compensation_results'] = camera_compensation_results
-            temporal_result['original_flows'] = original_flows
-            
-            # 计算统一动态度分数
-            print("计算统一动态度分数...")
-            unified_result = self.unified_scorer.calculate_unified_score(
-                temporal_result, self.enable_camera_compensation
-            )
-            
-            # 分类动态度
-            classification = self.dynamics_classifier.classify(
-                unified_result['unified_dynamics_score']
-            )
-            
-            # 添加到结果中
-            temporal_result['unified_dynamics'] = unified_result
-            temporal_result['dynamics_classification'] = classification
+        print("Analyzing unified dynamics...")
         
-        # 保存结果
-        self.save_results(temporal_result, frames, flows, output_dir)
+        # Calculate unified dynamics
+        unified_result = self.dynamics_calculator.calculate_unified_dynamics(
+            flows, frames, camera_matrix
+        )
         
-        return temporal_result
+        # Add camera compensation info
+        unified_result['camera_compensation_enabled'] = self.enable_camera_compensation
+        unified_result['camera_compensation_results'] = camera_compensation_results
+        unified_result['original_flows'] = original_flows
+        
+        # Build result structure
+        result = {
+            'frame_results': unified_result['frame_results'],
+            'temporal_stats': unified_result['temporal_stats'],
+            'unified_dynamics': {
+                'unified_dynamics_score': unified_result['unified_dynamics_score'],
+                'scene_type': unified_result['scene_type'],
+                'confidence': unified_result['temporal_stats'].get('temporal_stability', 0.0),
+                'interpretation': unified_result['interpretation']
+            },
+            'dynamics_classification': unified_result['classification'],
+            'camera_compensation_enabled': self.enable_camera_compensation,
+            'camera_compensation_results': camera_compensation_results,
+            'original_flows': original_flows
+        }
+        
+        # Save results
+        self.save_results(result, frames, flows, output_dir)
+        
+        return result
     
     def save_results(self, 
                     result: Dict,
                     frames: List[np.ndarray],
                     flows: List[np.ndarray],
                     output_dir: str):
-        """保存分析结果"""
+        """Save analysis results"""
         
-        # 保存数值结果
+        # Prepare numeric results
         numeric_result = {
             'temporal_stats': result['temporal_stats'],
             'frame_count': len(frames),
             'flow_count': len(flows),
             'camera_compensation_enabled': result.get('camera_compensation_enabled', False),
-            # 统一动态度分数（新增）
-            'unified_dynamics_score': result.get('unified_dynamics', {}).get('unified_dynamics_score', None),
-            'scene_type': result.get('unified_dynamics', {}).get('scene_type', None),
-            'dynamics_category': result.get('dynamics_classification', {}).get('category', None),
-            'dynamics_category_id': result.get('dynamics_classification', {}).get('category_id', None)
+            'unified_dynamics_score': result['unified_dynamics']['unified_dynamics_score'],
+            'scene_type': result['unified_dynamics']['scene_type'],
+            'dynamics_category': result['dynamics_classification']['category'],
+            'dynamics_category_id': result['dynamics_classification']['category_id'],
+            'confidence': result['unified_dynamics']['confidence']
         }
         
-        # 添加相机补偿统计信息
+        # Add camera compensation stats
         if result.get('camera_compensation_enabled', False):
             camera_comp_results = result.get('camera_compensation_results', [])
             comp_stats = self._calculate_camera_compensation_stats(camera_comp_results)
             numeric_result['camera_compensation_stats'] = comp_stats
         
-        # 添加每帧的数值结果
+        # Add frame results
         numeric_result['frame_results'] = []
         for i, frame_result in enumerate(result['frame_results']):
             numeric_frame_result = {
                 'frame_index': i,
-                'static_dynamics': frame_result['static_dynamics'],
-                'global_dynamics': frame_result['global_dynamics']
+                'static_metrics': frame_result['static_metrics'],
+                'dynamic_metrics': frame_result['dynamic_metrics'],
+                'global_metrics': frame_result['global_metrics'],
+                'static_ratio': frame_result['static_ratio'],
+                'dynamic_ratio': frame_result['dynamic_ratio']
             }
             
-            # 添加相机补偿信息
             if result.get('camera_compensation_enabled', False) and i < len(result.get('camera_compensation_results', [])):
                 comp_result = result['camera_compensation_results'][i]
                 if comp_result is not None:
@@ -321,23 +263,23 @@ class VideoProcessor:
             
             numeric_result['frame_results'].append(numeric_frame_result)
         
-        # 保存JSON结果
+        # Save JSON
         with open(os.path.join(output_dir, 'analysis_results.json'), 'w', encoding='utf-8') as f:
             json.dump(numeric_result, f, indent=2, ensure_ascii=False)
         
-        # 生成并保存报告
+        # Generate and save report
         report = self.generate_video_report(result)
         with open(os.path.join(output_dir, 'analysis_report.txt'), 'w', encoding='utf-8') as f:
             f.write(report)
         
-        # 保存可视化结果（如果启用）
+        # Save visualizations
         if self.enable_visualization:
             self.save_visualizations(result, frames, flows, output_dir)
         
-        print(f"结果已保存到: {output_dir}")
+        print(f"Results saved to: {output_dir}")
     
     def _calculate_camera_compensation_stats(self, camera_comp_results: List[Optional[Dict]]) -> Dict:
-        """计算相机补偿统计信息"""
+        """Calculate camera compensation statistics"""
         if not camera_comp_results:
             return {}
         
@@ -371,91 +313,141 @@ class VideoProcessor:
                            frames: List[np.ndarray],
                            flows: List[np.ndarray],
                            output_dir: str):
-        """保存可视化结果"""
+        """Save visualizations"""
         
         vis_dir = os.path.join(output_dir, 'visualizations')
         os.makedirs(vis_dir, exist_ok=True)
         
-        # 保存关键帧的详细分析
+        # Save key frame analyses
         key_frames = [0, len(frames)//4, len(frames)//2, 3*len(frames)//4, len(frames)-2]
         key_frames = [i for i in key_frames if i < len(result['frame_results'])]
         
         for i in key_frames:
-            frame_result = result['frame_results'][i]
-            fig = self.dynamics_calculator.visualize_results(
-                frames[i], flows[i], frame_result
-            )
-            fig.savefig(os.path.join(vis_dir, f'frame_{i:04d}_analysis.png'), 
-                       dpi=300, bbox_inches='tight')
-            plt.close(fig)
+            self._visualize_frame(i, frames[i], flows[i], result['frame_results'][i], vis_dir)
         
-        # 绘制时序动态度曲线
+        # Plot temporal dynamics
         self.plot_temporal_dynamics(result, os.path.join(vis_dir, 'temporal_dynamics.png'))
         
-        # 绘制静态区域比例变化
-        self.plot_static_ratio_changes(result, os.path.join(vis_dir, 'static_ratio_changes.png'))
-        
-        # 如果启用了相机补偿，绘制补偿效果对比
+        # Plot camera compensation comparison if enabled
         if result.get('camera_compensation_enabled', False):
-            self.plot_camera_compensation_comparison(result, frames, os.path.join(vis_dir, 'camera_compensation_comparison.png'))
+            self.plot_camera_compensation_comparison(result, frames, os.path.join(vis_dir, 'camera_compensation.png'))
+    
+    def _visualize_frame(self, frame_idx: int, image: np.ndarray, flow: np.ndarray, frame_result: Dict, vis_dir: str):
+        """Visualize single frame analysis"""
+        fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+        
+        # Original image
+        axes[0, 0].imshow(image)
+        axes[0, 0].set_title(f'Frame {frame_idx}')
+        axes[0, 0].axis('off')
+        
+        # Flow magnitude
+        flow_mag = np.sqrt(flow[:, :, 0]**2 + flow[:, :, 1]**2)
+        im1 = axes[0, 1].imshow(flow_mag, cmap='jet')
+        axes[0, 1].set_title('Flow Magnitude')
+        axes[0, 1].axis('off')
+        plt.colorbar(im1, ax=axes[0, 1])
+        
+        # Flow vectors
+        step = 16
+        y, x = np.mgrid[step//2:flow.shape[0]:step, step//2:flow.shape[1]:step]
+        fx = flow[::step, ::step, 0]
+        fy = flow[::step, ::step, 1]
+        axes[0, 2].imshow(image)
+        axes[0, 2].quiver(x, y, fx, fy, color='red', alpha=0.7)
+        axes[0, 2].set_title('Flow Vectors')
+        axes[0, 2].axis('off')
+        
+        # Metrics text
+        static_score = frame_result['static_metrics']['score']
+        dynamic_score = frame_result['dynamic_metrics']['score']
+        static_ratio = frame_result['static_ratio']
+        dynamic_ratio = frame_result['dynamic_ratio']
+        
+        metrics_text = f"""
+Frame Metrics:
+- Static score: {static_score:.4f}
+- Dynamic score: {dynamic_score:.4f}
+- Static ratio: {static_ratio:.2%}
+- Dynamic ratio: {dynamic_ratio:.2%}
+        """
+        
+        axes[1, 0].text(0.1, 0.5, metrics_text, fontsize=10, verticalalignment='center')
+        axes[1, 0].axis('off')
+        
+        # Static region visualization
+        # (Simplified - can be enhanced)
+        axes[1, 1].imshow(flow_mag < 0.002, cmap='gray')
+        axes[1, 1].set_title('Static Regions')
+        axes[1, 1].axis('off')
+        
+        # Dynamic region visualization
+        axes[1, 2].imshow(flow_mag > 0.005, cmap='hot')
+        axes[1, 2].set_title('Dynamic Regions')
+        axes[1, 2].axis('off')
+        
+        plt.tight_layout()
+        plt.savefig(os.path.join(vis_dir, f'frame_{frame_idx:04d}.png'), dpi=300, bbox_inches='tight')
+        plt.close()
     
     def plot_temporal_dynamics(self, result: Dict, save_path: str):
-        """绘制时序动态度曲线"""
+        """Plot temporal dynamics curves"""
         frame_results = result['frame_results']
         
-        dynamics_scores = [r['static_dynamics']['dynamics_score'] for r in frame_results]
-        static_ratios = [r['global_dynamics']['static_ratio'] for r in frame_results]
-        consistency_scores = [r['global_dynamics']['consistency_score'] for r in frame_results]
+        static_scores = [r['static_metrics']['score'] for r in frame_results]
+        dynamic_scores = [r['dynamic_metrics']['score'] for r in frame_results]
+        static_ratios = [r['static_ratio'] for r in frame_results]
+        dynamic_ratios = [r['dynamic_ratio'] for r in frame_results]
         
         fig, axes = plt.subplots(3, 1, figsize=(12, 10))
         
-        # 动态度分数
-        axes[0].plot(dynamics_scores, 'b-', linewidth=2, label='Dynamics Score')
-        axes[0].axhline(y=1.0, color='r', linestyle='--', alpha=0.7, label='Low Threshold')
-        axes[0].axhline(y=2.0, color='orange', linestyle='--', alpha=0.7, label='High Threshold')
-        axes[0].set_ylabel('Dynamics Score')
-        axes[0].set_title('Static Object Dynamics Over Time')
+        # Dynamics scores
+        axes[0].plot(static_scores, 'b-', linewidth=2, label='Static Score')
+        axes[0].plot(dynamic_scores, 'r-', linewidth=2, label='Dynamic Score')
+        axes[0].set_ylabel('Score')
+        axes[0].set_title('Dynamics Scores Over Time')
         axes[0].legend()
         axes[0].grid(True, alpha=0.3)
         
-        # 静态区域比例
+        # Region ratios
         axes[1].plot(static_ratios, 'g-', linewidth=2, label='Static Ratio')
-        axes[1].axhline(y=0.7, color='r', linestyle='--', alpha=0.7, label='Good Threshold')
-        axes[1].set_ylabel('Static Ratio')
-        axes[1].set_title('Static Region Ratio Over Time')
+        axes[1].plot(dynamic_ratios, 'm-', linewidth=2, label='Dynamic Ratio')
+        axes[1].set_ylabel('Ratio')
+        axes[1].set_title('Region Ratios Over Time')
         axes[1].legend()
         axes[1].grid(True, alpha=0.3)
         
-        # 一致性分数
-        axes[2].plot(consistency_scores, 'm-', linewidth=2, label='Consistency Score')
-        axes[2].set_ylabel('Consistency Score')
+        # Stacked area
+        axes[2].fill_between(range(len(static_ratios)), 0, static_ratios, alpha=0.7, color='green', label='Static')
+        axes[2].fill_between(range(len(static_ratios)), static_ratios, 1.0, alpha=0.7, color='red', label='Dynamic')
+        axes[2].set_ylabel('Proportion')
         axes[2].set_xlabel('Frame Index')
-        axes[2].set_title('Flow Consistency Over Time')
+        axes[2].set_title('Static vs Dynamic Regions')
         axes[2].legend()
         axes[2].grid(True, alpha=0.3)
+        axes[2].set_ylim(0, 1)
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         plt.close()
     
     def plot_camera_compensation_comparison(self, result: Dict, frames: List[np.ndarray], save_path: str):
-        """绘制相机补偿效果对比"""
+        """Plot camera compensation comparison"""
         original_flows = result.get('original_flows', [])
         camera_comp_results = result.get('camera_compensation_results', [])
         
         if not original_flows or not camera_comp_results:
             return
         
-        # 选择几个关键帧进行对比
-        key_frames = [0, len(original_flows)//4, len(original_flows)//2, 3*len(original_flows)//4, len(original_flows)-1]
+        # Select key frames
+        key_frames = [0, len(original_flows)//2, len(original_flows)-1]
         key_frames = [i for i in key_frames if i < len(original_flows) and camera_comp_results[i] is not None]
         
         if not key_frames:
             return
         
-        # 创建对比图
-        n_frames = min(3, len(key_frames))  # 最多显示3帧
-        fig, axes = plt.subplots(n_frames, 4, figsize=(20, 5*n_frames))
+        n_frames = min(3, len(key_frames))
+        fig, axes = plt.subplots(n_frames, 3, figsize=(15, 5*n_frames))
         
         if n_frames == 1:
             axes = axes.reshape(1, -1)
@@ -464,391 +456,234 @@ class VideoProcessor:
             original_flow = original_flows[frame_idx]
             comp_result = camera_comp_results[frame_idx]
             
-            # 计算幅度
             original_mag = np.sqrt(original_flow[:, :, 0]**2 + original_flow[:, :, 1]**2)
             camera_mag = np.sqrt(comp_result['camera_flow'][:, :, 0]**2 + comp_result['camera_flow'][:, :, 1]**2)
             residual_mag = np.sqrt(comp_result['residual_flow'][:, :, 0]**2 + comp_result['residual_flow'][:, :, 1]**2)
             
-            # 原始帧
-            axes[idx, 0].imshow(frames[frame_idx])
-            axes[idx, 0].set_title(f'Frame {frame_idx}')
+            vmax = np.percentile(original_mag, 95)
+            
+            im1 = axes[idx, 0].imshow(original_mag, cmap='jet', vmin=0, vmax=vmax)
+            axes[idx, 0].set_title(f'Frame {frame_idx}: Original Flow')
             axes[idx, 0].axis('off')
+            plt.colorbar(im1, ax=axes[idx, 0])
             
-            # 原始光流
-            im1 = axes[idx, 1].imshow(original_mag, cmap='jet', vmin=0, vmax=np.percentile(original_mag, 95))
-            axes[idx, 1].set_title(f'Original Flow\n(mean={original_mag.mean():.2f})')
+            im2 = axes[idx, 1].imshow(camera_mag, cmap='jet', vmin=0, vmax=vmax)
+            axes[idx, 1].set_title(f'Camera Flow (inliers={comp_result["inliers"]})')
             axes[idx, 1].axis('off')
-            plt.colorbar(im1, ax=axes[idx, 1], fraction=0.046)
+            plt.colorbar(im2, ax=axes[idx, 1])
             
-            # 相机光流
-            im2 = axes[idx, 2].imshow(camera_mag, cmap='jet', vmin=0, vmax=np.percentile(original_mag, 95))
-            axes[idx, 2].set_title(f'Camera Flow\n(inliers={comp_result["inliers"]})')
+            im3 = axes[idx, 2].imshow(residual_mag, cmap='jet', vmin=0, vmax=vmax)
+            axes[idx, 2].set_title(f'Residual Flow (mean={residual_mag.mean():.2f})')
             axes[idx, 2].axis('off')
-            plt.colorbar(im2, ax=axes[idx, 2], fraction=0.046)
-            
-            # 残差光流
-            im3 = axes[idx, 3].imshow(residual_mag, cmap='jet', vmin=0, vmax=np.percentile(residual_mag, 95))
-            axes[idx, 3].set_title(f'Residual Flow\n(mean={residual_mag.mean():.2f})')
-            axes[idx, 3].axis('off')
-            plt.colorbar(im3, ax=axes[idx, 3], fraction=0.046)
-        
-        plt.tight_layout()
-        plt.savefig(save_path, dpi=300, bbox_inches='tight')
-        plt.close()
-    
-    def plot_static_ratio_changes(self, result: Dict, save_path: str):
-        """绘制静态区域比例变化"""
-        frame_results = result['frame_results']
-        
-        static_ratios = [r['global_dynamics']['static_ratio'] for r in frame_results]
-        dynamic_ratios = [r['global_dynamics']['dynamic_ratio'] for r in frame_results]
-        
-        fig, ax = plt.subplots(figsize=(12, 6))
-        
-        x = range(len(static_ratios))
-        ax.fill_between(x, 0, static_ratios, alpha=0.7, color='green', label='Static Regions')
-        ax.fill_between(x, static_ratios, 1.0, alpha=0.7, color='red', label='Dynamic Regions')
-        
-        ax.set_ylabel('Region Ratio')
-        ax.set_xlabel('Frame Index')
-        ax.set_title('Static vs Dynamic Region Ratio Over Time')
-        ax.legend()
-        ax.grid(True, alpha=0.3)
-        ax.set_ylim(0, 1)
+            plt.colorbar(im3, ax=axes[idx, 2])
         
         plt.tight_layout()
         plt.savefig(save_path, dpi=300, bbox_inches='tight')
         plt.close()
     
     def generate_video_report(self, result: Dict) -> str:
-        """生成视频分析报告"""
+        """Generate video analysis report"""
         temporal_stats = result['temporal_stats']
-        frame_count = len(result['frame_results'])
-        camera_comp_enabled = result.get('camera_compensation_enabled', False)
-        
-        # 获取统一动态度信息
-        unified_dynamics = result.get('unified_dynamics', {})
-        dynamics_class = result.get('dynamics_classification', {})
+        unified_dynamics = result['unified_dynamics']
+        classification = result['dynamics_classification']
         
         report = f"""
-视频动态度综合分析报告
-================================================
+{'='*70}
+Video Dynamics Assessment Report
+{'='*70}
 
-视频基本信息:
-- 总帧数: {frame_count}
-- 分析帧数: {len(result['frame_results'])}
-- 相机补偿: {'启用' if camera_comp_enabled else '禁用'}
+Basic Information:
+- Total frames: {len(result['frame_results'])}
+- Camera compensation: {'Enabled' if result.get('camera_compensation_enabled') else 'Disabled'}
+
+{'='*70}
+Unified Dynamics Score
+{'='*70}
+
+Score: {unified_dynamics['unified_dynamics_score']:.3f} / 1.000
+Scene Type: {unified_dynamics['scene_type']}
+Classification: {classification['description']} ({classification['category']})
+Confidence: {unified_dynamics['confidence']:.3f}
+
+Typical Examples: {', '.join(classification['typical_examples'])}
+
+{'='*70}
+Detailed Interpretation
+{'='*70}
+
+{unified_dynamics['interpretation']}
+
+{'='*70}
+Technical Metrics
+{'='*70}
+
+Mean Score: {temporal_stats['mean_score']:.6f}
+Score Std Dev: {temporal_stats['std_score']:.6f}
+Max Score: {temporal_stats['max_score']:.6f}
+Min Score: {temporal_stats['min_score']:.6f}
+
+Mean Magnitude: {temporal_stats['mean_magnitude']:.6f}
+Temporal Stability: {temporal_stats['temporal_stability']:.3f}
+
+Static Region Ratio: {temporal_stats['mean_static_ratio']:.1%}
+Dynamic Region Ratio: {temporal_stats['mean_dynamic_ratio']:.1%}
 
 """
         
-        # 添加统一动态度评估
-        if unified_dynamics:
-            unified_score = unified_dynamics.get('unified_dynamics_score', 0)
-            scene_type = unified_dynamics.get('scene_type', 'unknown')
-            confidence = unified_dynamics.get('confidence', 0)
-            
-            report += f"""
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-📊 统一动态度评估 (Unified Dynamics Score)
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-综合动态度分数: {unified_score:.3f} / 1.000
-场景类型: {scene_type}
-置信度: {confidence:.1%}
-
-分类结果: {dynamics_class.get('description', 'N/A')}
-典型例子: {', '.join(dynamics_class.get('typical_examples', []))}
-
-{unified_dynamics.get('interpretation', '')}
-
-"""
-        
-        report += """
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-"""
-        
-        # 添加相机补偿统计
-        if camera_comp_enabled and 'camera_compensation_results' in result:
-            comp_stats = self._calculate_camera_compensation_stats(result['camera_compensation_results'])
+        # Add camera compensation stats
+        if result.get('camera_compensation_enabled'):
+            comp_stats = self._calculate_camera_compensation_stats(result.get('camera_compensation_results', []))
             if comp_stats:
-                report += f"""相机运动补偿统计:
-- 成功率: {comp_stats['success_rate']:.1%} ({comp_stats['successful_frames']}/{comp_stats['total_frames']})
-- 平均内点数: {comp_stats['mean_inliers']:.1f} ± {comp_stats['std_inliers']:.1f}
-- 平均匹配率: {comp_stats['mean_match_ratio']:.1%} ± {comp_stats['std_match_ratio']:.1%}
+                report += f"""
+{'='*70}
+Camera Compensation Statistics
+{'='*70}
+
+Success Rate: {comp_stats['success_rate']:.1%} ({comp_stats['successful_frames']}/{comp_stats['total_frames']})
+Mean Inliers: {comp_stats['mean_inliers']:.1f} ± {comp_stats['std_inliers']:.1f}
+Mean Match Ratio: {comp_stats['mean_match_ratio']:.1%} ± {comp_stats['std_match_ratio']:.1%}
 
 """
-        
-        report += f"""时序动态度统计:
-- 平均动态度分数: {temporal_stats['mean_dynamics_score']:.3f}
-- 动态度分数标准差: {temporal_stats['std_dynamics_score']:.3f}
-- 最大动态度分数: {temporal_stats['max_dynamics_score']:.3f}
-- 最小动态度分数: {temporal_stats['min_dynamics_score']:.3f}
-
-静态区域分析:
-- 平均静态区域比例: {temporal_stats['mean_static_ratio']:.3f}
-- 静态区域比例标准差: {temporal_stats['std_static_ratio']:.3f}
-
-一致性分析:
-- 平均一致性分数: {temporal_stats['mean_consistency_score']:.3f}
-- 时序稳定性: {temporal_stats['temporal_stability']:.3f}
-
-综合评估:
-"""
-        
-        # 添加综合评估
-        mean_dynamics = temporal_stats['mean_dynamics_score']
-        mean_static_ratio = temporal_stats['mean_static_ratio']
-        temporal_stability = temporal_stats['temporal_stability']
-        
-        if mean_dynamics < 1.0:
-            report += "✓ 静态物体动态度低，相机运动补偿效果良好\n"
-        elif mean_dynamics < 2.0:
-            report += "△ 静态物体动态度中等，存在轻微残余运动\n"
-        else:
-            report += "✗ 静态物体动态度高，可能存在补偿误差或真实物体运动\n"
-        
-        if mean_static_ratio > 0.7:
-            report += "✓ 场景主要由静态物体组成，适合进行静态物体动态度分析\n"
-        elif mean_static_ratio > 0.5:
-            report += "△ 场景中静态和动态区域比例适中\n"
-        else:
-            report += "⚠ 场景中动态区域较多，静态物体动态度分析可能不够准确\n"
-        
-        if temporal_stability > 0.8:
-            report += "✓ 时序稳定性高，动态度计算结果可靠\n"
-        elif temporal_stability > 0.6:
-            report += "△ 时序稳定性中等\n"
-        else:
-            report += "⚠ 时序稳定性低，结果可能存在较大波动\n"
-        
-        # 添加建议
-        report += "\n建议:\n"
-        
-        if mean_dynamics > 1.5:
-            report += "- 考虑调整相机运动估计参数或使用更精确的相机标定\n"
-            report += "- 检查是否存在真实的物体运动（如风吹、振动等）\n"
-        
-        if mean_static_ratio < 0.6:
-            report += "- 当前场景动态内容较多，建议选择更静态的场景进行测试\n"
-        
-        if temporal_stability < 0.7:
-            report += "- 动态度计算结果波动较大，建议增加时序平滑或调整参数\n"
         
         return report
 
 
-def load_expected_labels(label_file: str) -> Dict[str, Union[str, float]]:
-    """加载期望标签文件（用于BadCase检测）"""
-    labels = {}
-    if label_file.endswith('.json'):
-        with open(label_file, 'r', encoding='utf-8') as f:
-            labels = json.load(f)
-    return labels
-
-
 def process_single_video(processor, video_path, output_dir, camera_fov, expected_label=None):
-    """
-    处理单个视频
-    
-    Args:
-        processor: VideoProcessor实例
-        video_path: 视频路径
-        output_dir: 输出目录
-        camera_fov: 相机视场角
-        expected_label: 期望标签（可选，用于BadCase检测）
-    """
+    """Process single video"""
     video_name = os.path.splitext(os.path.basename(video_path))[0]
     video_output_dir = os.path.join(output_dir, video_name)
     
     print(f"\n{'='*70}")
-    print(f"处理视频: {video_name}")
+    print(f"Processing: {video_name}")
     if expected_label is not None:
-        print(f"期望标签: {expected_label}")
+        print(f"Expected label: {expected_label}")
     print(f"{'='*70}")
     
     try:
-        # 加载视频
         frames = processor.load_video(video_path)
-        
-        # 估计相机内参
         camera_matrix = processor.estimate_camera_matrix(frames[0].shape, camera_fov)
-        
-        # 处理视频
         result = processor.process_video(frames, camera_matrix, video_output_dir)
         
-        # 提取基础信息
         temporal_stats = result['temporal_stats']
-        unified = result.get('unified_dynamics', {})
-        actual_score = unified.get('unified_dynamics_score', 0.5)
-        confidence = unified.get('confidence', 0.0)
+        unified = result['unified_dynamics']
         
-        # 构建基础返回结果
         video_result = {
             'video_name': video_name,
             'video_path': video_path,
             'status': 'success',
             'frame_count': len(frames),
-            'mean_dynamics_score': temporal_stats['mean_dynamics_score'],
-            'mean_static_ratio': temporal_stats['mean_static_ratio'],
-            'temporal_stability': temporal_stats['temporal_stability'],
-            'actual_score': actual_score,
-            'confidence': confidence,
+            'unified_dynamics_score': unified['unified_dynamics_score'],
+            'scene_type': unified['scene_type'],
+            'classification': result['dynamics_classification'],
+            'confidence': unified['confidence'],
+            'temporal_stats': temporal_stats,
             'output_dir': video_output_dir,
             'full_result': result
         }
         
-        # 如果提供了期望标签，进行BadCase检测
+        # BadCase detection if label provided
         if expected_label is not None:
-            badcase_result = processor.badcase_analyzer.analyze_with_details(
-                result, expected_label
-            )
-            
-            result['badcase_detection'] = badcase_result
+            badcase_result = processor.badcase_analyzer.analyze_with_details(result, expected_label)
             video_result['expected_label'] = expected_label
             video_result['is_badcase'] = badcase_result['is_badcase']
             video_result['badcase_type'] = badcase_result.get('badcase_type', 'normal')
-            video_result['severity'] = badcase_result.get('severity', 'normal')
-            video_result['mismatch_score'] = badcase_result.get('mismatch_score', 0.0)
             
-            # 保存BadCase检测结果
-            badcase_report_path = os.path.join(video_output_dir, 'badcase_report.txt')
-            with open(badcase_report_path, 'w', encoding='utf-8') as f:
-                f.write(f"视频: {video_name}\n")
-                f.write(f"期望标签: {expected_label}\n")
-                f.write(f"实际动态度: {actual_score:.3f}\n")
-                f.write(f"是否BadCase: {'是' if badcase_result['is_badcase'] else '否'}\n")
-                if badcase_result['is_badcase']:
-                    f.write(f"\n{badcase_result['description']}\n")
-                    f.write(f"\n{badcase_result['suggestion']}\n")
-                    if 'diagnosis' in badcase_result:
-                        f.write(f"\n根因诊断:\n")
-                        f.write(f"  主要问题: {badcase_result['diagnosis']['primary_issue']}\n")
-                        f.write(f"  贡献因素:\n")
-                        for factor in badcase_result['diagnosis']['contributing_factors']:
-                            f.write(f"    - {factor}\n")
-            
-            # 打印BadCase结果
             if badcase_result['is_badcase']:
-                print(f"⚠  BadCase检测: 是")
-                print(f"   类型: {badcase_result['badcase_type']}")
-                print(f"   严重程度: {badcase_result['severity']}")
-                print(f"   不匹配度: {badcase_result['mismatch_score']:.3f}")
-            else:
-                print(f"✓  质量正常")
+                print(f"Warning: BadCase detected")
+                print(f"  Type: {badcase_result['badcase_type']}")
         
         return video_result
         
     except Exception as e:
-        print(f"错误: 处理视频失败 - {e}")
+        print(f"Error: Processing failed - {e}")
         return {
             'video_name': video_name,
             'video_path': video_path,
             'status': 'failed',
-            'error': str(e),
-            'is_badcase': None if expected_label is not None else None
+            'error': str(e)
         }
 
 
 def batch_process_videos(processor, input_dir, output_dir, camera_fov, badcase_labels=None):
-    """
-    批量处理目录下的所有视频
-    
-    Args:
-        processor: VideoProcessor实例
-        input_dir: 视频目录
-        output_dir: 输出目录
-        camera_fov: 相机视场角
-        badcase_labels: 可选，期望标签字典，启用BadCase检测
-    """
-    # 查找所有视频文件
+    """Batch process videos"""
     video_extensions = ['*.mp4', '*.avi', '*.mov', '*.mkv', '*.flv', '*.wmv']
     video_files = []
     for ext in video_extensions:
         video_files.extend(glob.glob(os.path.join(input_dir, ext)))
         video_files.extend(glob.glob(os.path.join(input_dir, ext.upper())))
     
-    # 去重（Windows系统下大小写不敏感会导致重复）
     video_files = list(set(video_files))
     
     if not video_files:
-        print(f"错误: 在 {input_dir} 中未找到视频文件")
+        print(f"Error: No video files found in {input_dir}")
         return []
     
     video_files.sort()
-    print(f"\n找到 {len(video_files)} 个视频文件")
+    print(f"\nFound {len(video_files)} video files")
     if badcase_labels:
-        print(f"已有 {len(badcase_labels)} 个视频标签")
+        print(f"Loaded {len(badcase_labels)} labels")
     
-    # 处理每个视频
     results = []
     for i, video_path in enumerate(video_files, 1):
         video_name = os.path.splitext(os.path.basename(video_path))[0]
         
-        # 获取期望标签（如果启用BadCase模式）
         expected_label = None
         if badcase_labels is not None:
-            expected_label = badcase_labels.get(video_name)
-            if expected_label is None:
-                print(f"\n⚠  视频 {video_name} 无期望标签，跳过BadCase检测")
-                expected_label = 'dynamic'  # 默认期望
+            expected_label = badcase_labels.get(video_name, 'dynamic')
         
-        print(f"\n进度: {i}/{len(video_files)}")
+        print(f"\nProgress: {i}/{len(video_files)}")
         result = process_single_video(processor, video_path, output_dir, camera_fov, expected_label)
         results.append(result)
     
-    # 保存批量处理总结
+    # Save batch summary
+    save_batch_summary(results, output_dir)
+    
     if badcase_labels is not None:
-        # BadCase报告
         batch_summary = processor.badcase_analyzer.generate_batch_summary(results)
         processor.badcase_analyzer.save_batch_report(batch_summary, results, output_dir)
         return batch_summary
     else:
-        # 普通报告
-        save_batch_summary(results, output_dir)
         return results
 
 
 def save_batch_summary(results, output_dir):
-    """保存批量处理总结"""
+    """Save batch processing summary"""
     summary_path = os.path.join(output_dir, 'batch_summary.txt')
     
-    # 统计成功和失败数量
     success_count = sum(1 for r in results if r['status'] == 'success')
     failed_count = len(results) - success_count
     
     with open(summary_path, 'w', encoding='utf-8') as f:
         f.write("=" * 70 + "\n")
-        f.write("批量视频处理总结\n")
+        f.write("Batch Video Processing Summary\n")
         f.write("=" * 70 + "\n\n")
         
-        f.write(f"总视频数: {len(results)}\n")
-        f.write(f"成功处理: {success_count}\n")
-        f.write(f"处理失败: {failed_count}\n\n")
+        f.write(f"Total videos: {len(results)}\n")
+        f.write(f"Successful: {success_count}\n")
+        f.write(f"Failed: {failed_count}\n\n")
         
         f.write("=" * 70 + "\n")
-        f.write("详细结果\n")
+        f.write("Detailed Results\n")
         f.write("=" * 70 + "\n\n")
         
         for result in results:
-            f.write(f"视频: {result['video_name']}\n")
+            f.write(f"Video: {result['video_name']}\n")
             if result['status'] == 'success':
-                f.write(f"  状态: ✓ 成功\n")
-                f.write(f"  帧数: {result['frame_count']}\n")
-                f.write(f"  平均动态度分数: {result['mean_dynamics_score']:.3f}\n")
-                f.write(f"  平均静态区域比例: {result['mean_static_ratio']:.3f}\n")
-                f.write(f"  时序稳定性: {result['temporal_stability']:.3f}\n")
-                f.write(f"  输出目录: {result['output_dir']}\n")
+                f.write(f"  Status: Success\n")
+                f.write(f"  Frames: {result['frame_count']}\n")
+                f.write(f"  Score: {result['unified_dynamics_score']:.3f}\n")
+                f.write(f"  Scene: {result['scene_type']}\n")
+                f.write(f"  Category: {result['classification']['category']}\n")
+                f.write(f"  Output: {result['output_dir']}\n")
             else:
-                f.write(f"  状态: ✗ 失败\n")
-                f.write(f"  错误: {result['error']}\n")
+                f.write(f"  Status: Failed\n")
+                f.write(f"  Error: {result['error']}\n")
             f.write("\n")
     
-    # 同时保存JSON格式（移除不可序列化的字段）
-    summary_json_path = os.path.join(output_dir, 'batch_summary.json')
+    # Save JSON
+    json_summary_path = os.path.join(output_dir, 'batch_summary.json')
     json_safe_results = []
     for result in results:
-        # 创建一个只包含可序列化字段的副本
         json_safe_result = {
             'video_name': result['video_name'],
             'video_path': result['video_path'],
@@ -858,95 +693,72 @@ def save_batch_summary(results, output_dir):
         if result['status'] == 'success':
             json_safe_result.update({
                 'frame_count': result['frame_count'],
-                'mean_dynamics_score': result['mean_dynamics_score'],
-                'mean_static_ratio': result['mean_static_ratio'],
-                'temporal_stability': result['temporal_stability'],
-                'actual_score': result['actual_score'],
+                'unified_dynamics_score': result['unified_dynamics_score'],
+                'scene_type': result['scene_type'],
+                'classification': result['classification'],
                 'confidence': result['confidence'],
                 'output_dir': result['output_dir']
             })
-            # 如果有BadCase相关信息，也添加进去
-            if 'expected_label' in result:
-                json_safe_result['expected_label'] = result['expected_label']
-            if 'is_badcase' in result:
-                json_safe_result['is_badcase'] = result['is_badcase']
-            if 'badcase_type' in result:
-                json_safe_result['badcase_type'] = result['badcase_type']
-            if 'severity' in result:
-                json_safe_result['severity'] = result['severity']
-            if 'mismatch_score' in result:
-                json_safe_result['mismatch_score'] = result['mismatch_score']
         else:
             json_safe_result['error'] = result['error']
-            if 'is_badcase' in result:
-                json_safe_result['is_badcase'] = result['is_badcase']
         
         json_safe_results.append(json_safe_result)
     
-    with open(summary_json_path, 'w', encoding='utf-8') as f:
+    with open(json_summary_path, 'w', encoding='utf-8') as f:
         json.dump(json_safe_results, f, indent=2, ensure_ascii=False)
     
-    print(f"\n批量处理总结已保存到: {summary_path}")
+    print(f"\nBatch summary saved to: {summary_path}")
+
+
+def load_expected_labels(label_file: str) -> Dict:
+    """Load expected labels from file"""
+    labels = {}
+    if label_file.endswith('.json'):
+        with open(label_file, 'r', encoding='utf-8') as f:
+            labels = json.load(f)
+    return labels
 
 
 def main():
-    """主函数"""
-    parser = argparse.ArgumentParser(description='静态物体动态度分析')
-    parser.add_argument('--input', '-i', required=True, 
-                       help='输入视频文件、图像目录或视频目录路径（批量模式）')
+    """Main function"""
+    parser = argparse.ArgumentParser(description='Unified Video Dynamics Assessment')
+    parser.add_argument('--input', '-i', required=True,
+                       help='Input video file or directory')
     parser.add_argument('--output', '-o', default='output',
-                       help='输出目录路径')
+                       help='Output directory')
     parser.add_argument('--raft_model', '-m', default="pretrained_models/raft-things.pth",
-                       help='RAFT模型路径')
+                       help='RAFT model path')
     parser.add_argument('--max_frames', type=int, default=None,
-                       help='最大处理帧数')
+                       help='Maximum frames to process')
     parser.add_argument('--frame_skip', type=int, default=1,
-                       help='帧跳跃间隔')
+                       help='Frame skip interval')
     parser.add_argument('--device', default='cuda',
-                       help='计算设备 (cuda/cpu)')
+                       help='Computing device (cuda/cpu)')
     parser.add_argument('--fov', type=float, default=60.0,
-                       help='相机视场角 (度)')
+                       help='Camera field of view (degrees)')
     parser.add_argument('--batch', action='store_true',
-                       help='批量处理模式：处理输入目录下的所有视频')
-    
-    # BadCase检测参数（可选）
+                       help='Batch processing mode')
+    parser.add_argument('--config', default='balanced',
+                       choices=['strict', 'balanced', 'lenient'],
+                       help='Configuration preset')
     parser.add_argument('--badcase-labels', '-l', default=None,
-                       help='期望标签文件（JSON），启用BadCase检测')
-    parser.add_argument('--mismatch-threshold', type=float, default=0.3,
-                       help='BadCase不匹配阈值（默认0.3）')
-    
-    # 可视化参数
-    parser.add_argument('--visualize', dest='visualize', action='store_true',
-                       help='禁用可视化生成（加快处理速度）')
-    parser.add_argument('--no-camera-compensation', dest='camera_compensation', action='store_false',
-                       help='禁用相机补偿（默认启用）')
-    parser.add_argument('--camera-ransac-thresh', type=float, default=1.0,
-                       help='相机补偿RANSAC阈值（像素）')
-    parser.add_argument('--camera-max-features', type=int, default=2000,
-                       help='相机补偿最大特征点数')
-    parser.add_argument('--normalize-by-resolution', dest='use_normalized_flow',
-                       action='store_true',
-                       help='按分辨率归一化光流（推荐开启以保证不同分辨率视频的公平性）')
-    parser.add_argument('--flow-threshold-ratio', type=float, default=0.002,
-                       help='归一化后的静态阈值（相对于图像对角线，默认0.002）')
-    parser.set_defaults(visualize=False, camera_compensation=True, use_normalized_flow=False)
+                       help='Expected labels file (JSON) for BadCase detection')
+    parser.add_argument('--no-viz', dest='visualize', action='store_false',
+                       help='Disable visualization')
+    parser.add_argument('--no-camera-comp', dest='camera_compensation', action='store_false',
+                       help='Disable camera compensation')
+    parser.set_defaults(visualize=True, camera_compensation=True)
     
     args = parser.parse_args()
     
-    # 加载BadCase标签（如果提供）
+    # Load badcase labels if provided
     badcase_labels = None
     if args.badcase_labels:
-        print(f"加载期望标签: {args.badcase_labels}")
+        print(f"Loading expected labels: {args.badcase_labels}")
         badcase_labels = load_expected_labels(args.badcase_labels)
-        print(f"已加载 {len(badcase_labels)} 个标签")
+        print(f"Loaded {len(badcase_labels)} labels")
     
-    # 准备相机补偿参数
-    camera_compensation_params = {
-        'ransac_thresh': args.camera_ransac_thresh,
-        'max_features': args.camera_max_features
-    }
-    
-    # 创建视频处理器
+    # Create processor
     processor = VideoProcessor(
         raft_model_path=args.raft_model,
         device=args.device,
@@ -954,82 +766,56 @@ def main():
         frame_skip=args.frame_skip,
         enable_visualization=args.visualize,
         enable_camera_compensation=args.camera_compensation,
-        camera_compensation_params=camera_compensation_params,
-        use_normalized_flow=args.use_normalized_flow,
-        flow_threshold_ratio=args.flow_threshold_ratio
+        config_preset=args.config
     )
     
-    # 设置BadCase检测器（如果启用）
-    if badcase_labels:
-        processor.badcase_detector = BadCaseDetector(
-            mismatch_threshold=args.mismatch_threshold
-        )
-        processor.badcase_analyzer.detector = processor.badcase_detector
-    
-    # 批量处理模式
+    # Batch processing
     if args.batch:
         if not os.path.isdir(args.input):
-            raise ValueError(f"批量模式需要提供目录路径: {args.input}")
+            raise ValueError(f"Batch mode requires directory path: {args.input}")
         
         results = batch_process_videos(processor, args.input, args.output, args.fov, badcase_labels)
         
-        # 打印总结
         print(f"\n{'='*70}")
-        print(f"批量处理完成!")
+        print(f"Batch processing complete!")
         print(f"{'='*70}")
         
-        if badcase_labels:
-            # BadCase模式总结
-            print(f"总视频数: {results['total_videos']}")
-            print(f"成功处理: {results['successful']}")
-            print(f"BadCase数量: {results['badcase_count']}")
-            print(f"BadCase比例: {results['badcase_rate']:.1%}")
-            print(f"\n严重程度分布:")
-            for severity, count in results['severity_distribution'].items():
-                print(f"  {severity}: {count}")
+        if isinstance(results, dict) and 'total_videos' in results:
+            # BadCase mode
+            print(f"Total videos: {results['total_videos']}")
+            print(f"Successful: {results['successful']}")
+            print(f"BadCase count: {results['badcase_count']}")
         else:
-            # 普通模式总结
+            # Normal mode
             success_count = sum(1 for r in results if r['status'] == 'success')
-            print(f"总计: {len(results)} 个视频")
-            print(f"成功: {success_count} 个")
-            print(f"失败: {len(results) - success_count} 个")
+            print(f"Total: {len(results)} videos")
+            print(f"Successful: {success_count}")
         
-        print(f"\n结果保存到: {args.output}")
+        print(f"\nResults saved to: {args.output}")
         print(f"{'='*70}")
-        
-    # 单个视频/图像目录处理模式
+    
+    # Single video processing
     else:
-        # 加载视频或图像
         if os.path.isfile(args.input):
-            # 单个视频文件
             frames = processor.load_video(args.input)
         elif os.path.isdir(args.input):
-            # 图像序列目录
             frames = processor.extract_frames_from_images(args.input)
             if len(frames) == 0:
-                raise ValueError(
-                    f"错误：目录 '{args.input}' 中未找到有效的图像文件！\n"
-                    f"提示：\n"
-                    f"  - 如果要处理单个视频，请直接指定视频文件路径\n"
-                    f"  - 如果要批量处理视频目录，请添加 --batch 参数\n"
-                    f"  - 如果是图像序列，请确保目录包含 .jpg/.png 等图像文件"
-                )
+                raise ValueError(f"No valid images found in: {args.input}")
         else:
-            raise ValueError(f"输入路径无效: {args.input}")
+            raise ValueError(f"Invalid input path: {args.input}")
         
-        # 估计相机内参
         camera_matrix = processor.estimate_camera_matrix(frames[0].shape, args.fov)
-        
-        # 处理视频
         result = processor.process_video(frames, camera_matrix, args.output)
         
-        # 打印简要结果
         temporal_stats = result['temporal_stats']
-        print(f"\n分析完成!")
-        print(f"平均静态物体动态度分数: {temporal_stats['mean_dynamics_score']:.3f}")
-        print(f"平均静态区域比例: {temporal_stats['mean_static_ratio']:.3f}")
-        print(f"时序稳定性: {temporal_stats['temporal_stability']:.3f}")
-        print(f"详细结果已保存到: {args.output}")
+        unified = result['unified_dynamics']
+        
+        print(f"\nAnalysis complete!")
+        print(f"Unified dynamics score: {unified['unified_dynamics_score']:.3f}")
+        print(f"Scene type: {unified['scene_type']}")
+        print(f"Classification: {result['dynamics_classification']['category']}")
+        print(f"Detailed results saved to: {args.output}")
 
 
 if __name__ == '__main__':
