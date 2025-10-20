@@ -1,0 +1,264 @@
+@startuml AIGC_Detector_Class_Diagram
+
+!define PRIMARY_COLOR #4A90E2
+!define SECONDARY_COLOR #50C878
+!define UTILITY_COLOR #F39C12
+!define ANALYSIS_COLOR #9B59B6
+
+' ============ 主处理器 ============
+package "Core Processing" <<Rectangle>> PRIMARY_COLOR {
+    class VideoProcessor {
+        - raft_predictor: RAFTPredictor
+        - dynamics_calculator: StaticObjectDynamicsCalculator
+        - camera_compensator: CameraCompensator
+        - unified_scorer: UnifiedDynamicsScorer
+        - dynamics_classifier: DynamicsClassifier
+        - badcase_detector: BadCaseDetector
+        - badcase_analyzer: BadCaseAnalyzer
+        - max_frames: int
+        - frame_skip: int
+        - enable_visualization: bool
+        - enable_camera_compensation: bool
+        - use_normalized_flow: bool
+        --
+        + __init__(raft_model_path, device, ...)
+        + load_video(video_path): List[ndarray]
+        + extract_frames_from_images(image_dir): List[ndarray]
+        + process_video(frames, camera_matrix, output_dir): Dict
+        + estimate_camera_matrix(frame_shape, fov): ndarray
+        + save_results(result, frames, flows, output_dir)
+        + save_visualizations(result, frames, flows, output_dir)
+        + plot_temporal_dynamics(result, save_path)
+        + plot_camera_compensation_comparison(result, frames, save_path)
+        + plot_static_ratio_changes(result, save_path)
+        + generate_video_report(result): str
+        - _calculate_camera_compensation_stats(results): Dict
+    }
+}
+
+' ============ 光流预测 ============
+package "Optical Flow" <<Rectangle>> SECONDARY_COLOR {
+    class SimpleRAFTPredictor {
+        - model: RAFT
+        - device: str
+        - method: str
+        --
+        + __init__(model_path, device, method)
+        + predict_flow(image1, image2): ndarray
+        - preprocess(image): Tensor
+        - load_model(model_path): RAFT
+    }
+    
+    class RAFT {
+        <<External Library>>
+        --
+        + forward(image1, image2): Tensor
+    }
+}
+
+' ============ 静态物体分析 ============
+package "Static Object Analysis" <<Rectangle>> ANALYSIS_COLOR {
+    class StaticObjectDynamicsCalculator {
+        - temporal_window: int
+        - spatial_kernel_size: int
+        - dynamics_threshold: float
+        - use_normalized_flow: bool
+        - static_detector: StaticObjectDetector
+        --
+        + __init__(temporal_window, spatial_kernel_size, ...)
+        + calculate_frame_dynamics(flow, image1, image2, camera_matrix): Dict
+        + calculate_static_region_dynamics(flow, static_mask, normalization_factor): Dict
+        + calculate_global_dynamics(flow, static_mask, normalization_factor): Dict
+        + calculate_temporal_dynamics(flows, images, camera_matrix): Dict
+        + calculate_temporal_statistics(frame_results): Dict
+        + visualize_results(image, flow, result, save_path): Figure
+        + generate_report(result): str
+    }
+    
+    class StaticObjectDetector {
+        - flow_threshold: float
+        - flow_threshold_ratio: float
+        - use_normalized_flow: bool
+        - consistency_threshold: float
+        - min_region_size: int
+        --
+        + __init__(flow_threshold, flow_threshold_ratio, ...)
+        + detect_static_regions(flow, image_shape): ndarray
+        + refine_static_regions(static_mask, image, flow): ndarray
+        + remove_small_regions(mask, min_size): ndarray
+    }
+}
+
+' ============ 相机运动补偿 ============
+package "Camera Compensation" <<Rectangle>> UTILITY_COLOR {
+    class CameraCompensator {
+        - method: str
+        - ransac_thresh: float
+        - max_features: int
+        - good_match_ratio: float
+        --
+        + __init__(method, ransac_thresh, max_features, ...)
+        + compensate(flow, image1, image2): Dict
+        - estimate_camera_motion_homography(image1, image2): Dict
+        - apply_homography_compensation(flow, homography): ndarray
+        - estimate_camera_motion_flow(flow): Dict
+    }
+}
+
+' ============ 统一动态度评分 ============
+package "Dynamics Scoring" <<Rectangle>> PRIMARY_COLOR {
+    class UnifiedDynamicsScorer {
+        - mode: str
+        - weights: Dict[str, float]
+        - thresholds: Dict[str, float]
+        - use_normalized_flow: bool
+        - default_weights: Dict
+        - default_thresholds: Dict
+        --
+        + __init__(mode, weights, thresholds, ...)
+        + calculate_unified_score(temporal_result, camera_compensation_enabled): Dict
+        + batch_calculate(results, camera_comp_enabled): Dict
+        - _detect_scene_type(temporal_stats, camera_comp_enabled): str
+        - _calculate_component_scores(temporal_stats, frame_results, ...): Dict
+        - _calculate_flow_magnitude_score(temporal_stats, ...): float
+        - _calculate_spatial_coverage_score(temporal_stats): float
+        - _calculate_temporal_variation_score(temporal_stats): float
+        - _calculate_spatial_consistency_score(temporal_stats): float
+        - _calculate_camera_factor(temporal_stats, camera_comp_enabled): float
+        - _sigmoid_normalize(value, threshold, steepness): float
+        - _weighted_fusion(component_scores, scene_type): float
+        - _calculate_confidence(component_scores, temporal_stats): float
+        - _generate_interpretation(unified_score, scene_type, component_scores): str
+    }
+    
+    class DynamicsClassifier {
+        - thresholds: Dict[str, float]
+        - default_thresholds: Dict
+        --
+        + __init__(thresholds)
+        + classify(unified_score): Dict
+        + get_binary_label(unified_score, threshold): int
+    }
+}
+
+' ============ BadCase检测 ============
+package "Quality Assessment" <<Rectangle>> ANALYSIS_COLOR {
+    class BadCaseDetector {
+        - mismatch_threshold: float
+        - severity_thresholds: Dict
+        --
+        + __init__(mismatch_threshold)
+        + detect(result, expected_label): bool
+        + calculate_mismatch_score(actual_score, expected_label): float
+        + determine_severity(mismatch_score): str
+        + diagnose_issue(result, expected_label): Dict
+    }
+    
+    class BadCaseAnalyzer {
+        - detector: BadCaseDetector
+        --
+        + __init__(detector)
+        + analyze_with_details(result, expected_label): Dict
+        + generate_batch_summary(results): Dict
+        + save_batch_report(summary, results, output_dir)
+        - _categorize_badcase(result, expected_label): str
+    }
+    
+    class QualityFilter {
+        - min_score: float
+        - max_score: float
+        --
+        + __init__(min_score, max_score)
+        + filter(results): List[Dict]
+        + filter_by_category(results, categories): List[Dict]
+    }
+}
+
+' ============ 关系定义 ============
+
+' VideoProcessor 组合关系
+VideoProcessor *-- SimpleRAFTPredictor : contains
+VideoProcessor *-- StaticObjectDynamicsCalculator : contains
+VideoProcessor *-- CameraCompensator : contains
+VideoProcessor *-- UnifiedDynamicsScorer : contains
+VideoProcessor *-- DynamicsClassifier : contains
+VideoProcessor *-- BadCaseDetector : contains
+VideoProcessor *-- BadCaseAnalyzer : contains
+
+' StaticObjectDynamicsCalculator 组合关系
+StaticObjectDynamicsCalculator *-- StaticObjectDetector : contains
+
+' BadCaseAnalyzer 组合关系
+BadCaseAnalyzer o-- BadCaseDetector : uses
+
+' SimpleRAFTPredictor 依赖关系
+SimpleRAFTPredictor ..> RAFT : uses
+
+' 数据流依赖关系（虚线）
+VideoProcessor ..> SimpleRAFTPredictor : predicts flow
+VideoProcessor ..> CameraCompensator : compensates motion
+VideoProcessor ..> StaticObjectDynamicsCalculator : analyzes dynamics
+VideoProcessor ..> UnifiedDynamicsScorer : scores dynamics
+VideoProcessor ..> DynamicsClassifier : classifies
+VideoProcessor ..> BadCaseAnalyzer : detects issues
+
+StaticObjectDynamicsCalculator ..> StaticObjectDetector : detects static regions
+
+' ============ 工具函数 ============
+package "Utility Functions" <<Rectangle>> UTILITY_COLOR {
+    class UtilityFunctions <<Function Collection>> {
+        + process_single_video(processor, video_path, output_dir, camera_fov, expected_label): Dict
+        + batch_process_videos(processor, input_dir, output_dir, camera_fov, badcase_labels): Union[Dict, List]
+        + save_batch_summary(results, output_dir)
+        + load_expected_labels(label_file): Dict
+        + main()
+    }
+}
+
+VideoProcessor ..> UtilityFunctions : used by
+
+' ============ 注释 ============
+note right of VideoProcessor
+  **主控制器**
+  - 协调所有模块
+  - 管理处理流程
+  - 生成可视化和报告
+end note
+
+note right of UnifiedDynamicsScorer
+  **核心评分引擎**
+  - 输出0-1标准化分数
+  - 自动检测场景类型
+  - 多维度指标融合
+end note
+
+note right of CameraCompensator
+  **相机运动补偿**
+  - 基于单应性变换
+  - 提取残差光流
+  - 消除相机运动影响
+end note
+
+note right of BadCaseAnalyzer
+  **质量评估**
+  - 检测评分异常
+  - 分析根本原因
+  - 生成诊断报告
+end note
+
+' ============ 图例 ============
+legend right
+  |= 符号 |= 含义 |
+  | ——— | 组合关系 (强依赖) |
+  | - - - | 依赖关系 (使用) |
+  | ◆ | 组合 |
+  | ◇ | 聚合 |
+  
+  |= 颜色 |= 模块类型 |
+  | <back:PRIMARY_COLOR>　　</back> | 核心处理 |
+  | <back:SECONDARY_COLOR>　　</back> | 光流预测 |
+  | <back:ANALYSIS_COLOR>　　</back> | 分析评估 |
+  | <back:UTILITY_COLOR>　　</back> | 工具辅助 |
+end legend
+
+@enduml
