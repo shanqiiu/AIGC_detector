@@ -791,10 +791,47 @@ def save_batch_summary(results, output_dir):
                 f.write(f"  错误: {result['error']}\n")
             f.write("\n")
     
-    # 同时保存JSON格式
+    # 同时保存JSON格式（移除不可序列化的字段）
     summary_json_path = os.path.join(output_dir, 'batch_summary.json')
+    json_safe_results = []
+    for result in results:
+        # 创建一个只包含可序列化字段的副本
+        json_safe_result = {
+            'video_name': result['video_name'],
+            'video_path': result['video_path'],
+            'status': result['status']
+        }
+        
+        if result['status'] == 'success':
+            json_safe_result.update({
+                'frame_count': result['frame_count'],
+                'mean_dynamics_score': result['mean_dynamics_score'],
+                'mean_static_ratio': result['mean_static_ratio'],
+                'temporal_stability': result['temporal_stability'],
+                'actual_score': result['actual_score'],
+                'confidence': result['confidence'],
+                'output_dir': result['output_dir']
+            })
+            # 如果有BadCase相关信息，也添加进去
+            if 'expected_label' in result:
+                json_safe_result['expected_label'] = result['expected_label']
+            if 'is_badcase' in result:
+                json_safe_result['is_badcase'] = result['is_badcase']
+            if 'badcase_type' in result:
+                json_safe_result['badcase_type'] = result['badcase_type']
+            if 'severity' in result:
+                json_safe_result['severity'] = result['severity']
+            if 'mismatch_score' in result:
+                json_safe_result['mismatch_score'] = result['mismatch_score']
+        else:
+            json_safe_result['error'] = result['error']
+            if 'is_badcase' in result:
+                json_safe_result['is_badcase'] = result['is_badcase']
+        
+        json_safe_results.append(json_safe_result)
+    
     with open(summary_json_path, 'w', encoding='utf-8') as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
+        json.dump(json_safe_results, f, indent=2, ensure_ascii=False)
     
     print(f"\n批量处理总结已保存到: {summary_path}")
 

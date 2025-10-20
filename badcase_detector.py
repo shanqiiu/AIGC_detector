@@ -3,7 +3,7 @@
 BadCase检测器 - 筛选劣质AIGC生成视频
 
 检测两类劣质视频：
-1. 期望静态但动态度高（如建筑物抖动）
+1. 期望静态但动态度高（如建筑物抖动�?
 2. 期望动态但动态度低（如演唱会大屏幕静止）
 """
 
@@ -26,7 +26,7 @@ class BadCaseDetector:
         初始化BadCase检测器
         
         Args:
-            mismatch_threshold: 不匹配阈值（期望与实际的差异）
+            mismatch_threshold: 不匹配阈值（期望与实际的差异�?
             confidence_threshold: 最低置信度要求
         """
         self.mismatch_threshold = mismatch_threshold
@@ -41,12 +41,12 @@ class BadCaseDetector:
         检测单个视频的BadCase
         
         Args:
-            actual_score: 实际动态度分数（0-1）
+            actual_score: 实际动态度分数�?0-1�?
             expected_label: 期望标签
-                - 'static' 或 0: 期望静态
-                - 'dynamic' 或 1: 期望动态
+                - 'static' �? 0: 期望静�?
+                - 'dynamic' �? 1: 期望动�?
                 - 0.0-1.0: 期望的具体动态度分数
-            confidence: 检测结果的置信度
+            confidence: 检测结果的置信�?
             video_info: 视频额外信息（可选）
             
         Returns:
@@ -60,10 +60,10 @@ class BadCaseDetector:
             }
         """
         
-        # 转换期望标签为数值
+        # 转换期望标签为数�?
         expected_score = self._parse_expected_label(expected_label)
         
-        # 计算不匹配程度
+        # 计算不匹配程�?
         mismatch_score = abs(actual_score - expected_score)
         
         # 判断是否为BadCase
@@ -78,7 +78,7 @@ class BadCaseDetector:
         # 评估严重程度
         severity = self._evaluate_severity(mismatch_score)
         
-        # 生成描述和建议
+        # 生成描述和建�?
         description = self._generate_description(
             actual_score, expected_score, badcase_type, video_info
         )
@@ -98,15 +98,15 @@ class BadCaseDetector:
         }
     
     def _parse_expected_label(self, label: Union[str, float]) -> float:
-        """解析期望标签为分数"""
+        """解析期望标签为分�?"""
         if isinstance(label, str):
             label_lower = label.lower()
-            if label_lower in ['static', 'still', '静态']:
+            if label_lower in ['static', 'still', '静�?']:
                 return 0.0
-            elif label_lower in ['dynamic', 'moving', '动态']:
+            elif label_lower in ['dynamic', 'moving', '动�?']:
                 return 1.0
             else:
-                raise ValueError(f"未知的标签类型: {label}")
+                raise ValueError(f"未知的标签类�?: {label}")
         else:
             return float(np.clip(label, 0.0, 1.0))
     
@@ -119,11 +119,11 @@ class BadCaseDetector:
         if mismatch < self.mismatch_threshold:
             return 'normal'  # 正常，非BadCase
         
-        # 期望静态但实际动态
+        # 期望静态但实际动�?
         if expected < 0.3 and actual > 0.5:
             return 'static_to_dynamic'  # 类型A
         
-        # 期望动态但实际静态
+        # 期望动态但实际静�?
         if expected > 0.7 and actual < 0.4:
             return 'dynamic_to_static'  # 类型B
         
@@ -161,19 +161,19 @@ class BadCaseDetector:
         video_name = video_info.get('name', '未知视频') if video_info else '未知视频'
         
         descriptions = {
-            'static_to_dynamic': f"劣质视频：{video_name} 期望静态（{expected:.2f}）但实际高动态（{actual:.2f}）。"
-                                f"可能原因：物体抖动、飘移、相机补偿失败。",
+            'static_to_dynamic': f"劣质视频：{video_name} 期望静态（{expected:.2f}）但实际高动态（{actual:.2f}）�?"
+                                f"可能原因：物体抖动、飘移、相机补偿失败�?",
             
-            'dynamic_to_static': f"劣质视频：{video_name} 期望动态（{expected:.2f}）但实际低动态（{actual:.2f}）。"
-                                f"可能原因：人物僵硬、大屏幕静止、生成失败。",
+            'dynamic_to_static': f"劣质视频：{video_name} 期望动态（{expected:.2f}）但实际低动态（{actual:.2f}）�?"
+                                f"可能原因：人物僵硬、大屏幕静止、生成失败�?",
             
-            'over_dynamic': f"劣质视频：{video_name} 动态度过高（期望{expected:.2f}，实际{actual:.2f}）。"
-                           f"可能原因：过度运动、抖动、不稳定。",
+            'over_dynamic': f"劣质视频：{video_name} 动态度过高（期望{expected:.2f}，实际{actual:.2f}）�?"
+                           f"可能原因：过度运动、抖动、不稳定�?",
             
-            'under_dynamic': f"劣质视频：{video_name} 动态度过低（期望{expected:.2f}，实际{actual:.2f}）。"
-                            f"可能原因：运动不足、卡顿、僵硬。",
+            'under_dynamic': f"劣质视频：{video_name} 动态度过低（期望{expected:.2f}，实际{actual:.2f}）�?"
+                            f"可能原因：运动不足、卡顿、僵硬�?",
             
-            'mismatch': f"视频质量异常：{video_name} 动态度不匹配（期望{expected:.2f}，实际{actual:.2f}）。"
+            'mismatch': f"视频质量异常：{video_name} 动态度不匹配（期望{expected:.2f}，实际{actual:.2f}）�?"
         }
         
         return descriptions.get(badcase_type, "未知类型")
@@ -194,26 +194,26 @@ class BadCaseDetector:
                 "1. 检查人物动作是否生成正确\n"
                 "2. 查看关键帧，确认是否存在静止画面\n"
                 "3. 检查大屏幕等应动态区域是否正常\n"
-                "4. 考虑调整生成参数或重新生成",
+                "4. 考虑调整生成参数或重新生�?",
             
             'over_dynamic': 
                 "建议：\n"
                 "1. 检查是否有异常抖动或飘移\n"
                 "2. 降低生成运动幅度参数\n"
-                "3. 增强视频稳定性处理",
+                "3. 增强视频稳定性处�?",
             
             'under_dynamic': 
                 "建议：\n"
                 "1. 检查运动生成是否充分\n"
                 "2. 增加运动幅度参数\n"
-                "3. 确认关键帧运动连续性",
+                "3. 确认关键帧运动连续�?",
             
-            'normal': "无需改进，质量符合预期",
+            'normal': "无需改进，质量符合预�?",
             
-            'mismatch': "建议人工review，确认是否需要重新生成"
+            'mismatch': "建议人工review，确认是否需要重新生�?"
         }
         
-        return suggestions.get(badcase_type, "建议人工检查")
+        return suggestions.get(badcase_type, "建议人工检�?")
     
     def batch_detect(self,
                     results: List[Dict],
@@ -223,8 +223,8 @@ class BadCaseDetector:
         批量检测BadCase
         
         Args:
-            results: 视频处理结果列表（每个包含unified_dynamics）
-            expected_labels: 期望标签列表（与results对应）
+            results: 视频处理结果列表（每个包含unified_dynamics�?
+            expected_labels: 期望标签列表（与results对应�?
             video_names: 视频名称列表（可选）
             
         Returns:
@@ -261,7 +261,7 @@ class BadCaseDetector:
                 actual_score, expected, confidence, video_info
             )
             
-            # 如果是BadCase，加入列表
+            # 如果是BadCase，加入列�?
             if detection['is_badcase']:
                 detection['video_name'] = video_info['name']
                 detection['video_index'] = i
@@ -290,14 +290,14 @@ class BadCaseDetector:
         
         report = f"""
 {'='*70}
-劣质视频检测报告 (BadCase Detection Report)
+劣质视频检测报�? (BadCase Detection Report)
 {'='*70}
 
 总体统计:
 - 总视频数: {batch_result['total_videos']}
 - BadCase数量: {batch_result['badcase_count']}
 - BadCase比例: {batch_result['badcase_rate']:.1%}
-- 正常视频数: {batch_result['normal_count']}
+- 正常视频�?: {batch_result['normal_count']}
 
 严重程度分布:
 - 轻微 (Mild): {batch_result['severity_distribution'].get('mild', 0)}
@@ -309,8 +309,8 @@ BadCase类型分布:
         
         for btype, count in batch_result['type_distribution'].items():
             type_names = {
-                'static_to_dynamic': '期望静态→实际动态',
-                'dynamic_to_static': '期望动态→实际静态',
+                'static_to_dynamic': '期望静态→实际动�?',
+                'dynamic_to_static': '期望动态→实际静�?',
                 'over_dynamic': '动态度过高',
                 'under_dynamic': '动态度过低',
                 'mismatch': '一般不匹配'
@@ -319,7 +319,7 @@ BadCase类型分布:
         
         report += f"\n{'='*70}\nBadCase详细列表:\n{'='*70}\n\n"
         
-        # 按严重程度排序
+        # 按严重程度排�?
         sorted_badcases = sorted(
             batch_result['badcase_list'],
             key=lambda x: {'severe': 3, 'moderate': 2, 'mild': 1}.get(x['severity'], 0),
@@ -347,9 +347,9 @@ BadCase类型分布:
         筛选特定类型的BadCase
         
         Args:
-            batch_result: batch_detect的返回结果
-            severity_levels: 严重程度过滤（如['moderate', 'severe']）
-            badcase_types: BadCase类型过滤（如['static_to_dynamic']）
+            batch_result: batch_detect的返回结�?
+            severity_levels: 严重程度过滤（如['moderate', 'severe']�?
+            badcase_types: BadCase类型过滤（如['static_to_dynamic']�?
             
         Returns:
             筛选后的BadCase列表
@@ -368,7 +368,7 @@ BadCase类型分布:
 
 class BadCaseAnalyzer:
     """
-    BadCase分析器 - 提供更详细的分析和诊断
+    BadCase分析�? - 提供更详细的分析和诊�?
     """
     
     def __init__(self):
@@ -388,12 +388,12 @@ class BadCaseAnalyzer:
         confidence = unified.get('confidence', 0.0)
         component_scores = unified.get('component_scores', {})
         
-        # 基础检测
+        # 基础检�?
         detection = self.detector.detect_badcase(
             actual_score, expected_label, confidence
         )
         
-        # 如果是BadCase，添加详细诊断
+        # 如果是BadCase，添加详细诊�?
         if detection['is_badcase']:
             diagnosis = self._diagnose_root_cause(
                 component_scores,
@@ -416,9 +416,9 @@ class BadCaseAnalyzer:
             'detailed_analysis': {}
         }
         
-        # 找出异常的维度
+        # 找出异常的维�?
         if badcase_type == 'static_to_dynamic':
-            # 期望静态但动态度高，检查哪个维度贡献最大
+            # 期望静态但动态度高，检查哪个维度贡献最�?
             max_component = max(component_scores, key=component_scores.get)
             diagnosis['primary_issue'] = f"{max_component} 异常偏高"
             
@@ -432,7 +432,7 @@ class BadCaseAnalyzer:
                 diagnosis['contributing_factors'].append('相机补偿失败率高（特征匹配问题）')
         
         elif badcase_type == 'dynamic_to_static':
-            # 期望动态但动态度低
+            # 期望动态但动态度�?
             diagnosis['primary_issue'] = '整体运动不足'
             
             if component_scores.get('flow_magnitude', 0) < 0.3:
@@ -460,17 +460,17 @@ class BadCaseAnalyzer:
         生成批量处理的BadCase统计摘要
         
         Args:
-            results: 视频处理结果列表，每个包含:
+            results: 视频处理结果列表，每个包�?:
                 - video_name: 视频名称
                 - video_path: 视频路径
-                - status: 处理状态
+                - status: 处理状�?
                 - is_badcase: 是否为BadCase
                 - badcase_type: BadCase类型
                 - severity: 严重程度
                 - mismatch_score: 不匹配度
                 - expected_label: 期望标签
                 - actual_score: 实际动态度
-                - confidence: 置信度
+                - confidence: 置信�?
                 
         Returns:
             统计摘要字典
@@ -479,13 +479,13 @@ class BadCaseAnalyzer:
         successful_results = [r for r in results if r.get('status') == 'success']
         
         if not successful_results:
-            return {'error': '没有成功处理的视频'}
+            return {'error': '没有成功处理的视�?'}
         
         # 统计BadCase
         badcases = [r for r in successful_results if r.get('is_badcase', False)]
         normal = [r for r in successful_results if not r.get('is_badcase', False)]
         
-        # 按类型统计
+        # 按类型统�?
         type_count = {}
         severity_count = {'mild': 0, 'moderate': 0, 'severe': 0}
         
@@ -511,12 +511,12 @@ class BadCaseAnalyzer:
     
     def save_batch_report(self, summary: Dict, results: List[Dict], output_dir: str):
         """
-        保存批量处理的完整报告
+        保存批量处理的完整报�?
         
-        统一保存：文本报告 + JSON结果 + BadCase视频列表
+        统一保存：文本报�? + JSON结果 + BadCase视频列表
         
         Args:
-            summary: generate_batch_summary() 生成的统计摘要
+            summary: generate_batch_summary() 生成的统计摘�?
             results: 原始结果列表
             output_dir: 输出目录
         """
@@ -533,7 +533,7 @@ class BadCaseAnalyzer:
             f.write(f"成功处理: {summary['successful']}\n")
             f.write(f"处理失败: {summary['failed']}\n")
             f.write(f"\nBadCase数量: {summary['badcase_count']}\n")
-            f.write(f"正常视频数: {summary['normal_count']}\n")
+            f.write(f"正常视频�?: {summary['normal_count']}\n")
             f.write(f"BadCase比例: {summary['badcase_rate']:.1%}\n\n")
             
             f.write("="*70 + "\n")
@@ -558,7 +558,7 @@ class BadCaseAnalyzer:
             f.write("BadCase详细列表:\n")
             f.write("="*70 + "\n\n")
             
-            # 按严重程度排序
+            # 按严重程度排�?
             sorted_badcases = sorted(
                 summary['badcase_list'],
                 key=lambda x: {'severe': 3, 'moderate': 2, 'mild': 1}.get(x.get('severity', 'normal'), 0),
@@ -572,7 +572,7 @@ class BadCaseAnalyzer:
                 f.write(f"   期望: {bc['expected_label']}\n")
                 f.write(f"   实际动态度: {bc['actual_score']:.3f}\n")
                 f.write(f"   不匹配度: {bc['mismatch_score']:.3f}\n")
-                f.write(f"   置信度: {bc['confidence']:.1%}\n")
+                f.write(f"   置信�?: {bc['confidence']:.1%}\n")
                 f.write(f"\n")
         
         # 2. 保存JSON（精简版）
@@ -605,7 +605,7 @@ class BadCaseAnalyzer:
             for bc in sorted_badcases:
                 f.write(f"{bc['video_path']}\n")
         
-        print(f"\nBadCase总结已保存:")
+        print(f"\nBadCase总结已保�?:")
         print(f"  - 文本报告: {report_path}")
         print(f"  - JSON结果: {json_path}")
         print(f"  - 视频列表: {badcase_videos_path}")
@@ -617,8 +617,25 @@ class BadCaseAnalyzer:
         """导出BadCase列表"""
         
         if format == 'json':
+            # ����һ��ֻ���������л��ֶεĸ���
+            json_safe_result = {
+                k: v for k, v in batch_result.items() 
+                if k not in ['badcase_list', 'normal_list']
+            }
+            # ���˵��������л����ֶ�
+            if 'badcase_list' in batch_result:
+                json_safe_result['badcase_list'] = [
+                    {k: v for k, v in bc.items() if k != 'full_result'}
+                    for bc in batch_result['badcase_list']
+                ]
+            if 'normal_list' in batch_result:
+                json_safe_result['normal_list'] = [
+                    {k: v for k, v in norm.items() if k != 'full_result'}
+                    for norm in batch_result['normal_list']
+                ]
+            
             with open(output_path, 'w', encoding='utf-8') as f:
-                json.dump(batch_result, f, indent=2, ensure_ascii=False)
+                json.dump(json_safe_result, f, indent=2, ensure_ascii=False)
         
         elif format == 'txt':
             report = self.detector.generate_badcase_report(batch_result)
@@ -649,7 +666,7 @@ class BadCaseAnalyzer:
 
 class QualityFilter:
     """
-    质量过滤器 - 基于BadCase检测筛选视频
+    质量过滤�? - 基于BadCase检测筛选视�?
     """
     
     def __init__(self,
@@ -677,7 +694,7 @@ class QualityFilter:
             video_results: [(video_path, result, expected_label), ...]
             keep_mode: 
                 - 'good': 保留正常视频，过滤BadCase
-                - 'bad': 保留BadCase，过滤正常视频
+                - 'bad': 保留BadCase，过滤正常视�?
                 - 'all': 返回所有视频（仅标记）
                 
         Returns:
